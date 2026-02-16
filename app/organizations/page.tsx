@@ -1,6 +1,6 @@
 'use client'
 
-import PagebarContent from "@/components/PagebarContent";
+import PagebarContent from "@/components/pagebar/PagebarContent";
 
 export default function Page() {
   return (

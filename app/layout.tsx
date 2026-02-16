@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
-import Sidebar from "@/components/Sidebar";
-import Pagebar from "@/components/Pagebar";
-import { PagebarProvider } from "@/components/PagebarContext";
+import {PagebarProvider} from "@/components/pagebar/PagebarContext";
+import Sidebar from "@/components/sidebar/Sidebar";
+import Pagebar from "@/components/pagebar/Pagebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

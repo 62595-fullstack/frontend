@@ -1,7 +1,7 @@
 "use client";
 
 import { usePagebar } from "./PagebarContext";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
 export default function PagebarContent({ children }: { children: React.ReactNode }) {
   const { setContent } = usePagebar();
