@@ -24,7 +24,7 @@ export default function Sidebar() {
               <li key={href}>
                 <Link
                   href={href}
-                  className={`block px-4 py-1 rounded-xl hover:bg-sky-400 ${isActive && "bg-sky-300"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
+                  className={`block px-4 py-1 rounded-lg hover:bg-sky-400 ${isActive && "bg-sky-300"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
                 >
                   {label}
                 </Link>

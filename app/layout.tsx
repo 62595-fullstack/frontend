@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import Sidebar from "@/components/Sidebar";
+import Pagebar from "@/components/Pagebar";
+import { PagebarProvider } from "@/components/PagebarContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +25,15 @@ export default function RootLayout({children}: Readonly<{ children: React.ReactN
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 bg-zinc-100">
-            {children}
-          </main>
-        </div>
+        <PagebarProvider>
+          <div className="flex">
+            <Sidebar />
+            <main className="flex-1 bg-zinc-100">
+              {children}
+            </main>
+            <Pagebar />
+          </div>
+        </PagebarProvider>
       </body>
     </html>
   );
