@@ -12,7 +12,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-1 min-h-screen items-center justify-center font-sans space-x-4">
-      <p>Dashboard</p>
+      <p>Messages</p>
 
       <button className='bg-zinc-500 rounded-lg py-4 px-8' onClick={handleGoToAsd}>Go to asd</button>
     </div>
