@@ -8,7 +8,7 @@ export default function Pagebar() {
   if (!content) return null;
 
   return (
-    <aside className="w-48 h-screen bg-zinc-300 text-zinc-800 space-y-4">
+    <aside className="w-48 h-screen bg-zinc-200 text-zinc-800 space-y-4">
       <div className="h-25 bg-amber-500 p-4">
         Hejsa
       </div>

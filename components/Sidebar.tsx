@@ -15,7 +15,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-48 h-screen bg-zinc-300 text-zinc-800 p-4">
+    <aside className="w-48 h-screen bg-zinc-200 text-zinc-800 p-4">
       <nav>
         <ul className="space-y-2">
           {links.map(({ href, label }) => {
