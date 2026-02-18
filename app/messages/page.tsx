@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface Message {
   id: string;
@@ -23,6 +24,9 @@ const mockMessages: Message[] = [
   { id: "4", text: "That sounds awesome, I'll make sure to catch your talk.", sender: "me", timestamp: "10:05" },
   { id: "5", text: "Thanks! Let me know if you want to grab coffee before it starts.", sender: "them", timestamp: "10:06" },
   { id: "6", text: "Definitely, let's do that!", sender: "me", timestamp: "10:07" },
+  { id: "7", text: "okay", sender: "them", timestamp: "10:10" },
+  { id: "8", text: "thx", sender: "them", timestamp: "10:11" },
+  { id: "9", text: "bye", sender: "them", timestamp: "10:12" },
 ];
 
 export default function Page() {
@@ -30,6 +34,7 @@ export default function Page() {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -65,6 +70,11 @@ export default function Page() {
     el.style.height = `${el.scrollHeight}px`;
   };
 
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setInput((prev) => prev + emojiData.emoji);
+    setShowPicker(false);
+  };
+
   return (
     <div className="flex flex-col h-screen font-sans">
       <PagebarContent>
@@ -96,47 +106,73 @@ export default function Page() {
         className="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-zinc-100"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
       >
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex items-end gap-2 ${msg.sender === "me" ? "flex-row-reverse" : "flex-row"}`}
-          >
-            {msg.sender === "them" && (
-              <img
-                src={contact.avatar}
-                alt={contact.name}
-                className="w-7 h-7 rounded-full object-cover flex-shrink-0 mb-1"
-              />
-            )}
-            <div className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}>
-              <div
-                className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
-                  msg.sender === "me"
-                    ? "bg-sky-500 text-white rounded-br-sm"
-                    : "bg-white text-zinc-800 rounded-bl-sm shadow-sm"
-                }`}
-              >
-                {msg.text}
+        {messages.map((msg, index) => {
+          const prevMsg = messages[index - 1];
+          const nextMsg = messages[index + 1];
+          const sameAsPrev = prevMsg?.sender === msg.sender;
+          const sameAsNext = nextMsg?.sender === msg.sender;
+
+          return (
+            <div
+              key={msg.id}
+              className={`flex items-end gap-2 ${msg.sender === "me" ? "flex-row-reverse" : "flex-row"}`}
+            >
+              {msg.sender === "them" && (
+                <div className="w-7 flex-shrink-0">
+                  {!sameAsNext && (
+                    <img
+                      src={contact.avatar}
+                      alt={contact.name}
+                      className="w-7 h-7 rounded-full object-cover mb-1"
+                    />
+                  )}
+                </div>
+              )}
+              <div className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}>
+                <div
+                  className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                    msg.sender === "me"
+                      ? "bg-sky-500 text-white rounded-br-sm"
+                      : "bg-white text-zinc-800 rounded-bl-sm shadow-sm"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+                {!sameAsNext && (
+                  <span className="text-xs text-zinc-400 mt-1">{msg.timestamp}
+                  </span>
+                )}
               </div>
-              <span className="text-xs text-zinc-400 mt-1">{msg.timestamp}</span>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
       {/* Input */}
       <div className="px-6 py-4 bg-white border-t border-zinc-200 flex items-end gap-3">
-        <textarea
-          ref={textareaRef}
-          value={input}
-          onChange={handleInput}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
-          rows={1}
-          className="flex-1 resize-none rounded-2xl border border-zinc-300 bg-zinc-50 px-4 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-sky-400 max-h-40 overflow-y-auto"
-          style={{ scrollbarWidth: "none" } as React.CSSProperties}
-        />
+        <div className="relative flex-1">
+          <div
+            className="flex items-end flex-1 rounded-2xl border border-zinc-300 bg-zinc-50 focus-within:ring-2 focus-within:ring-sky-400 pr-2"
+            style={{ scrollbarWidth: "none" } as React.CSSProperties}
+          >
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
+              rows={1}
+              className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-zinc-800 focus:outline-none max-h-40 overflow-y-auto"
+            />
+            <button
+              onClick={() => setShowPicker((prev) => !prev)}
+              className="text-lg pb-2 px-1 leading-none"
+            >
+              😊
+            </button>
+          </div>
+        </div>
         <button
           onClick={handleSend}
           className="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-5 py-2 rounded-2xl text-sm transition-colors"
@@ -144,6 +180,12 @@ export default function Page() {
           Send
         </button>
       </div>
+
+      {showPicker && (
+        <div className="absolute bottom-20 left-200">
+          <EmojiPicker onEmojiClick={onEmojiClick} />
+        </div>
+      )}
     </div>
   );
 }
