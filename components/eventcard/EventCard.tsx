@@ -39,7 +39,8 @@ export default function EventCard({
                 <div className="flex items-baseline gap-2">
                     <span className="text-2xl text-white font-semibold">{posterName}</span>
                     <span className="text-xs text-white">Organization: {posterOrganization}</span>
-                    <span className="text-xs text-gray-400 font-normal">· {createdDate}</span>
+                    <span className="text-xs text-gray-400 font-normal">·</span>
+                    <span className="text-xs text-gray-400 font-normal">Posted: {createdDate}</span>
                 </div>
             </div>
 
