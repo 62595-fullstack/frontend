@@ -363,7 +363,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen font-sans">
-      <PagebarContent>
+      <PagebarContent title="Conversations">
         <ul className="space-y-1">
           {mockConversations.map((c) => (
             <li key={c.id}>
