@@ -9,7 +9,7 @@ export default function Pagebar() {
 
   return (
     <aside className="w-48 h-screen bg-zinc-200 text-zinc-800 flex flex-col">
-      <div className="bg-zinc-300 p-4 font-semibold text-zinc-600 text-sm flex-shrink-0">
+      <div className="bg-zinc-300 px-4 h-[73px] flex items-center font-semibold text-zinc-600 text-xl flex-shrink-0">
         {title}
       </div>
       <div
