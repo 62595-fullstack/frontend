@@ -8,12 +8,14 @@ export default function Pagebar() {
   if (!content) return null;
 
   return (
-    <aside className="w-48 h-screen bg-zinc-200 text-zinc-800 space-y-4">
-      <div className="h-25 bg-amber-500 p-4">
-        Hejsa
+    <aside className="w-48 h-screen bg-zinc-200 text-zinc-800 flex flex-col">
+      <div className="bg-zinc-300 p-4 font-semibold text-zinc-600 text-sm flex-shrink-0">
+        Conversations
       </div>
-
-      <div className="p-4">
+      <div
+        className="p-2 overflow-y-auto flex-1"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+      >
         {content}
       </div>
     </aside>
