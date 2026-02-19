@@ -8,12 +8,21 @@ export default function Pagebar() {
   if (!content) return null;
 
   return (
-    <aside className="w-48 h-screen bg-zinc-200 text-zinc-800 space-y-4">
-      <div className="h-25 bg-amber-500 p-4">
-        Hejsa
+    <aside className="w-80 bg-gray-100">
+      {/* Grey header */}
+      <div className="bg-gray-300 p-4 flex items-center gap-3">
+        <img
+          src="/profile.jpg"
+          className="w-12 h-12 rounded-full"
+        />
+        <div>
+          <p className="font-semibold">Christian W. L.</p>
+          <p className="text-sm text-gray-600">Organization: DTU</p>
+        </div>
       </div>
 
-      <div className="p-4">
+      {/* Dynamic page content */}
+      <div className="p-5">
         {content}
       </div>
     </aside>
