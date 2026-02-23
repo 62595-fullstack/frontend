@@ -120,20 +120,20 @@ export default async function Page({
           </div>
 
           {/* Tabs */}
-          <div className="mt-4 flex items-center gap-8 border-b border-gray-300">
-            {tabs.map((t) => {
-              const active = t === "Overview";
+          <div className="mt-6 flex border-b border-gray-300">
+          {tabs.map((t) => {
+            const active = t === "Overview";
 
               return (
                 <button
                   key={t}
                   type="button"
                   className={[
-                    "pb-3 text-base font-semibold transition-colors",
-                    active
-                      ? "text-black border-b-2 border-black"
-                      : "text-gray-600 hover:text-black",
-                  ].join(" ")}
+                  "pb-3 px-4 text-base font-semibold text-white transition-colors",
+                  active
+                    ? "border-b-2 border-white"
+                    : "opacity-70 hover:opacity-100",
+                ].join(" ")}
                 >
                   {t}
                 </button>
