@@ -25,11 +25,11 @@ export default function EventTabs({ eventId }: { eventId: string }) {
             key={t.label}
             href={href}
             className={[
-              "pb-3 px-8 text-base font-semibold text-white",
+              "pb-3 px-8 text-base font-semibold text-black",
               "cursor-pointer transition-all duration-200 ease-in-out",
               active
-                ? "border-b-2 border-white opacity-100"
-                : "opacity-70 hover:opacity-100 hover:border-b-2 hover:border-white/60",
+                ? "border-b-2 border-black opacity-100"
+                : "opacity-70 hover:opacity-100 hover:border-b-2 hover:border-black/60",
             ].join(" ")}
           >
             {t.label}

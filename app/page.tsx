@@ -13,7 +13,7 @@ export default function Home() {
           <li>Events</li>
         </ul>
       </PagebarContent>
-      <h1 className="text-5xl font-bold text-white mb-6">Upcoming Events</h1>
+      <h1 className="text-5xl font-bold text-black mb-6">Upcoming Events</h1>
       <div className="w-full max-w-5xl max-h-[70vh] rounded-lg overflow-hidden">
         <div
           className="overflow-y-auto max-h-[70vh] space-y-4 p-4"

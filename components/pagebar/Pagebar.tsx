@@ -16,7 +16,7 @@ export default function Pagebar() {
           className="w-12 h-12 rounded-full"
         />
         <div>
-          <p className="font-semibold">Christian W. L.</p>
+          <p className="font-semibold text-gray-700">Guest</p>
           <p className="text-sm text-gray-600">Organization: DTU</p>
         </div>
       </div>
