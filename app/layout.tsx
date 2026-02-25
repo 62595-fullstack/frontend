@@ -26,11 +26,9 @@ export default function RootLayout({children}: Readonly<{ children: React.ReactN
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PagebarProvider>
-          <div className="flex">
+          <div className="flex min-h-screen">
             <Sidebar />
-            <main className="flex-1 bg-zinc-100">
-              {children}
-            </main>
+            <main className="flex-1">{children}</main>
             <Pagebar />
           </div>
         </PagebarProvider>
