@@ -1,5 +1,6 @@
 'use client';
 
+import React from "react";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -12,21 +13,18 @@ function Card({ children }: { children: React.ReactNode }) {
 
 export default function Page() {
   return (
-    <div className="min-h-screen w-full bg-gray-100 font-sans">
-      {/* Your app's LEFT sidebar is probably coming from your layout, so we build ONLY center + right here */}
-      <div className="mx-auto flex w-full max-w-6xl gap-4 px-4 py-6">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-100 font-sans">
+      {/* Fill the entire <main> area (between Sidebar and Pagebar) */}
+      <div className="flex w-full gap-4 px-6 py-6">
         {/* CENTER (Profile) */}
-        <div className="min-w-full flex-1 space-y-4">
-          {/* Profile header */}
+        <div className="min-w-0 flex-1 space-y-4">
           <Card>
-            {/* Cover */}
             <div className="relative h-56 rounded-t-xl bg-gradient-to-r from-blue-600 to-indigo-600">
               <button className="absolute bottom-3 right-3 rounded-lg bg-white/90 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-white">
                 📷 Edit cover photo
               </button>
             </div>
 
-            {/* Avatar + actions */}
             <div className="relative px-4 pb-4">
               <div className="-mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex items-end gap-3">
@@ -52,7 +50,6 @@ export default function Page() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 sm:pb-2">
-                  
                   <button className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-200">
                     ✏️ Edit profile
                   </button>
@@ -62,7 +59,6 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Tabs */}
               <div className="mt-4 border-t">
                 <div className="flex gap-2 overflow-x-auto py-2 text-sm font-semibold text-gray-600">
                   <button className="rounded-lg bg-blue-50 px-3 py-2 text-blue-600">
@@ -74,17 +70,14 @@ export default function Page() {
                   <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
                     Friends
                   </button>
-                  <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
-                    Photos
-                  </button>
+                  
                 </div>
               </div>
             </div>
           </Card>
 
-          {/* Two-column section like Facebook (Intro left, feed right) */}
+          {/* Middle two-column profile body */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-            {/* Intro (left) */}
             <div className="lg:col-span-5 space-y-4">
               <Card>
                 <div className="p-4">
@@ -105,12 +98,11 @@ export default function Page() {
                   </button>
                 </div>
               </Card>
+
             </div>
 
-            {/* Feed (right) */}
-            <div className="lg:col-span-7 space-y-4">              
+            <div className="lg:col-span-7 space-y-4">
 
-              {/* Posts */}
               {[
                 { time: "2h", text: "Working on a Facebook-style profile layout in Next.js 😄" },
                 { time: "Yesterday", text: "Shipped a new UI update. Cleaner spacing, better hierarchy." },
@@ -137,19 +129,21 @@ export default function Page() {
                   </div>
                 </Card>
               ))}
+              
             </div>
           </div>
         </div>
 
-        {/* RIGHT (your Pagebar) */}
-        <div className="hidden w-80 shrink-0 lg:block">
+        {/* Optional: keep this ONLY if you want an additional right sidebar INSIDE main.
+            If your Pagebar already renders on the far right (it does), you likely should remove this block. */}
           <PagebarContent>
             <ul className="space-y-2">
               <li className="text-sm font-semibold text-gray-800">Profile</li>
             </ul>
           </PagebarContent>
         </div>
-      </div>
+      
     </div>
+    
   );
 }
