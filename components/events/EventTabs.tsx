@@ -9,6 +9,7 @@ const tabs = [
   { label: "Bracket", href: (id: string) => `/events/${id}/bracket` },
   { label: "Participants", href: (id: string) => `/events/${id}/participants` },
   { label: "Rules", href: (id: string) => `/events/${id}/rules` },
+  { label: "Comments", href: (id: string) => `/events/${id}/comments` },
 ] as const;
 
 export default function EventTabs({ eventId }: { eventId: string }) {

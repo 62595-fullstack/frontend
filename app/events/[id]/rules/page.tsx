@@ -1,4 +1,3 @@
-// app/events/[id]/bracket/page.tsx
 export default function RulesTab() {
   return (
     <div className="overflow-hidden rounded-lg bg-gray-200">
