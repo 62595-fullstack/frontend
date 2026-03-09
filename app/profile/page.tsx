@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { api, Post } from "@/lib/api";
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +12,56 @@ function Card({ children }: { children: React.ReactNode }) {
   );
 }
 
+function formatPostTime(iso?: string) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function Page() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setPostsLoading(true);
+      setPostsError(null);
+      try {
+        const data = await api.getPosts();
+        if (!cancelled) setPosts(data ?? []);
+      } catch (e: any) {
+        if (!cancelled) setPostsError(e?.message ?? "Failed to load posts");
+      } finally {
+        if (!cancelled) setPostsLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Newest-first i API
+  const sortedPosts = useMemo(() => {
+    return [...posts].sort((a: any, b: any) => {
+      const ad = new Date(a?.createdDate ?? 0).getTime();
+      const bd = new Date(b?.createdDate ?? 0).getTime();
+      return bd - ad;
+    });
+  }, [posts]);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gray-100 font-sans">
       {/* Fill the entire <main> area (between Sidebar and Pagebar) */}
@@ -36,7 +86,9 @@ export default function Page() {
                   </div>
 
                   <div className="pb-1">
-                    <h1 className="text-2xl font-bold text-gray-900">Your Name</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      Your Name
+                    </h1>
                     <p className="text-sm text-gray-500">1,234 friends</p>
                     <div className="mt-2 flex -space-x-2">
                       {Array.from({ length: 6 }).map((_, i) => (
@@ -70,7 +122,6 @@ export default function Page() {
                   <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
                     Friends
                   </button>
-                  
                 </div>
               </div>
             </div>
@@ -87,10 +138,20 @@ export default function Page() {
                   </p>
 
                   <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                    <li>🏢 Works at <span className="font-semibold">Company</span></li>
-                    <li>🎓 Studied at <span className="font-semibold">School</span></li>
-                    <li>📍 Lives in <span className="font-semibold">City</span></li>
-                    <li>🔗 <span className="font-semibold">your-site.com</span></li>
+                    <li>
+                      🏢 Works at{" "}
+                      <span className="font-semibold">Company</span>
+                    </li>
+                    <li>
+                      🎓 Studied at{" "}
+                      <span className="font-semibold">School</span>
+                    </li>
+                    <li>
+                      📍 Lives in <span className="font-semibold">City</span>
+                    </li>
+                    <li>
+                      🔗 <span className="font-semibold">your-site.com</span>
+                    </li>
                   </ul>
 
                   <button className="mt-4 w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-200">
@@ -98,52 +159,100 @@ export default function Page() {
                   </button>
                 </div>
               </Card>
-
             </div>
 
             <div className="lg:col-span-7 space-y-4">
+              {/* Posts header / state */}
+              <Card>
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-gray-900">
+                      Posts
+                    </p>
+                    {postsLoading ? (
+                      <span className="text-xs text-gray-500">Loading…</span>
+                    ) : (
+                      <span className="text-xs text-gray-500">
+                        {sortedPosts.length} total
+                      </span>
+                    )}
+                  </div>
 
-              {[
-                { time: "2h", text: "Working on a Facebook-style profile layout in Next.js 😄" },
-                { time: "Yesterday", text: "Shipped a new UI update. Cleaner spacing, better hierarchy." },
-              ].map((post, idx) => (
-                <Card key={idx}>
+                  {postsError && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {postsError}
+                    </p>
+                  )}
+                </div>
+              </Card>
+
+              {/* Real posts */}
+              {sortedPosts.map((post: any) => (
+                <Card key={post.id}>
                   <div className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-gray-300" />
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">Your Name</p>
-                        <p className="text-xs text-gray-500">{post.time} · 🌐</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          Your Name
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatPostTime(post.createdDate)} · 🌐
+                        </p>
                       </div>
                     </div>
-                    <button className="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-100">⋯</button>
+                    <button className="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-100">
+                      ⋯
+                    </button>
                   </div>
 
-                  <div className="px-4 pb-3 text-sm text-gray-800">{post.text}</div>
+                  <div className="px-4 pb-3 text-sm text-gray-800 space-y-2">
+                    {/* Title */}
+                    {post.title ? (
+                      <p className="font-semibold">{post.title}</p>
+                    ) : null}
+
+                    {/* Body */}
+                    <p className="whitespace-pre-wrap">
+                      {post.bodyText ?? "(No body text)"}
+                    </p>
+                  </div>
+
+                  {/* Placeholder media block*/}
                   <div className="h-64 bg-gray-200" />
 
                   <div className="grid grid-cols-3 gap-2 border-t p-2 text-sm font-semibold text-gray-700">
-                    <button className="rounded-lg px-3 py-2 hover:bg-gray-100">👍 Like</button>
-                    <button className="rounded-lg px-3 py-2 hover:bg-gray-100">💬 Comment</button>
-                    <button className="rounded-lg px-3 py-2 hover:bg-gray-100">↗️ Share</button>
+                    <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
+                      👍 Like
+                    </button>
+                    <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
+                      💬 Comment
+                    </button>
+                    <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
+                      ↗️ Share
+                    </button>
                   </div>
                 </Card>
               ))}
-              
+
+              {!postsLoading && !postsError && sortedPosts.length === 0 && (
+                <Card>
+                  <div className="p-4 text-sm text-gray-700">
+                    No posts yet.
+                  </div>
+                </Card>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Optional: keep this ONLY if you want an additional right sidebar INSIDE main.
-            If your Pagebar already renders on the far right (it does), you likely should remove this block. */}
-          <PagebarContent>
-            <ul className="space-y-2">
-              <li className="text-sm font-semibold text-gray-800">Profile</li>
-            </ul>
-          </PagebarContent>
-        </div>
-      
+        {/* Right side content */}
+        <PagebarContent>
+          <ul className="space-y-2">
+            <li className="text-sm font-semibold text-gray-800">Profile</li>
+          </ul>
+        </PagebarContent>
+      </div>
     </div>
-    
   );
 }

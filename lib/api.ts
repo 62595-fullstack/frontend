@@ -12,25 +12,32 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(`${res.status} ${res.statusText}: ${text}`);
   }
 
+  const contentType = res.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return (await res.text()) as T;
+  }
+
   return (await res.json()) as T;
 }
 
-// ---- Minimal types (replace with real fields later) ----
 export type Organization = { id: number; name?: string };
 export type Post = { id: number; title?: string };
 export type OrganizationEvent = { id: number };
 export type UserOrganizationBinding = { id: number };
 
-// ---- API surface matching your backend routes ----
+export type GdprDeleteResult = boolean;
+
+
 export const api = {
   // posts
   getPosts: () => request<Post[]>("/posts"),
-  getPostsByOrganization: (organizationId: number) =>
-    request<Post[]>(`/posts/${organizationId}`),
+  getPostsByOrganization: (organizationsId: number) =>
+    request<Post[]>(`/posts/${organizationsId}`),
 
   // organizations
   getOrganizations: () => request<Organization[]>("/organizations"),
-  getOrganizationById: (id: number) => request<Organization>(`/organizations/${id}`),
+  getOrganizationById: (id: number) =>
+    request<Organization>(`/organizations/${id}`),
   deleteOrganization: (id: number) =>
     request<boolean>(`/organizations/${id}`, { method: "DELETE" }),
 
@@ -43,4 +50,8 @@ export const api = {
   // events
   getOrganizationEvents: (organizationId: number) =>
     request<OrganizationEvent[]>(`/OrganizationEvents/${organizationId}`),
+
+  // GDPR
+  deleteGdprByUserId: (userId: number) =>
+    request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
 };
