@@ -12,6 +12,8 @@ export default function Sidebar() {
     { href: "/organizations", label: "Organizations" },
     { href: "/notifications", label: "Notifications" },
     { href: "/events", label: "Events" },
+    { href: "/profile", label: "Profile" },
+
   ];
 
   return (
