@@ -214,7 +214,7 @@ export default function Page() {
 
                     {/* Body */}
                     <p className="whitespace-pre-wrap">
-                      {post.bodytext ?? "(No body text)"}
+                    {post.bodytext?.trim() ? post.bodytext : "(No body text)"} 
                     </p>
                   </div>
 
