@@ -17,17 +17,17 @@ export default function Page() {
     });
   }, []);
 
-  async function handleCreate(data: { title: string; description: string; imageUrl: string }) {
+  async function handleCreate(data: { title: string; description: string; imageUrl: string; organizationId: number }) {
     setCreateError(null);
     try {
       await api.createOrganizationEvent({
         id: 0,
-        organizationId: 0,
+        organizationId: data.organizationId,
         title: data.title,
         description: data.description,
         imageUrl: data.imageUrl,
       });
-      const updated = await api.getOrganizationEvents(1);
+      const updated = await api.getOrganizationEvents(data.organizationId);
       setEvents(Array.isArray(updated) ? updated : JSON.parse(updated as unknown as string));
       setShowModal(false);
     } catch (err) {

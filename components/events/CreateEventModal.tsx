@@ -1,11 +1,13 @@
 'use client'
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { api, Organization } from "@/lib/api";
 
 interface NewEventData {
     title: string;
     description: string;
     imageUrl: string;
+    organizationId: number;
 }
 
 interface CreateEventModalProps {
@@ -19,8 +21,31 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
     const [description, setDescription] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [titleError, setTitleError] = useState(false);
+    const [orgError, setOrgError] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [organizationId, setOrganizationId] = useState<number | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        api.getOrganizations().then((data) => {
+            const orgs = Array.isArray(data) ? data : JSON.parse(data as unknown as string);
+            setOrganizations(orgs);
+            if (orgs.length > 0) setOrganizationId(orgs[0].id);
+        });
+    }, []);
 
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -34,12 +59,12 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!title.trim()) {
-            setTitleError(true);
-            return;
-        }
+        let valid = true;
+        if (!title.trim()) { setTitleError(true); valid = false; }
+        if (organizationId === null) { setOrgError(true); valid = false; }
+        if (!valid) return;
         setSubmitting(true);
-        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl });
+        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl, organizationId: organizationId! });
         setSubmitting(false);
     }
 
@@ -77,6 +102,41 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
                         />
                         {titleError && (
                             <span className="text-red-400 text-xs">Title is required.</span>
+                        )}
+                    </div>
+
+                    {/* Organization */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-300">
+                            Organization <span className="text-red-400">*</span>
+                        </label>
+                        <div ref={dropdownRef} className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setDropdownOpen((o) => !o)}
+                                className={`w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm text-left border ${
+                                    orgError ? "border-red-500" : "border-gray-700 focus:border-blue-500"
+                                } transition-colors flex items-center justify-between`}
+                            >
+                                <span>{organizations.find((o) => o.id === organizationId)?.name ?? "No organizations available"}</span>
+                                <span className="ml-2 text-gray-400">▾</span>
+                            </button>
+                            {dropdownOpen && organizations.length > 0 && (
+                                <ul className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg">
+                                    {organizations.map((org) => (
+                                        <li
+                                            key={org.id}
+                                            onClick={() => { setOrganizationId(org.id); setOrgError(false); setDropdownOpen(false); }}
+                                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-700 ${org.id === organizationId ? "text-blue-400" : "text-white"}`}
+                                        >
+                                            {org.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        {orgError && (
+                            <span className="text-red-400 text-xs">Organization is required.</span>
                         )}
                     </div>
 
