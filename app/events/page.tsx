@@ -11,9 +11,24 @@ export default function Page() {
   const [showModal, setShowModal] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  async function loadAllEvents() {
+    const orgs = await api.getOrganizations();
+    const orgList = Array.isArray(orgs) ? orgs : JSON.parse(orgs as unknown as string);
+    const results = await Promise.all(
+      orgList.map((org: { id: number }) => api.getOrganizationEvents(org.id))
+    );
+    const all = results.flatMap((data) =>
+      Array.isArray(data) ? data : JSON.parse(data as unknown as string)
+    );
+    setEvents(all);
+  }
+
   useEffect(() => {
-    api.getOrganizationEvents(1).then((data) => {
-      setEvents(Array.isArray(data) ? data : JSON.parse(data as unknown as string));
+    api.getOrganizations().then((orgs) => {
+      const orgList = Array.isArray(orgs) ? orgs : JSON.parse(orgs as unknown as string);
+      Promise.all(orgList.map((org: { id: number }) => api.getOrganizationEvents(org.id))).then((results) => {
+        setEvents(results.flatMap((data) => Array.isArray(data) ? data : JSON.parse(data as unknown as string)));
+      });
     });
   }, []);
 
@@ -27,8 +42,7 @@ export default function Page() {
         description: data.description,
         imageUrl: data.imageUrl,
       });
-      const updated = await api.getOrganizationEvents(data.organizationId);
-      setEvents(Array.isArray(updated) ? updated : JSON.parse(updated as unknown as string));
+      await loadAllEvents();
       setShowModal(false);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Failed to create event.");
