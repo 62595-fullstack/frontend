@@ -56,10 +56,10 @@ export const api = {
   getOrganizationEvents: (organizationId: number) =>
     request<OrganizationEvent[]>(`/OrganizationEvents/${organizationId}`),
   createOrganizationEvent: (event: OrganizationEvent) =>
-    request<string>("/OrganizationEvents", {
-      method: "POST",
-      body: JSON.stringify(JSON.stringify(event)),
-    }),
+    request<string>(
+      `/OrganizationEvents?organizationEvent=${encodeURIComponent(JSON.stringify(event))}`,
+      { method: "POST" }
+    ),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
