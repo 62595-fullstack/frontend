@@ -49,7 +49,7 @@ export default function EventCard({
             {/* Event image */}
             {imageUrl && (
                 <img
-                    src={imageUrl}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE}${imageUrl}`}
                     alt={title}
                     className="w-full h-64 object-cover"
                 />
