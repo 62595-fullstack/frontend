@@ -1,38 +1,52 @@
 'use client'
 
-import { useState } from "react";
-import { mockEvents } from "@/lib/mockEvents";
+import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import PagebarContent from "@/components/pagebar/PagebarContent";
-
-type EventItem = typeof mockEvents[number];
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
+import { api, OrganizationEvent } from "@/lib/api";
 
 export default function Page() {
-  const [events, setEvents] = useState<EventItem[]>(mockEvents);
+  const [events, setEvents] = useState<OrganizationEvent[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
-  function handleCreate(data: { title: string; description: string; imageUrl: string }) {
-    const nextId = String(events.length > 0 ? Math.max(...events.map((e) => Number(e.id))) + 1 : 1);
-    const newEvent: EventItem = {
-      id: nextId,
-      title: data.title,
-      description: data.description,
-      imageUrl: data.imageUrl,
-      posterName: "John Doe",
-      posterAvatar: "https://picsum.photos/seed/john/100/100",
-      posterOrganization: "DTU",
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      createdDate: formatDate(new Date()),
-    };
-    setEvents((prev) => [newEvent, ...prev]);
-    setShowModal(false);
+  async function loadAllEvents() {
+    const orgs = await api.getOrganizations();
+    const orgList = Array.isArray(orgs) ? orgs : JSON.parse(orgs as unknown as string);
+    const results = await Promise.all(
+      orgList.map((org: { id: number }) => api.getOrganizationEvents(org.id))
+    );
+    const all = results.flatMap((data) =>
+      Array.isArray(data) ? data : JSON.parse(data as unknown as string)
+    );
+    setEvents(all);
+  }
+
+  useEffect(() => {
+    api.getOrganizations().then((orgs) => {
+      const orgList = Array.isArray(orgs) ? orgs : JSON.parse(orgs as unknown as string);
+      Promise.all(orgList.map((org: { id: number }) => api.getOrganizationEvents(org.id))).then((results) => {
+        setEvents(results.flatMap((data) => Array.isArray(data) ? data : JSON.parse(data as unknown as string)));
+      });
+    });
+  }, []);
+
+  async function handleCreate(data: { title: string; description: string; imageUrl: string; organizationId: number }) {
+    setCreateError(null);
+    try {
+      await api.createOrganizationEvent({
+        id: 0,
+        organizationId: data.organizationId,
+        title: data.title,
+        description: data.description,
+        imageUrl: data.imageUrl,
+      });
+      await loadAllEvents();
+      setShowModal(false);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Failed to create event.");
+    }
   }
 
   return (
@@ -61,7 +75,20 @@ export default function Page() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {events.map((event) => (
-            <EventCard key={event.id} {...event} />
+            <EventCard
+              key={event.id}
+              id={String(event.id)}
+              title={event.title}
+              description={event.description}
+              imageUrl={event.imageUrl}
+              posterName="Unknown"
+              posterAvatar=""
+              posterOrganization=""
+              likes={0}
+              comments={0}
+              shares={0}
+              createdDate=""
+            />
           ))}
         </div>
       </div>
@@ -69,8 +96,9 @@ export default function Page() {
       {/* Modal */}
       {showModal && (
         <CreateEventModal
-          onClose={() => setShowModal(false)}
+          onClose={() => { setShowModal(false); setCreateError(null); }}
           onSubmit={handleCreate}
+          error={createError}
         />
       )}
     </div>

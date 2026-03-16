@@ -31,11 +31,13 @@ export default function EventCard({
         <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
             {/* Top bar - Poster info */}
             <div className="flex items-center gap-3 p-4">
-                <img
-                    src={posterAvatar}
-                    alt={posterName}
-                    className="w-10 h-10 rounded-full object-cover"
-                />
+                {posterAvatar && (
+                    <img
+                        src={posterAvatar}
+                        alt={posterName}
+                        className="w-10 h-10 rounded-full object-cover"
+                    />
+                )}
                 <div className="flex items-baseline gap-2">
                     <span className="text-2xl text-white font-semibold">{posterName}</span>
                     <span className="text-xs text-white">Organization: {posterOrganization}</span>
@@ -45,11 +47,13 @@ export default function EventCard({
             </div>
 
             {/* Event image */}
-            <img
-                src={imageUrl}
-                alt={title}
-                className="w-full h-64 object-cover"
-            />
+            {imageUrl && (
+                <img
+                    src={`${process.env.NEXT_PUBLIC_API_BASE}${imageUrl}`}
+                    alt={title}
+                    className="w-full h-64 object-cover"
+                />
+            )}
 
             {/* Stats bar */}
             <div className="flex items-center gap-6 px-4 py-3 border-b border-gray-700 text-gray-300 text-sm">
