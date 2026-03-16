@@ -24,6 +24,7 @@ export default function Page() {
       const nextId = events.length > 0 ? Math.max(...events.map((e) => Number(e.id))) + 1 : 1;
       await api.createOrganizationEvent({
         id: nextId,
+        organizationId: 1,
         title: data.title,
         description: data.description,
         imageUrl: data.imageUrl,
