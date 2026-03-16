@@ -21,7 +21,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export type Organization = { id: number; name?: string };
-export type Post = { id: number; title?: string };
+export type Post = { id: number; title?: string; createdDate?: string; organizationId?: number; bodytext?: string };
 export type OrganizationEvent = { id: number };
 export type UserOrganizationBinding = { id: number };
 
