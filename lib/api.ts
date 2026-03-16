@@ -22,7 +22,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export type Organization = { id: number; name?: string };
 export type Post = { id: number; title?: string };
-export type OrganizationEvent = { id: number };
+export type OrganizationEvent = {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+};
 export type UserOrganizationBinding = { id: number };
 
 export type GdprDeleteResult = boolean;
@@ -50,6 +55,11 @@ export const api = {
   // events
   getOrganizationEvents: (organizationId: number) =>
     request<OrganizationEvent[]>(`/OrganizationEvents/${organizationId}`),
+  createOrganizationEvent: (event: OrganizationEvent) =>
+    request<string>("/OrganizationEvents", {
+      method: "POST",
+      body: JSON.stringify(JSON.stringify(event)),
+    }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>

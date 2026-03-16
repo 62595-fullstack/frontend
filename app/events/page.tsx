@@ -5,6 +5,7 @@ import { mockEvents } from "@/lib/mockEvents";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { api } from "@/lib/api";
 
 type EventItem = typeof mockEvents[number];
 
@@ -15,24 +16,36 @@ function formatDate(date: Date): string {
 export default function Page() {
   const [events, setEvents] = useState<EventItem[]>(mockEvents);
   const [showModal, setShowModal] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
-  function handleCreate(data: { title: string; description: string; imageUrl: string }) {
-    const nextId = String(events.length > 0 ? Math.max(...events.map((e) => Number(e.id))) + 1 : 1);
-    const newEvent: EventItem = {
-      id: nextId,
-      title: data.title,
-      description: data.description,
-      imageUrl: data.imageUrl,
-      posterName: "John Doe",
-      posterAvatar: "https://picsum.photos/seed/john/100/100",
-      posterOrganization: "DTU",
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      createdDate: formatDate(new Date()),
-    };
-    setEvents((prev) => [newEvent, ...prev]);
-    setShowModal(false);
+  async function handleCreate(data: { title: string; description: string; imageUrl: string }) {
+    setCreateError(null);
+    try {
+      const nextId = events.length > 0 ? Math.max(...events.map((e) => Number(e.id))) + 1 : 1;
+      await api.createOrganizationEvent({
+        id: nextId,
+        title: data.title,
+        description: data.description,
+        imageUrl: data.imageUrl,
+      });
+      const newEvent: EventItem = {
+        id: String(nextId),
+        title: data.title,
+        description: data.description,
+        imageUrl: data.imageUrl,
+        posterName: "John Doe",
+        posterAvatar: "https://picsum.photos/seed/john/100/100",
+        posterOrganization: "DTU",
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        createdDate: formatDate(new Date()),
+      };
+      setEvents((prev) => [newEvent, ...prev]);
+      setShowModal(false);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Failed to create event.");
+    }
   }
 
   return (
@@ -69,8 +82,9 @@ export default function Page() {
       {/* Modal */}
       {showModal && (
         <CreateEventModal
-          onClose={() => setShowModal(false)}
+          onClose={() => { setShowModal(false); setCreateError(null); }}
           onSubmit={handleCreate}
+          error={createError}
         />
       )}
     </div>

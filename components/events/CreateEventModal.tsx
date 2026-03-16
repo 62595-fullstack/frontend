@@ -10,14 +10,16 @@ interface NewEventData {
 
 interface CreateEventModalProps {
     onClose: () => void;
-    onSubmit: (data: NewEventData) => void;
+    onSubmit: (data: NewEventData) => Promise<void>;
+    error?: string | null;
 }
 
-export default function CreateEventModal({ onClose, onSubmit }: CreateEventModalProps) {
+export default function CreateEventModal({ onClose, onSubmit, error }: CreateEventModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [titleError, setTitleError] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -30,13 +32,15 @@ export default function CreateEventModal({ onClose, onSubmit }: CreateEventModal
         reader.readAsDataURL(file);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!title.trim()) {
             setTitleError(true);
             return;
         }
-        onSubmit({ title: title.trim(), description: description.trim(), imageUrl });
+        setSubmitting(true);
+        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl });
+        setSubmitting(false);
     }
 
     return (
@@ -124,20 +128,27 @@ export default function CreateEventModal({ onClose, onSubmit }: CreateEventModal
                         )}
                     </div>
 
+                    {/* Error */}
+                    {error && (
+                        <p className="text-red-400 text-sm">{error}</p>
+                    )}
+
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-1">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="text-gray-400 hover:text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
+                            disabled={submitting}
+                            className="text-gray-400 hover:text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors cursor-pointer"
+                            disabled={submitting}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Create Event
+                            {submitting ? "Creating…" : "Create Event"}
                         </button>
                     </div>
                 </form>
