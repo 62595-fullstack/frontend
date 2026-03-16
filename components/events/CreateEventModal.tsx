@@ -43,7 +43,7 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
         api.getOrganizations().then((data) => {
             const orgs = Array.isArray(data) ? data : JSON.parse(data as unknown as string);
             setOrganizations(orgs);
-            if (orgs.length > 0) setOrganizationId(orgs[0].id);
+            if (orgs.length > 0 && orgs[0].id) setOrganizationId(orgs[0].id);
         });
     }, []);
 
@@ -61,7 +61,7 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
         e.preventDefault();
         let valid = true;
         if (!title.trim()) { setTitleError(true); valid = false; }
-        if (organizationId === null) { setOrgError(true); valid = false; }
+        if (!organizationId) { setOrgError(true); valid = false; }
         if (!valid) return;
         setSubmitting(true);
         await onSubmit({ title: title.trim(), description: description.trim(), imageUrl, organizationId: organizationId! });
