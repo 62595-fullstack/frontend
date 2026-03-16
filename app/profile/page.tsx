@@ -40,8 +40,8 @@ export default function Page() {
       try {
         const data = await api.getPosts();
         if (!cancelled) setPosts(data ?? []);
-      } catch (e: any) {
-        if (!cancelled) setPostsError(e?.message ?? "Failed to load posts");
+      } catch (e: unknown) {
+        if (!cancelled) setPostsError((e as Error)?.message ?? "Failed to load posts");
       } finally {
         if (!cancelled) setPostsLoading(false);
       }
@@ -55,7 +55,7 @@ export default function Page() {
 
   // Newest-first i API
   const sortedPosts = useMemo(() => {
-    return [...posts].sort((a: any, b: any) => {
+    return [...posts].sort((a: Post, b: Post) => {
       const ad = new Date(a?.createdDate ?? 0).getTime();
       const bd = new Date(b?.createdDate ?? 0).getTime();
       return bd - ad;
@@ -187,7 +187,7 @@ export default function Page() {
               </Card>
 
               {/* Real posts */}
-              {sortedPosts.map((post: any) => (
+              {sortedPosts.map((post: Post) => (
                 <Card key={post.id}>
                   <div className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
@@ -214,7 +214,7 @@ export default function Page() {
 
                     {/* Body */}
                     <p className="whitespace-pre-wrap">
-                      {post.bodyText ?? "(No body text)"}
+                    {post.bodytext?.trim() ? post.bodytext : "(No body text)"} 
                     </p>
                   </div>
 
