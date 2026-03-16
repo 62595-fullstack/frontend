@@ -31,11 +31,13 @@ export default function EventCard({
         <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
             {/* Top bar - Poster info */}
             <div className="flex items-center gap-3 p-4">
-                <img
-                    src={posterAvatar}
-                    alt={posterName}
-                    className="w-10 h-10 rounded-full object-cover"
-                />
+                {posterAvatar && (
+                    <img
+                        src={posterAvatar}
+                        alt={posterName}
+                        className="w-10 h-10 rounded-full object-cover"
+                    />
+                )}
                 <div className="flex items-baseline gap-2">
                     <span className="text-2xl text-white font-semibold">{posterName}</span>
                     <span className="text-xs text-white">Organization: {posterOrganization}</span>
