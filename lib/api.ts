@@ -20,7 +20,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
-export type Organization = { id: number; name?: string };
+export type Organization = { id: number; name: string; description: string };
 export type Post = { id: number; title?: string };
 export type OrganizationEvent = {
   id: number;
@@ -44,6 +44,11 @@ export const api = {
   getOrganizations: () => request<Organization[]>("/organizations"),
   getOrganizationById: (id: number) =>
     request<Organization>(`/organizations/${id}`),
+  createOrganization: (org: { name: string; description: string }) =>
+    request<string>(`/organizations`, {
+      method: "POST",
+      body: JSON.stringify({ id: 0, name: org.name, description: org.description, createdDate: new Date().toISOString() }),
+    }),
   deleteOrganization: (id: number) =>
     request<boolean>(`/organizations/${id}`, { method: "DELETE" }),
 
