@@ -1,48 +1,34 @@
 'use client'
 
-import { useState } from "react";
-import { mockEvents } from "@/lib/mockEvents";
+import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import PagebarContent from "@/components/pagebar/PagebarContent";
-import { api } from "@/lib/api";
-
-type EventItem = typeof mockEvents[number];
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
+import { api, OrganizationEvent } from "@/lib/api";
 
 export default function Page() {
-  const [events, setEvents] = useState<EventItem[]>(mockEvents);
+  const [events, setEvents] = useState<OrganizationEvent[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.getOrganizationEvents(1).then((data) => {
+      setEvents(Array.isArray(data) ? data : JSON.parse(data as unknown as string));
+    });
+  }, []);
 
   async function handleCreate(data: { title: string; description: string; imageUrl: string }) {
     setCreateError(null);
     try {
-      const nextId = events.length > 0 ? Math.max(...events.map((e) => Number(e.id))) + 1 : 1;
       await api.createOrganizationEvent({
-        id: nextId,
-        organizationId: 1,
+        id: 0,
+        organizationId: 0,
         title: data.title,
         description: data.description,
         imageUrl: data.imageUrl,
       });
-      const newEvent: EventItem = {
-        id: String(nextId),
-        title: data.title,
-        description: data.description,
-        imageUrl: data.imageUrl,
-        posterName: "John Doe",
-        posterAvatar: "https://picsum.photos/seed/john/100/100",
-        posterOrganization: "DTU",
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        createdDate: formatDate(new Date()),
-      };
-      setEvents((prev) => [newEvent, ...prev]);
+      const updated = await api.getOrganizationEvents(1);
+      setEvents(Array.isArray(updated) ? updated : JSON.parse(updated as unknown as string));
       setShowModal(false);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Failed to create event.");
@@ -75,7 +61,20 @@ export default function Page() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {events.map((event) => (
-            <EventCard key={event.id} {...event} />
+            <EventCard
+              key={event.id}
+              id={String(event.id)}
+              title={event.title}
+              description={event.description}
+              imageUrl={event.imageUrl}
+              posterName="Unknown"
+              posterAvatar=""
+              posterOrganization=""
+              likes={0}
+              comments={0}
+              shares={0}
+              createdDate=""
+            />
           ))}
         </div>
       </div>
