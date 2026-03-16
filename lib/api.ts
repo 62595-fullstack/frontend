@@ -7,17 +7,31 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${res.status} ${res.statusText}: ${text}`);
-  }
-
   const contentType = res.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
-    return (await res.text()) as T;
+  const isJson = contentType.includes("application/json");
+  const body = await res.text();
+
+  if (!res.ok) {
+    let message = `${res.status} ${res.statusText}`;
+    if (body) {
+      try {
+        const parsed = JSON.parse(body);
+        // ASP.NET Core ProblemDetails
+        if (parsed?.detail) message = parsed.detail;
+        else if (parsed?.title) message = parsed.title;
+        // Plain JSON string e.g. "Organization with ID 15 does not exist."
+        else if (typeof parsed === "string") message = parsed;
+        else message = body;
+      } catch {
+        message = body;
+      }
+    }
+    throw new Error(message);
   }
 
-  return (await res.json()) as T;
+  if (!body) return undefined as T;
+  if (!isJson) return body as T;
+  return JSON.parse(body) as T;
 }
 
 export type Organization = { id: number; name: string; description: string };
