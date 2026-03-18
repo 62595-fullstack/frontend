@@ -31,7 +31,7 @@ export default function Login() {
                   Password
                 </label>
                 <a href="#" className="text-xs text-gray-500 hover:text-gray-900 transition">
-                  Forgot password?
+                  {/*Forgot password?*/}
                 </a>
               </div>
               <input
@@ -52,12 +52,12 @@ export default function Login() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        {/*<p className="mt-6 text-center text-sm text-gray-500">
           Don&apos;t have an account?{' '}
           <a href="#" className="font-medium text-gray-900 hover:underline">
             Sign up
           </a>
-        </p>
+        </p>*/}
       </div>
     </div>
   );
