@@ -1,9 +1,10 @@
-'use client'
+import type { Metadata } from 'next'
+import Login from './Login'
 
-export default function Home() {
-  return (
-    <div className="flex flex-col h-screen items-center font-sans p-8">
-      Login
-    </div>
-  );
+export const metadata: Metadata = {
+  title: 'Login',
+}
+
+export default function Page() {
+  return <Login/>
 }
