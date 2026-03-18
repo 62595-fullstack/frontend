@@ -12,10 +12,12 @@ export default function Sidebar() {
     { href: "/organizations", label: "Organizations" },
     { href: "/notifications", label: "Notifications" },
     { href: "/events", label: "Events" },
+    { href: "/profile", label: "Profile" },
+
   ];
 
   return (
-    <aside className="w-48 h-screen bg-zinc-300 text-zinc-800 p-4">
+    <aside className="w-72 h-screen bg-zinc-200 text-zinc-800 p-4">
       <nav>
         <ul className="space-y-2">
           {links.map(({ href, label }) => {
@@ -24,7 +26,7 @@ export default function Sidebar() {
               <li key={href}>
                 <Link
                   href={href}
-                  className={`block px-4 py-1 rounded-xl hover:bg-sky-400 ${isActive && "bg-sky-300"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
+                  className={`block px-4 py-1 rounded-lg hover:bg-sky-400 ${isActive && "bg-sky-300"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
                 >
                   {label}
                 </Link>
