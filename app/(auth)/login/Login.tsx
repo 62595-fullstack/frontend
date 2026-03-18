@@ -16,13 +16,13 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const body = JSON.stringify({ Email: email, PasswordHash: password })
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE}/login/${encodeURIComponent(body)}`
-      )
-      const text = await res.text()
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
 
-      if (text.toLowerCase() === 'true') {
+      if (res.ok) {
         router.push('/')
       } else {
         setError('Invalid email or password.')
