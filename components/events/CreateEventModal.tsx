@@ -1,24 +1,51 @@
 'use client'
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { api, Organization } from "@/lib/api";
 
 interface NewEventData {
     title: string;
     description: string;
     imageUrl: string;
+    organizationId: number;
 }
 
 interface CreateEventModalProps {
     onClose: () => void;
-    onSubmit: (data: NewEventData) => void;
+    onSubmit: (data: NewEventData) => Promise<void>;
+    error?: string | null;
 }
 
-export default function CreateEventModal({ onClose, onSubmit }: CreateEventModalProps) {
+export default function CreateEventModal({ onClose, onSubmit, error }: CreateEventModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [titleError, setTitleError] = useState(false);
+    const [orgError, setOrgError] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [organizationId, setOrganizationId] = useState<number | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        api.getOrganizations().then((data) => {
+            const orgs = Array.isArray(data) ? data : JSON.parse(data as unknown as string);
+            setOrganizations(orgs);
+            if (orgs.length > 0 && orgs[0].id) setOrganizationId(orgs[0].id);
+        });
+    }, []);
 
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -30,13 +57,15 @@ export default function CreateEventModal({ onClose, onSubmit }: CreateEventModal
         reader.readAsDataURL(file);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!title.trim()) {
-            setTitleError(true);
-            return;
-        }
-        onSubmit({ title: title.trim(), description: description.trim(), imageUrl });
+        let valid = true;
+        if (!title.trim()) { setTitleError(true); valid = false; }
+        if (!organizationId) { setOrgError(true); valid = false; }
+        if (!valid) return;
+        setSubmitting(true);
+        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl, organizationId: organizationId! });
+        setSubmitting(false);
     }
 
     return (
@@ -73,6 +102,41 @@ export default function CreateEventModal({ onClose, onSubmit }: CreateEventModal
                         />
                         {titleError && (
                             <span className="text-red-400 text-xs">Title is required.</span>
+                        )}
+                    </div>
+
+                    {/* Organization */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-300">
+                            Organization <span className="text-red-400">*</span>
+                        </label>
+                        <div ref={dropdownRef} className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setDropdownOpen((o) => !o)}
+                                className={`w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm text-left border ${
+                                    orgError ? "border-red-500" : "border-gray-700 focus:border-blue-500"
+                                } transition-colors flex items-center justify-between`}
+                            >
+                                <span>{organizations.find((o) => o.id === organizationId)?.name ?? "No organizations available"}</span>
+                                <span className="ml-2 text-gray-400">▾</span>
+                            </button>
+                            {dropdownOpen && organizations.length > 0 && (
+                                <ul className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg">
+                                    {organizations.map((org) => (
+                                        <li
+                                            key={org.id}
+                                            onClick={() => { setOrganizationId(org.id); setOrgError(false); setDropdownOpen(false); }}
+                                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-700 ${org.id === organizationId ? "text-blue-400" : "text-white"}`}
+                                        >
+                                            {org.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        {orgError && (
+                            <span className="text-red-400 text-xs">Organization is required.</span>
                         )}
                     </div>
 
@@ -124,20 +188,27 @@ export default function CreateEventModal({ onClose, onSubmit }: CreateEventModal
                         )}
                     </div>
 
+                    {/* Error */}
+                    {error && (
+                        <p className="text-red-400 text-sm">{error}</p>
+                    )}
+
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-1">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="text-gray-400 hover:text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
+                            disabled={submitting}
+                            className="text-gray-400 hover:text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors cursor-pointer"
+                            disabled={submitting}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Create Event
+                            {submitting ? "Creating…" : "Create Event"}
                         </button>
                     </div>
                 </form>

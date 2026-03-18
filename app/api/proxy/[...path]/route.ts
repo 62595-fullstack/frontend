@@ -26,11 +26,10 @@ async function forward(req: Request, path: string[]) {
 
   const body = await res.text();
 
-  return new NextResponse(body, {
+  const contentType = res.headers.get("content-type");
+  return new NextResponse(body || null, {
     status: res.status,
-    headers: {
-      "Content-Type": res.headers.get("content-type") ?? "application/json",
-    },
+    headers: contentType ? { "Content-Type": contentType } : {},
   });
 }
 

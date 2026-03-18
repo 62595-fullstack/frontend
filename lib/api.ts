@@ -7,37 +7,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${res.status} ${res.statusText}: ${text}`);
-  }
-
   const contentType = res.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+  const body = await res.text();
 
-  let data: unknown;
-
-  if (contentType.includes("application/json")) {
-    data = await res.json();
-  } else {
-    data = await res.text();
-  }
-
-  // Some backends return JSON as a string. Parse it if possible.
-  if (typeof data === "string") {
-    try {
-      data = JSON.parse(data);
-    } catch {
-      // leave as plain text
+  if (!res.ok) {
+    let message = `${res.status} ${res.statusText}`;
+    if (body) {
+      try {
+        const parsed = JSON.parse(body);
+        // ASP.NET Core ProblemDetails
+        if (parsed?.detail) message = parsed.detail;
+        else if (parsed?.title) message = parsed.title;
+        // Plain JSON string e.g. "Organization with ID 15 does not exist."
+        else if (typeof parsed === "string") message = parsed;
+        else message = body;
+      } catch {
+        message = body;
+      }
     }
+    throw new Error(message);
   }
 
-  return data as T;
+  if (!body) return undefined as T;
+  if (!isJson) return body as T;
+  return JSON.parse(body) as T;
 }
 
-export type Organization = {
-  id: number;
-  name?: string;
-};
+export type Organization = { id: number; name: string; description: string };
 
 export type Post = {
   id: number;
@@ -46,8 +43,13 @@ export type Post = {
   organizationId?: number;
   bodytext?: string;
 };
-
-export type OrganizationEvent = { id: number };
+export type OrganizationEvent = {
+  id: number;
+  organizationId: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+};
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;
 
@@ -127,6 +129,11 @@ export const api = {
   getOrganizations: () => request<Organization[]>("/organizations"),
   getOrganizationById: (id: number) =>
     request<Organization>(`/organizations/${id}`),
+  createOrganization: (org: { name: string; description: string }) =>
+    request<string>(`/organizations`, {
+      method: "POST",
+      body: JSON.stringify({ id: 0, name: org.name, description: org.description, createdDate: new Date().toISOString() }),
+    }),
   deleteOrganization: (id: number) =>
     request<boolean>(`/organizations/${id}`, { method: "DELETE" }),
 
@@ -139,6 +146,11 @@ export const api = {
   // events
   getOrganizationEvents: (organizationId: number) =>
     request<OrganizationEvent[]>(`/OrganizationEvents/${organizationId}`),
+  createOrganizationEvent: (event: OrganizationEvent) =>
+    request<string>(`/OrganizationEvents`, {
+      method: "POST",
+      body: JSON.stringify(event),
+    }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>

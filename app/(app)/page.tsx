@@ -2,15 +2,14 @@
 
 import PagebarContent from "@/components/pagebar/PagebarContent";
 
-export default function Page() {
+export default function Home() {
   return (
-    <div className="flex flex-1 min-h-screen items-center justify-center font-sans space-x-4">
+    <div className="flex flex-col h-screen items-center font-sans p-8">
       <PagebarContent>
         <ul className="space-y-2">
-          <li>Organizations</li>
+          <li>Events</li>
         </ul>
       </PagebarContent>
-      <p>Organizations</p>
     </div>
   );
 }
