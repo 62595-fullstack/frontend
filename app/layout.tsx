@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
-import { redirect } from "next/navigation";
-import { checkIfLoggedIn } from "@/lib/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,12 +18,7 @@ export const metadata: Metadata = {
   description: "Connect your book with other faces.",
 };
 
-export default async function RootLayout({children}: Readonly<{ children: React.ReactNode }>) {
-  const { isLoggedIn } = await checkIfLoggedIn()
-  if (!isLoggedIn) {
-    redirect('/login')
-  }
-
+export default function RootLayout({children}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
