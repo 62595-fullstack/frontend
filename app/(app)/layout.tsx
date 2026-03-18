@@ -1,4 +1,4 @@
-import "@/globals.css";
+import "@/app/globals.css";
 import React from "react";
 import { PagebarProvider } from "@/components/pagebar/PagebarContext";
 import Sidebar from "@/components/sidebar/Sidebar";
