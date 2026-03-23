@@ -12,6 +12,7 @@
   --border-muted: oklch(0.3 0 282);
   --primary: oklch(0.76 0.1 282);
   --primary-hover: oklch(0.66 0.1 282);
+  --primary-on-click: oklch(0.36 0.1 282);
   --secondary: oklch(0.76 0.1 102);
   --danger: oklch(0.7 0.05 30);
   --warning: oklch(0.7 0.05 100);
@@ -30,6 +31,7 @@ body.light {
   --border-muted: oklch(0.7 0 282);
   --primary: oklch(0.4 0.1 282);
   --primary-hover: oklch(0.3 0.1 282);
+  --primary-on-click: oklch(0.1 0.1 282);
   --secondary: oklch(0.4 0.1 102);
   --danger: oklch(0.5 0.05 30);
   --warning: oklch(0.5 0.05 100);
@@ -48,6 +50,7 @@ body.light {
   --color-border-muted: var(--border-muted);
   --color-brand: var(--primary);
   --color-brand-hover: var(--primary-hover);
+  --color-brand-on-click: var(--primary-on-click);
   --color-brand-dark: var(--text);
   --color-secondary: var(--secondary);
   --color-success: var(--success);
@@ -64,6 +67,32 @@ body {
 
 @layer components {
   .btn-brand {
+    display: inline-block;
+    @apply
+      border-2
+      bg-bg
+      border-brand
+      text-text
+      px-4
+      py-2
+      rounded-lg
+      font-semibold
+      transition-all
+      cursor-pointer
+      hover:bg-brand-hover
+      active:scale-95
+      active:bg-brand-on-click;
+  }
+  body.light .btn-brand {
+    @apply
+      bg-brand
+      text-bg
+      hover:bg-brand-hover
+      active:scale-95
+      active:bg-brand-on-click;
+  }
+
+  .btn-regular {
     @apply
       border-2
       bg-bg
@@ -75,12 +104,6 @@ body {
       font-semibold
       transition-colors
       cursor-pointer
-      hover:bg-brand-hover;
-  }
-  body.light .btn-brand {
-    @apply
-      bg-brand
-      text-bg
       hover:bg-brand-hover;
   }
 
