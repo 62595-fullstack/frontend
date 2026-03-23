@@ -26,7 +26,7 @@ body.light {
   --text: oklch(0.15 0 282);
   --text-muted: oklch(0.4 0 282);
   
-  --highlight: oklch(1 0 282);
+  --highlight: oklch(.80 0 282);
   --border: oklch(0.6 0 282);
   --border-muted: oklch(0.7 0 282);
   --primary: oklch(0.4 0.1 282);
@@ -66,9 +66,39 @@ body {
 }
 
 @layer components {
+  .btn-sidebar {
+    display: inline-block;
+    @apply
+      w-full
+      text-left
+      px-4
+      py-1
+      rounded-lg
+      text-sm
+      text-text
+      cursor-pointer
+      hover:bg-highlight;
+  }
+
+  .btn-regular {
+    @apply
+      border-2
+      bg-bg
+      border-brand
+      text-text
+      px-4
+      py-2
+      rounded-lg
+      font-semibold
+      transition-colors
+      cursor-pointer
+      hover:bg-brand-hover;
+  }
+
   .btn-brand {
     display: inline-block;
     @apply
+      btn-regular
       border-2
       bg-bg
       border-brand
@@ -90,21 +120,6 @@ body {
       hover:bg-brand-hover
       active:scale-95
       active:bg-brand-on-click;
-  }
-
-  .btn-regular {
-    @apply
-      border-2
-      bg-bg
-      border-brand
-      text-text
-      px-4
-      py-2
-      rounded-lg
-      font-semibold
-      transition-colors
-      cursor-pointer
-      hover:bg-brand-hover;
   }
 
   .card {
