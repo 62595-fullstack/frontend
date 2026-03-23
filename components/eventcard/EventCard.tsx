@@ -5,7 +5,7 @@ interface EventCardProps {
     id: string;
     title: string;
     description: string;
-    imageUrl: Attachment | null;
+    attachment: Attachment | null;
     posterName: string;
     posterAvatar: string;
     posterOrganization: string;
@@ -19,7 +19,7 @@ export default function EventCard({
     id,
     title,
     description,
-    imageUrl,
+    attachment,
     posterName,
     posterAvatar,
     posterOrganization,
@@ -48,9 +48,9 @@ export default function EventCard({
             </div>
 
             {/* Event image */}
-            {imageUrl && (
+            {attachment && (
                 <img
-                    src={`data:${imageUrl.fileType};base64,${imageUrl.content}`}
+                    src={`data:${attachment.fileType};base64,${attachment.content}`}
                     alt={title}
                     className="w-full aspect-video object-cover"
                 />

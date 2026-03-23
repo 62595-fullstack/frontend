@@ -6,7 +6,7 @@ import { api, Organization, Attachment } from "@/lib/api";
 interface NewEventData {
     title: string;
     description: string;
-    imageUrl: Attachment | null;
+    attachment: Attachment | null;
     organizationId: number;
 }
 
@@ -72,7 +72,7 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
         if (!organizationId) { setOrgError(true); valid = false; }
         if (!valid) return;
         setSubmitting(true);
-        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl: imageAttachment, organizationId: organizationId! });
+        await onSubmit({ title: title.trim(), description: description.trim(), attachment: imageAttachment, organizationId: organizationId! });
         setSubmitting(false);
     }
 

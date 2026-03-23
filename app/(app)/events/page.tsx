@@ -32,7 +32,7 @@ export default function Page() {
     });
   }, []);
 
-  async function handleCreate(data: { title: string; description: string; imageUrl: Attachment | null; organizationId: number }) {
+  async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number }) {
     setCreateError(null);
     try {
       await api.createOrganizationEvent({
@@ -40,7 +40,7 @@ export default function Page() {
         organizationId: data.organizationId,
         title: data.title,
         description: data.description,
-        imageUrl: data.imageUrl,
+        attachment: data.attachment,
       });
       await loadAllEvents();
       setShowModal(false);
@@ -80,7 +80,7 @@ export default function Page() {
               id={String(event.id)}
               title={event.title}
               description={event.description}
-              imageUrl={event.imageUrl}
+              attachment={event.attachment}
               posterName="Unknown"
               posterAvatar=""
               posterOrganization=""
