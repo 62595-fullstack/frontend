@@ -43,12 +43,20 @@ export type Post = {
   organizationId?: number;
   bodytext?: string;
 };
+export type Attachment = {
+  id?: number;
+  fileName: string;
+  fileType: string;
+  content: string; // base64-encoded binary
+  createdDate?: string;
+};
+
 export type OrganizationEvent = {
   id: number;
   organizationId: number;
   title: string;
   description: string;
-  imageUrl: string;
+  imageUrl: Attachment | null;
 };
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;

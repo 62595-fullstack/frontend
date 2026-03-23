@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { Attachment } from "@/lib/api";
 
 interface EventCardProps {
     id: string;
     title: string;
     description: string;
-    imageUrl: string;
+    imageUrl: Attachment | null;
     posterName: string;
     posterAvatar: string;
     posterOrganization: string;
@@ -49,7 +50,7 @@ export default function EventCard({
             {/* Event image */}
             {imageUrl && (
                 <img
-                    src={`${process.env.NEXT_PUBLIC_API_BASE}${imageUrl}`}
+                    src={`data:${imageUrl.fileType};base64,${imageUrl.content}`}
                     alt={title}
                     className="w-full aspect-video object-cover"
                 />

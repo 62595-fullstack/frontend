@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import PagebarContent from "@/components/pagebar/PagebarContent";
-import { api, OrganizationEvent } from "@/lib/api";
+import { api, OrganizationEvent, Attachment } from "@/lib/api";
 
 export default function Page() {
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
@@ -32,7 +32,7 @@ export default function Page() {
     });
   }, []);
 
-  async function handleCreate(data: { title: string; description: string; imageUrl: string; organizationId: number }) {
+  async function handleCreate(data: { title: string; description: string; imageUrl: Attachment | null; organizationId: number }) {
     setCreateError(null);
     try {
       await api.createOrganizationEvent({

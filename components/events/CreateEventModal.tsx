@@ -1,12 +1,12 @@
 'use client'
 
 import { useRef, useState, useEffect } from "react";
-import { api, Organization } from "@/lib/api";
+import { api, Organization, Attachment } from "@/lib/api";
 
 interface NewEventData {
     title: string;
     description: string;
-    imageUrl: string;
+    imageUrl: Attachment | null;
     organizationId: number;
 }
 
@@ -19,7 +19,8 @@ interface CreateEventModalProps {
 export default function CreateEventModal({ onClose, onSubmit, error }: CreateEventModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [imageUrl, setImageUrl] = useState("");
+    const [imagePreview, setImagePreview] = useState("");
+    const [imageAttachment, setImageAttachment] = useState<Attachment | null>(null);
     const [titleError, setTitleError] = useState(false);
     const [orgError, setOrgError] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -52,7 +53,14 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (event) => {
-            setImageUrl(event.target?.result as string);
+            const dataUrl = event.target?.result as string;
+            setImagePreview(dataUrl);
+            setImageAttachment({
+                fileName: file.name,
+                fileType: file.type,
+                content: dataUrl.split(",")[1],
+                createdDate: new Date().toISOString(),
+            });
         };
         reader.readAsDataURL(file);
     }
@@ -64,7 +72,7 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
         if (!organizationId) { setOrgError(true); valid = false; }
         if (!valid) return;
         setSubmitting(true);
-        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl, organizationId: organizationId! });
+        await onSubmit({ title: title.trim(), description: description.trim(), imageUrl: imageAttachment, organizationId: organizationId! });
         setSubmitting(false);
     }
 
@@ -169,16 +177,16 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
                             className="hidden"
                             onChange={handleImageChange}
                         />
-                        {imageUrl && (
+                        {imagePreview && (
                             <div className="relative mt-1">
                                 <img
-                                    src={imageUrl}
+                                    src={imagePreview}
                                     alt="Preview"
                                     className="w-full max-h-48 object-cover rounded-lg border border-gray-700"
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => { setImageUrl(""); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                                    onClick={() => { setImagePreview(""); setImageAttachment(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
                                     className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm leading-none cursor-pointer"
                                     aria-label="Remove image"
                                 >
