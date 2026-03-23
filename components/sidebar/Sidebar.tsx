@@ -17,11 +17,6 @@ export default function Sidebar() {
     localStorage.setItem("theme", isLight ? "light" : "dark");
   };
 
-  const toggleTheme = () => {
-    const isLight = document.body.classList.toggle("light");
-    localStorage.setItem("theme", isLight ? "light" : "dark");
-  };
-
   const links = [
     { href: "/", label: "Home" },
     { href: "/messages", label: "Messages" },
