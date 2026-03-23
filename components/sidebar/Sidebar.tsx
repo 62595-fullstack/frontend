@@ -48,7 +48,7 @@ export default function Sidebar() {
         </nav>
         <button
           onClick={handleSignOut}
-          className="mt-12 w-full text-left px-4 py-1 rounded-lg text-sm hover:bg-zinc-300"
+          className="mt-12 w-full text-left px-4 py-1 rounded-lg text-sm hover:bg-highlight cursor-pointer"
         >
           Sign out
         </button>
