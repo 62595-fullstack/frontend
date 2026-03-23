@@ -12,6 +12,11 @@ export default function Sidebar() {
     router.push("/login");
   }
 
+  const toggleTheme = () => {
+    const isLight = document.body.classList.toggle("light");
+    localStorage.setItem("theme", isLight ? "light" : "dark");
+  };
+
   const links = [
     { href: "/", label: "Home" },
     { href: "/messages", label: "Messages" },
@@ -19,12 +24,11 @@ export default function Sidebar() {
     { href: "/notifications", label: "Notifications" },
     { href: "/events", label: "Events" },
     { href: "/profile", label: "Profile" },
-
   ];
 
   return (
-    <aside className="w-72 h-screen bg-zinc-200 text-zinc-800 p-4">
-      <nav>
+    <aside className="w-72 h-screen bg-bg text-text p-4 flex flex-col">
+      <nav className="flex-1">
         <ul className="space-y-2">
           {links.map(({ href, label }) => {
             const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -32,7 +36,7 @@ export default function Sidebar() {
               <li key={href}>
                 <Link
                   href={href}
-                  className={`block px-4 py-1 rounded-lg hover:bg-sky-400 ${isActive && "bg-sky-300"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
+                  className={`block px-4 py-1 rounded-lg hover:bg-highlight ${isActive && "bg-primary"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
                 >
                   {label}
                 </Link>
@@ -46,6 +50,10 @@ export default function Sidebar() {
         className="mt-12 w-full text-left px-4 py-1 rounded-lg text-sm hover:bg-zinc-300"
       >
         Sign out
+      </button>
+
+      <button onClick={toggleTheme} className="btn-brand">
+        Dark mode / Light mode
       </button>
     </aside>
   );
