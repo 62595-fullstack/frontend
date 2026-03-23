@@ -57,13 +57,13 @@ export default function TestPage() {
       const data = await fn();
       const ms = Math.round(nowMs() - start);
       return { ok: true, statusText: "OK", ms, data };
-    } catch (e: any) {
+    } catch (e: unknown) {
       const ms = Math.round(nowMs() - start);
       return {
         ok: false,
         statusText: "ERROR",
         ms,
-        error: e?.message ?? String(e),
+        error: (e as Error)?.message ?? String(e),
       };
     } finally {
       setLoadingKey(null);

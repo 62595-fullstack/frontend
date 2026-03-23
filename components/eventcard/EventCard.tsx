@@ -31,11 +31,13 @@ export default function EventCard({
         <div className="card w-full md:w-3/4 lg:max-w-3xl flex flex-col flex-shrink-0">
             {/* Top bar - Poster info */}
             <div className="flex items-center gap-3 p-4">
-                <img
-                    src={posterAvatar}
-                    alt={posterName}
-                    className="w-10 h-10 rounded-full object-cover"
-                />
+                {posterAvatar && (
+                    <img
+                        src={posterAvatar}
+                        alt={posterName}
+                        className="w-10 h-10 rounded-full object-cover"
+                    />
+                )}
                 <div className="flex items-baseline gap-2">
                     <span className="text-2xl text-text font-semibold">{posterName}</span>
                     <span className="text-xs text-text">Organization: {posterOrganization}</span>
@@ -45,11 +47,13 @@ export default function EventCard({
             </div>
 
             {/* Event image */}
-            <img
-                src={imageUrl}
-                alt={title}
-                className="w-full aspect-video object-cover"
-            />
+            {imageUrl && (
+                <img
+                    src={`${process.env.NEXT_PUBLIC_API_BASE}${imageUrl}`}
+                    alt={title}
+                    className="w-full aspect-video object-cover"
+                />
+            )}
 
             {/* Stats bar */}
             <div className="flex items-center gap-6 px-4 py-3 border-b border-brand text-text-muted text-sm">
@@ -64,7 +68,7 @@ export default function EventCard({
                 <p className="text-text-muted text-sm">{description}</p>
 
                 <Link
-                    href={`/events/${id}`}
+                    href={`/app/(app)/events/${id}`}
                     className="btn-brand"
                 >
                     View Event
