@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+  /* Semantic colors */
+  /* --color-brand-100: #E3FAEB; */
+  /* --color-brand-200: #C8F5DC; */
+  /* --color-brand-300: #A4E1C5; */
+  /* --color-brand-400: #81C4AB; */
+  /* --color-brand-500: #569D8A; */
+  /* --color-brand-600: #3E877A; */
+  /* --color-brand-700: #2B716B; */
+  /* --color-brand-800: #1B595B; */
+  /* --color-brand-900: #10444B; */
+
+  --color-brand-100: #FBDFF1;
+  --color-brand-200: #F8C1E9;
+  --color-brand-300: #EC9DDD;
+  --color-brand-400: #D97ED0;
+  --color-brand-500: #C155C0;
+  --color-brand-600: #9D3EA5;
+  --color-brand-700: #7B2A8A;
+  --color-brand-800: #5A1B6F;
+  --color-brand-900: #42105C;
+
+  --color-success-100: #EEFBD1;
+  --color-success-200: #D9F7A6;
+  --color-success-300: #B8E775;
+  --color-success-400: #94D050;
+  --color-success-500: #66B220;
+  --color-success-600: #4E9917;
+  --color-success-700: #3A8010;
+  --color-success-800: #28670A;
+  --color-success-900: #1B5506;
+
+  --color-info-100: #E5EBFE;
+  --color-info-200: #CCD7FE;
+  --color-info-300: #B3C2FE;
+  --color-info-400: #9FB1FD;
+  --color-info-500: #8095FC;
+  --color-info-600: #5D70D8;
+  --color-info-700: #4050B5;
+  --color-info-800: #283592;
+  --color-info-900: #182278;
+
+  --color-warning-100: #FBF4C9;
+  --color-warning-200: #F8E795;
+  --color-warning-300: #ECD05E;
+  --color-warning-400: #D9B536;
+  --color-warning-500: #C19100;
+  --color-warning-600: #A57800;
+  --color-warning-700: #8A6100;
+  --color-warning-800: #6F4B00;
+  --color-warning-900: #5C3C00;
+
+  --color-danger-100: #FDDFD5;
+  --color-danger-200: #FCB8AD;
+  --color-danger-300: #F68882;
+  --color-danger-400: #ED6268;
+  --color-danger-500: #E23149;
+  --color-danger-600: #C22348;
+  --color-danger-700: #A21845;
+  --color-danger-800: #830F3F;
+  --color-danger-900: #6C093B;
+
+  --background: hsl(0, 0%, 11%);
+
+  --background: #ffffff;
+  
+  --foreground: #171717;
+}
+
+@theme inline {
+  /* Brand — primary color, used across the UI */
+  --color-brand-background: var(--color-brand-100);    /* light backgrounds, badges, tints */
+  --color-brand-light: var(--color-brand-300);
+  --color-brand: var(--color-brand-500);          /* buttons, links, accents */
+  --color-brand-hover: var(--color-brand-600);    /* hover/active states */
+  --color-brand-dark: var(--color-brand-800);     /* text on light brand backgrounds */
+
+  /* Success */
+  --color-success-light: var(--color-success-100); /* alert/banner backgrounds */
+  --color-success: var(--color-success-500);       /* icons, text, borders */
+  --color-success-dark: var(--color-success-700);  /* hover, emphasis */
+
+  /* Info */
+  --color-info-light: var(--color-info-100);
+  --color-info: var(--color-info-500);
+  --color-info-dark: var(--color-info-700);
+
+  /* Warning */
+  --color-warning-light: var(--color-warning-100);
+  --color-warning: var(--color-warning-500);
+  --color-warning-dark: var(--color-warning-700);
+
+  /* Danger */
+  --color-danger-light: var(--color-danger-100);
+  --color-danger: var(--color-danger-500);
+  --color-danger-dark: var(--color-danger-700);
+
+  /* Base */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ededed;
+    --foreground: #ffffff;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  button, [role="button"], a {
+    cursor: pointer;
+  }
+}

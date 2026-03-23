@@ -24,6 +24,12 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <script dangerouslySetInnerHTML={{__html: `
+          const saved = localStorage.getItem("theme");
+          if (saved === "light") document.body.classList.add("light");
+        `}} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PagebarProvider>
           <div className="flex min-h-screen">

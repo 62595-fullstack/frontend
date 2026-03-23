@@ -48,7 +48,7 @@ export default function Page() {
         <button
           onClick={() => setShowModal(true)}
           aria-label="Create new event"
-          className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-3xl font-light flex items-center justify-center shadow-lg transition-all flex-shrink-0 cursor-pointer"
+          className="w-12 h-12 rounded-full hover:bg-blue-700 active:scale-95 text-white text-3xl font-light flex items-center justify-center shadow-lg transition-all flex-shrink-0"
         >
           +
         </button>
