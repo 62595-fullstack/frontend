@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await fetch("/api/logout", { method: "POST" });
+    router.push("/login");
+  }
 
   const links = [
     { href: "/", label: "Home" },
@@ -35,6 +41,12 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
+      <button
+        onClick={handleSignOut}
+        className="mt-12 w-full text-left px-4 py-1 rounded-lg text-sm hover:bg-zinc-300"
+      >
+        Sign out
+      </button>
     </aside>
   );
 }
