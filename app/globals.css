@@ -76,8 +76,11 @@ body {
       rounded-lg
       text-sm
       text-text
+      transition-all
       cursor-pointer
-      hover:bg-highlight;
+      hover:bg-highlight
+      active:scale-95
+      active:bg-brand-on-click;
   }
 
   .btn-regular {
@@ -90,7 +93,7 @@ body {
       py-2
       rounded-lg
       font-semibold
-      transition-colors
+      transition-all
       cursor-pointer
       hover:bg-brand-hover;
   }
@@ -98,7 +101,6 @@ body {
   .btn-brand {
     display: inline-block;
     @apply
-      btn-regular
       border-2
       bg-bg
       border-brand
