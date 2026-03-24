@@ -19,7 +19,7 @@ export default function Home() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {mockEvents.map((event) => (
-            <EventCard key={event.id} {...event} />
+            <EventCard key={event.id} {...event} attachment={null}/>
           ))}
         </div>
       </div>
