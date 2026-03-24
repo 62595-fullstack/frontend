@@ -6,7 +6,7 @@ import { mockEvents } from "@/lib/mockEvents";
 
 export default function Home() {
   return (
-    <div className="bg-bg flex flex-col h-screen items-center font-sans p-8">
+    <div className="page items-center p-8">
       <PagebarContent>
         <ul className="space-y-2">
           <li>Events</li>
@@ -19,7 +19,7 @@ export default function Home() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {mockEvents.map((event) => (
-            <EventCard key={event.id} {...event} />
+            <EventCard key={event.id} {...event} attachment={null}/>
           ))}
         </div>
       </div>

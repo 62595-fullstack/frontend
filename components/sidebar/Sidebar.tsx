@@ -37,7 +37,7 @@ export default function Sidebar() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className={`block px-4 py-1 rounded-lg hover:bg-highlight ${isActive && "bg-primary"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
+                    className={`btn-sidebar ${isActive && "bg-brand text-bg-dark"} ${label === 'Home' ? "text-2xl font-bold mb-12" : ""}`}
                   >
                     {label}
                   </Link>
@@ -48,7 +48,7 @@ export default function Sidebar() {
         </nav>
         <button
           onClick={handleSignOut}
-          className="mt-12 w-full text-left px-4 py-1 rounded-lg text-sm hover:bg-highlight cursor-pointer"
+          className="btn-sidebar mt-12"
         >
           Sign out
         </button>
