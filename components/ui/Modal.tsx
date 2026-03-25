@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: Add proper types when backend API is finalized
 'use client'
 
 import { useState, useRef, useEffect, ReactNode } from "react";
