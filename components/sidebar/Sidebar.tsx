@@ -2,20 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "@/lib/useTheme";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   async function handleSignOut() {
     await fetch("/api/logout", { method: "POST" });
     router.push("/login");
   }
-
-  const toggleTheme = () => {
-    const isLight = document.body.classList.toggle("light");
-    localStorage.setItem("theme", isLight ? "light" : "dark");
-  };
 
   const links = [
     { href: "/", label: "Home" },
@@ -54,8 +51,8 @@ export default function Sidebar() {
         </button>
       </div>
 
-      <button onClick={toggleTheme} className="btn-brand">
-        Dark mode / Light mode
+      <button onClick={toggleTheme} className="btn-brand w-min">
+        {theme === "dark" ? "☀️" : "🌙"}
       </button>
     </aside>
   );
