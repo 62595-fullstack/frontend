@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
+import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { api, OrganizationEvent, Attachment } from "@/lib/api";
 import { mockEvents } from "@/lib/mockEvents";
@@ -60,22 +61,7 @@ export default function Page() {
       {/* Header row */}
       <div className="flex items-center w-full max-w-5xl mb-6">
         <h1 className="text-5xl font-bold text-text flex-1 text-center">Events</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          aria-label="Create new event"
-          className="btn-brand rounded-full w-12 h-12 flex items-center justify-center p-3"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 32 32"
-            stroke="currentColor"
-            strokeWidth={3}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 2 v28 m14-14 H2" />
-          </svg>
-        </button>
+        <CreateButton onClick={() => setShowModal(true)} label="event"/>
       </div>
 
       {/* Scrollable card list */}
