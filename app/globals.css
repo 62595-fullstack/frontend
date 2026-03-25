@@ -94,6 +94,7 @@ body {
     align-items: center;
     @apply
       bg-bg
+      p-8
       h-screen
       text-text
       font-sans;

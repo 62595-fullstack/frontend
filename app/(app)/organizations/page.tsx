@@ -30,7 +30,7 @@ export default function Page() {
   }
 
   return (
-    <div className="page p-8">
+    <div className="page">
       <PagebarContent title="Organizations">
         <h2>Organizations pagebar</h2>
       </PagebarContent>
