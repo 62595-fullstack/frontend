@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "@/lib/useTheme";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
+
+  async function handleSignOut() {
+    await fetch("/api/logout", { method: "POST" });
+    router.push("/login");
+  }
 
   const links = [
     { href: "/", label: "Home" },
@@ -13,28 +21,39 @@ export default function Sidebar() {
     { href: "/notifications", label: "Notifications" },
     { href: "/events", label: "Events" },
     { href: "/profile", label: "Profile" },
-
   ];
 
   return (
-    <aside className="w-72 h-screen bg-zinc-200 text-zinc-800 p-4">
-      <nav>
-        <ul className="space-y-2">
-          {links.map(({ href, label }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={`block px-4 py-1 rounded-lg hover:bg-sky-400 ${isActive && "bg-sky-300"} ${label === 'Home' ? "text-2xl font-bold mb-12" : "text-sm"}`}
-                >
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+    <aside className="w-72 h-screen bg-bg text-text p-4 flex flex-col">
+      <div className="flex-1">
+        <nav>
+          <ul className="space-y-2">
+            {links.map(({ href, label }) => {
+              const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`btn-sidebar ${isActive && "bg-brand text-bg-dark"} ${label === 'Home' ? "text-2xl font-bold mb-12" : ""}`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <button
+          onClick={handleSignOut}
+          className="btn-sidebar mt-12"
+        >
+          Sign out
+        </button>
+      </div>
+
+      <button onClick={toggleTheme} className="btn-brand w-min">
+        {theme === "dark" ? "☀️" : "🌙"}
+      </button>
     </aside>
   );
 }

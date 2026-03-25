@@ -369,8 +369,8 @@ export default function Page() {
             <li key={c.id}>
               <button
                 onClick={() => { setActiveId(c.id); setInput(""); }}
-                className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-colors ${
-                  c.id === activeId ? "bg-sky-100 text-sky-700" : "hover:bg-zinc-300 text-zinc-700"
+                className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-all cursor-pointer ${
+                  c.id === activeId ? "bg-brand text-bg-dark" : "hover:bg-highlight text-text"
                 }`}
               >
                 <div className="relative flex-shrink-0">
@@ -387,7 +387,7 @@ export default function Page() {
       </PagebarContent>
 
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-zinc-200 shadow-sm">
+      <div className="flex items-center gap-3 px-6 py-4 bg-bg-light border-b border-brand shadow-sm">
         <div className="relative">
           <img
             src={activeContact.avatar}
@@ -399,14 +399,18 @@ export default function Page() {
           )}
         </div>
         <div>
-          <p className="font-semibold text-zinc-800">{activeContact.name}</p>
-          <p className="text-xs text-green-500">{activeContact.online ? "Active now" : "Offline"}</p>
+          <p className="font-semibold text-text">{activeContact.name}</p>
+          <p
+            className={`text-xs ${activeContact.online ? "text-green-500" : "text-text-muted"}`}
+          >
+            {activeContact.online ? "Active now" : "Offline"}
+          </p>
         </div>
       </div>
 
       {/* Messages */}
       <div
-        className="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-zinc-100"
+        className="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
       >
         {messages.map((msg, index) => {
@@ -435,14 +439,14 @@ export default function Page() {
                 <div
                   className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
                     msg.sender === "me"
-                      ? "bg-sky-500 text-white rounded-br-sm"
-                      : "bg-white text-zinc-800 rounded-bl-sm shadow-sm"
+                      ? "bg-brand text-bg-dark rounded-br-sm"
+                      : "bg-bg-light text-text rounded-bl-sm shadow-sm"
                   }`}
                 >
                   {msg.text}
                 </div>
                 {!sameAsNext && (
-                  <span className="text-xs text-zinc-400 mt-1">{msg.timestamp}
+                  <span className="text-xs text-text-muted mt-1">{msg.timestamp}
                   </span>
                 )}
               </div>
@@ -453,10 +457,10 @@ export default function Page() {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 bg-white border-t border-zinc-200 flex items-end gap-3">
+      <div className="px-6 py-4 bg-bg-light border-t border-brand flex items-end gap-3">
         <div className="relative flex-1">
           <div
-            className="flex items-end flex-1 rounded-2xl border border-zinc-300 bg-zinc-50 focus-within:ring-2 focus-within:ring-sky-400 pr-2"
+            className="flex items-end flex-1 rounded-2xl border border-brand bg-bg-input-field focus-within:ring-2 focus-within:ring-bg-brand pr-2"
             style={{ scrollbarWidth: "none" } as React.CSSProperties}
           >
             <textarea
@@ -466,29 +470,32 @@ export default function Page() {
               onKeyDown={handleKeyDown}
               placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
               rows={1}
-              className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-zinc-800 focus:outline-none max-h-40 overflow-y-auto"
+              className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40 overflow-y-auto"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
             />
-            <button
-              onClick={() => setShowPicker((prev) => !prev)}
-              className="text-lg pb-2 px-1 leading-none"
-            >
-              😊
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowPicker((prev) => !prev)}
+                className="text-lg pb-2.5 leading-none"
+              >
+                😊
+              </button>
+
+              {showPicker && (
+                <div className="absolute bottom-full right-0 mb-2">
+                  <EmojiPicker onEmojiClick={onEmojiClick} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <button
           onClick={handleSend}
-          className="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-5 py-2 rounded-2xl text-sm transition-colors"
+          className="btn-brand font-semibold px-5 py-2 rounded-2xl text-sm"
         >
           Send
         </button>
       </div>
-
-      {showPicker && (
-        <div className="absolute bottom-20 left-200">
-          <EmojiPicker onEmojiClick={onEmojiClick} />
-        </div>
-      )}
     </div>
   );
 }
