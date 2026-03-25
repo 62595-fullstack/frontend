@@ -51,7 +51,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col h-screen items-center font-sans p-8">
+    <div className="page p-8">
       {/* Pagebar – empty for now */}
       <PagebarContent title="Events">
         <h2>Events pagebar</h2>
@@ -63,9 +63,18 @@ export default function Page() {
         <button
           onClick={() => setShowModal(true)}
           aria-label="Create new event"
-          className="w-12 h-12 rounded-full hover:bg-blue-700 active:scale-95 text-white text-3xl font-light flex items-center justify-center shadow-lg transition-all flex-shrink-0 cursor-pointer"
+          className="btn-brand rounded-full w-12 h-12 flex items-center justify-center p-3"
         >
-          +
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 32 32"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16 2 v28 m14-14 H2" />
+          </svg>
         </button>
       </div>
 

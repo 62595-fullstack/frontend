@@ -86,13 +86,14 @@ body {
 
 @layer components {
   .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     @apply
       bg-bg
-      flex
-      flex-col
       h-screen
       font-sans;
-  }
+}
 
   .btn-sidebar {
     display: inline-block;
