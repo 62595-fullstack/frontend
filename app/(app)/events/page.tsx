@@ -5,6 +5,7 @@ import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { api, OrganizationEvent, Attachment } from "@/lib/api";
+import { mockEvents } from "@/lib/mockEvents";
 
 export default function Page() {
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
@@ -74,21 +75,8 @@ export default function Page() {
           className="overflow-y-auto h-full gap-4 p-4 flex flex-col items-center"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              id={String(event.id)}
-              title={event.title}
-              description={event.description}
-              attachment={event.attachment}
-              posterName="Unknown"
-              posterAvatar=""
-              posterOrganization=""
-              likes={0}
-              comments={0}
-              shares={0}
-              createdDate=""
-            />
+          {mockEvents.map((event) => (
+            <EventCard key={event.id} {...event} attachment={null} />
           ))}
         </div>
       </div>
