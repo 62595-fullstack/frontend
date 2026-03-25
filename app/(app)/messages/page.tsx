@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import PagebarContent from "@/components/pagebar/PagebarContent";
-import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface Message {
   id: string;
