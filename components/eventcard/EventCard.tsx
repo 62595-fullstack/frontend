@@ -69,7 +69,7 @@ export default function EventCard({
                 <p className="text-text-muted text-sm">{description}</p>
 
                 <Link
-                    href={`/app/(app)/events/${id}`}
+                    href={`/events/${id}`}
                     className="btn-brand"
                 >
                     View Event

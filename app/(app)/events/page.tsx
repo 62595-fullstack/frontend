@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
+import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { api, OrganizationEvent, Attachment } from "@/lib/api";
+import { mockEvents } from "@/lib/mockEvents";
 
 export default function Page() {
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
@@ -50,7 +52,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col h-screen items-center font-sans p-8">
+    <div className="page p-8">
       {/* Pagebar – empty for now */}
       <PagebarContent title="Events">
         <h2>Events pagebar</h2>
@@ -59,13 +61,7 @@ export default function Page() {
       {/* Header row */}
       <div className="flex items-center w-full max-w-5xl mb-6">
         <h1 className="text-5xl font-bold text-text flex-1 text-center">Events</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          aria-label="Create new event"
-          className="w-12 h-12 rounded-full hover:bg-blue-700 active:scale-95 text-white text-3xl font-light flex items-center justify-center shadow-lg transition-all flex-shrink-0 cursor-pointer"
-        >
-          +
-        </button>
+        <CreateButton onClick={() => setShowModal(true)} label="event"/>
       </div>
 
       {/* Scrollable card list */}
@@ -74,21 +70,8 @@ export default function Page() {
           className="overflow-y-auto h-full gap-4 p-4 flex flex-col items-center"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              id={String(event.id)}
-              title={event.title}
-              description={event.description}
-              attachment={event.attachment}
-              posterName="Unknown"
-              posterAvatar=""
-              posterOrganization=""
-              likes={0}
-              comments={0}
-              shares={0}
-              createdDate=""
-            />
+          {mockEvents.map((event) => (
+            <EventCard key={event.id} {...event} attachment={null} />
           ))}
         </div>
       </div>

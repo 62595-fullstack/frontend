@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CreateOrganizationModal from "@/components/organizations/CreateOrganizationModal";
+import CreateButton from "@/components/ui/CreateButton";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { api, Organization } from "@/lib/api";
 
@@ -29,21 +30,15 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col h-screen items-center font-sans p-8">
+    <div className="page">
       <PagebarContent title="Organizations">
         <h2>Organizations pagebar</h2>
       </PagebarContent>
 
       {/* Header row */}
       <div className="flex items-center w-full max-w-5xl mb-6">
-        <h1 className="text-5xl font-bold text-black flex-1 text-center">Organizations</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          aria-label="Create new organization"
-          className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-3xl font-light flex items-center justify-center shadow-lg transition-all flex-shrink-0 cursor-pointer"
-        >
-          +
-        </button>
+        <h1 className="text-5xl font-bold flex-1 text-center">Organizations</h1>
+        <CreateButton onClick={() => setShowModal(true)} label="organization"/>
       </div>
 
       {/* Scrollable list */}

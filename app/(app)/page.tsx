@@ -6,7 +6,7 @@ import { mockEvents } from "@/lib/mockEvents";
 
 export default function Home() {
   return (
-    <div className="page items-center p-8">
+    <div className="page">
       <PagebarContent>
         <ul className="space-y-2">
           <li>Events</li>

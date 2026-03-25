@@ -19,6 +19,7 @@
   --warning: oklch(0.7 0.05 100);
   --success: oklch(0.7 0.05 160);
   --info: oklch(0.7 0.05 260);
+  --field-required: var(--danger);
 }
 body.light {
   --bg-dark: oklch(0.88 0 282);
@@ -39,6 +40,7 @@ body.light {
   --warning: oklch(0.5 0.05 100);
   --success: oklch(0.5 0.05 160);
   --info: oklch(0.5 0.05 260);
+  --field-required: var(--danger);
 }
 
 @theme inline {
@@ -60,6 +62,7 @@ body.light {
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-info: var(--info);
+  --color-field-required: var(--field-required);
 }
 
 .EmojiPickerReact {
@@ -86,12 +89,29 @@ body {
 
 @layer components {
   .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     @apply
       bg-bg
-      flex
-      flex-col
+      p-8
       h-screen
+      text-text
       font-sans;
+}
+
+  .popup-brand {
+    display: flex;
+    flex-direction: column;
+    @apply
+      bg-bg-light
+      text-text
+      rounded-xl
+      shadow-2xl
+      w-full
+      max-w-lg
+      mx-4 p-6
+      gap-5
   }
 
   .btn-sidebar {
@@ -114,16 +134,18 @@ body {
   .btn-regular {
     @apply
       border-2
-      bg-bg
+      bg-bg-light
       border-brand
       text-text
+      text-sm
+      font-medium
       px-4
       py-2
       rounded-lg
       font-semibold
       transition-all
       cursor-pointer
-      hover:bg-brand-hover;
+      hover:bg-bg-dark;
   }
 
   .btn-brand {
