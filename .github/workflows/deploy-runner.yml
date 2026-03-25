@@ -13,4 +13,5 @@ jobs:
         tmux send -t runnerFrontend:pane "cd ~/frontend" ENTER
         tmux send -t runnerFrontend:pane "git pull" ENTER
         tmux send -t runnerFrontend:pane "npm ci" ENTER
+        tmux send -t runnerFrontend:pane "npm run build" ENTER
         tmux send -t runnerFrontend:pane "npm run start" ENTER
