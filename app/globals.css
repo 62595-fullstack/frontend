@@ -106,11 +106,13 @@ body {
     @apply
       bg-bg-light
       text-text
+      border
+      border-brand
       rounded-xl
       shadow-2xl
       w-full
       max-w-lg
-      mx-4 p-6
+      p-6
       gap-5
   }
 
@@ -182,5 +184,20 @@ body {
       overflow-hidden
       shadow-lg
       border-brand
+  }
+
+  .input-field {
+    @apply
+      w-full
+      bg-bg-input-field
+      rounded-lg
+      px-3
+      py-2
+      text-sm
+      outline-none
+      border
+      border-brand
+      focus:ring-2
+      focus:ring-brand;
   }
 }
