@@ -164,7 +164,7 @@ export default function Modal({
               value={values[field.name]}
               onChange={(e) => setValue(field.name, e.target.value)}
               placeholder={field.placeholder}
-              className={`bg-input-field rounded-lg px-3 py-2 text-sm outline-none border ${
+              className={`input-field ${
                 hasError ? "border-field-required" : "border-brand focus-within:ring-2 focus-within:ring-bg-brand"
               } transition-colors`}
             />
@@ -185,7 +185,7 @@ export default function Modal({
               onChange={(e) => setValue(field.name, e.target.value)}
               placeholder={field.placeholder}
               rows={field.rows ?? 4}
-              className={`bg-input-field rounded-lg px-3 py-2 text-sm outline-none border ${
+              className={`input-field ${
                 hasError ? "border-field-required" : "border-brand focus-within:ring-2 focus-within:ring-bg-brand"
               } transition-colors resize-none`}
             />
@@ -206,7 +206,7 @@ export default function Modal({
               <button
                 type="button"
                 onClick={() => setOpenDropdown(openDropdown === field.name ? null : field.name)}
-                className={`w-full bg-input-field rounded-lg px-3 py-2 text-sm outline-none text-left border ${
+                className={`w-full input-field ${
                   hasError ? "border-field-required" : "border-brand focus-within:ring-2 focus-within:ring-bg-brand"
                 } transition-colors flex items-center justify-between`}
               >
