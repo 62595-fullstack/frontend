@@ -33,7 +33,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try { return JSON.parse(body) as T; } catch { return body as T; }
 }
 
-export type Organization = { Id: number; Name: string; Description: string };
+export type Organization = { id: number; name: string; description: string };
 
 export type Post = {
   id: number;
