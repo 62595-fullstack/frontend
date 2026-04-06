@@ -9,9 +9,6 @@ interface EventCardProps {
     posterName: string;
     posterAvatar: string;
     posterOrganization: string;
-    likes: number;
-    comments: number;
-    shares: number;
     createdDate: string;
     mock?: boolean;
 }
@@ -24,9 +21,6 @@ export default function EventCard({
     posterName,
     posterAvatar,
     posterOrganization,
-    likes,
-    comments,
-    shares,
     createdDate,
     mock,
 }: EventCardProps) {
@@ -64,11 +58,11 @@ export default function EventCard({
             )}
 
             {/* Stats bar */}
-            <div className="flex items-center gap-6 px-4 py-3 border-b border-brand text-text-muted text-sm">
+            {/*<div className="flex items-center gap-6 px-4 py-3 border-b border-brand text-text-muted text-sm">
                 <span>👍 {likes}</span>
                 <span>💬 {comments}</span>
                 <span>📤 {shares}</span>
-            </div>
+            </div>*/}
 
             {/* Content */}
             <div className="p-4 space-y-3">
