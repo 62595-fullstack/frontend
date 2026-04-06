@@ -24,7 +24,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-72 h-screen bg-bg text-text p-4 flex flex-col">
+    <aside className="w-72 h-full bg-bg text-text p-4 flex flex-col flex-shrink-0">
       <div className="flex-1">
         <nav>
           <ul className="space-y-2">

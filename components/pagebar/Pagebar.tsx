@@ -8,7 +8,7 @@ export default function Pagebar() {
   if (!content) return null;
 
   return (
-    <aside className="w-72 h-screen bg-bg text-text flex flex-col">
+    <aside className="w-72 h-full bg-bg text-text flex flex-col flex-shrink-0">
       <div className="bg-bg px-4 h-[73px] flex items-center font-semibold text-text text-xl flex-shrink-0">
         {title}
       </div>
