@@ -145,7 +145,7 @@ export default function EventLayout({
       <div className="mx-auto max-w-4xl px-8 py-10">
         <div className="rounded-lg bg-white p-6 shadow-sm">
           {/* Header row */}
-          <div className="flex items-start justify-between gap-6">
+          <div className="flex items-start justify-between gap-6 grid grid-rows-2 md:grid-rows-1">
             <div className="flex items-start gap-4">
               <div
                 className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-600">
@@ -177,35 +177,6 @@ export default function EventLayout({
               </div>
               {deleteError && <p className="text-sm text-red-500 mt-2">{deleteError}</p>}
             </div>
-
-
-            {showDeleteConfirm && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                <div className="popup-brand max-w-sm">
-                  <h2 className="text-lg font-bold">Delete event</h2>
-                  <p className="text-sm text-text-muted">Are you sure you want to delete <span
-                    className="font-semibold text-text">{event.title}</span>? This cannot be undone.</p>
-                  {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
-                  <div className="flex justify-end gap-3">
-                    <button className="btn-regular" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-                    <button
-                      className="rounded bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
-                      onClick={async () => {
-                        setDeleteError(null);
-                        try {
-                          await api.deleteOrganizationEvent(event.id);
-                          router.push("/events");
-                        } catch (err) {
-                          setDeleteError(err instanceof Error ? err.message : "Failed to delete event.");
-                        }
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Tabs */}
@@ -213,6 +184,34 @@ export default function EventLayout({
 
           {/* Active tab content */}
           <div className="mt-4">{children}</div>
+
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="popup-brand max-w-sm">
+                <h2 className="text-lg font-bold">Delete event</h2>
+                <p className="text-sm text-text-muted">Are you sure you want to delete <span
+                  className="font-semibold text-text">{event.title}</span>? This cannot be undone.</p>
+                {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+                <div className="flex justify-end gap-3">
+                  <button className="btn-regular" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                  <button
+                    className="rounded bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
+                    onClick={async () => {
+                      setDeleteError(null);
+                      try {
+                        await api.deleteOrganizationEvent(event.id);
+                        router.push("/events");
+                      } catch (err) {
+                        setDeleteError(err instanceof Error ? err.message : "Failed to delete event.");
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </EventContext.Provider>
