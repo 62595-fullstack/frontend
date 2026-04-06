@@ -23,24 +23,23 @@ export default function EventLayout({
 
   useEffect(() => {
     async function load() {
-      const found = await getEventById(Number(id));
-      if (found) {
-        setEvent(found);
-        const org = await api.getOrganizationById(found.organizationId);
-        if (org) setOrgName(org.name);
-        setLoading(false);
-        return;
-      }
-
       const mock = mockEvents.find((e) => e.id === id);
-      if (mock) {
-        setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null });
-        setOrgName(mock.posterOrganization);
+      if (!mock) {
+        const found = await getEventById(Number(id));
+        if (found) {
+          setEvent(found);
+          const org = await api.getOrganizationById(found.organizationId);
+          if (org) setOrgName(org.name);
+          setLoading(false);
+          return;
+        }
+        setMissing(true);
         setLoading(false);
         return;
       }
 
-      setMissing(true);
+      setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null });
+      setOrgName(mock.posterOrganization);
       setLoading(false);
     }
     load();
