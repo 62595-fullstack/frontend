@@ -55,6 +55,7 @@ export type Attachment = {
 export type OrganizationEvent = {
   id: number;
   organizationId: number;
+  userOrganizationBindingId: number;
   title: string;
   description: string;
   attachment: Attachment | null;
