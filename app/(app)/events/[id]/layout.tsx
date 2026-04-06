@@ -49,6 +49,7 @@ export default function EventLayout({
         setLoading(false);
       }
     }
+
     load();
   }, [id]);
 
@@ -78,7 +79,8 @@ export default function EventLayout({
           <div className="rounded-md bg-white shadow-sm border border-gray-200 overflow-hidden">
             {/* Identity row */}
             <div className="flex items-center gap-3 px-4 py-4">
-              <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold text-gray-600">
+              <div
+                className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold text-gray-600">
                 {event.title.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -87,7 +89,7 @@ export default function EventLayout({
               </div>
             </div>
 
-            <div className="border-t border-gray-200" />
+            <div className="border-t border-gray-200"/>
 
             {/* Details */}
             <div className="px-4 py-4">
@@ -107,7 +109,11 @@ export default function EventLayout({
                   <div className="flex justify-between gap-4">
                     <span className="text-gray-700">Start date:</span>
                     <span className="font-semibold text-black">
-                      {new Date(event.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      {new Date(event.startDate).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                      })}
                     </span>
                   </div>
                 )}
@@ -120,7 +126,7 @@ export default function EventLayout({
               </div>
             </div>
 
-            <div className="border-t border-gray-200" />
+            <div className="border-t border-gray-200"/>
 
             {/* Signup */}
             <div className="px-4 py-4">
@@ -135,13 +141,14 @@ export default function EventLayout({
         </aside>
       </PagebarContent>
 
-      {/* MIDDLE COLUMN */}
+      {/* Page contents */}
       <div className="mx-auto max-w-4xl px-8 py-10">
         <div className="rounded-lg bg-white p-6 shadow-sm">
           {/* Header row */}
           <div className="flex items-start justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-600">
+              <div
+                className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-600">
                 {event.title.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -152,25 +159,32 @@ export default function EventLayout({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Share</button>
-              <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Save</button>
-              {isCreator && (
-                <button
-                  className="rounded bg-red-500 px-6 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
-                  onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
-                >
-                  Delete
-                </button>
-              )}
+            <div>
+              <div className="flex items-center gap-3">
+                <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Share</button>
+                <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Save</button>
+                {isCreator && (
+                  <button
+                    className="rounded bg-red-500 px-6 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
+                    onClick={() => {
+                      setDeleteError(null);
+                      setShowDeleteConfirm(true);
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+              {deleteError && <p className="text-sm text-red-500 mt-2">{deleteError}</p>}
             </div>
-            {deleteError && <p className="text-sm text-red-500 mt-2">{deleteError}</p>}
+
 
             {showDeleteConfirm && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                 <div className="popup-brand max-w-sm">
                   <h2 className="text-lg font-bold">Delete event</h2>
-                  <p className="text-sm text-text-muted">Are you sure you want to delete <span className="font-semibold text-text">{event.title}</span>? This cannot be undone.</p>
+                  <p className="text-sm text-text-muted">Are you sure you want to delete <span
+                    className="font-semibold text-text">{event.title}</span>? This cannot be undone.</p>
                   {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
                   <div className="flex justify-end gap-3">
                     <button className="btn-regular" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
@@ -195,7 +209,7 @@ export default function EventLayout({
           </div>
 
           {/* Tabs */}
-          <EventTabs eventId={String(event.id)} />
+          <EventTabs eventId={String(event.id)}/>
 
           {/* Active tab content */}
           <div className="mt-4">{children}</div>
