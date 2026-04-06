@@ -71,7 +71,7 @@ export default function EventCard({
 
                 <Link
                     href={`/events/${id}`}
-                    className="btn-brand"
+                    className="btn-brand mt-1"
                 >
                     View Event
                 </Link>
