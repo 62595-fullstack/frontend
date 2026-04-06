@@ -6,6 +6,7 @@ import PagebarContent from "@/components/pagebar/PagebarContent";
 import EventTabs from "@/components/events/EventTabs";
 import { EventContext } from "@/components/events/EventContext";
 import { getEventById, OrganizationEvent, api } from "@/lib/api";
+import { mockEvents } from "@/lib/mockEvents";
 
 export default function EventLayout({
   children,
@@ -22,6 +23,14 @@ export default function EventLayout({
 
   useEffect(() => {
     async function load() {
+      const mock = mockEvents.find((e) => e.id === id);
+      if (mock) {
+        setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null });
+        setOrgName(mock.posterOrganization);
+        setLoading(false);
+        return;
+      }
+
       const found = await getEventById(Number(id));
       if (!found) {
         setMissing(true);

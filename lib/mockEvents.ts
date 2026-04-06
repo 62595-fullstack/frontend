@@ -1,6 +1,6 @@
 export const mockEvents = [
   {
-    id: "1",
+    id: "9001",
     title: "Summer Music Festival",
     description: "A weekend of live music, food trucks, and good vibes in the park.",
     imageUrl: "https://picsum.photos/seed/music/800/400",
@@ -13,7 +13,7 @@ export const mockEvents = [
     createdDate: "Feb 15, 2026",
   },
   {
-    id: "2",
+    id: "9002",
     title: "Tech Conference 2026",
     description: "Join industry leaders for talks on AI, web development, and cloud computing.",
     imageUrl: "https://picsum.photos/seed/tech/800/400",
@@ -26,7 +26,7 @@ export const mockEvents = [
     createdDate: "Feb 10, 2026",
   },
   {
-    id: "3",
+    id: "9003",
     title: "Food & Wine Tasting",
     description: "Explore local flavors with curated wine pairings and gourmet dishes.",
     imageUrl: "https://picsum.photos/seed/food/800/400",
@@ -39,7 +39,7 @@ export const mockEvents = [
     createdDate: "Jan 28, 2026",
   },
   {
-    id: "4",
+    id: "9004",
     title: "Outdoor Yoga Session",
     description: "Start your morning with a peaceful yoga session by the lake.",
     imageUrl: "https://picsum.photos/seed/yoga/800/400",
@@ -52,7 +52,7 @@ export const mockEvents = [
     createdDate: "Feb 17, 2026",
   },
   {
-    id: "5",
+    id: "9005",
     title: "Art Exhibition Opening",
     description: "Discover stunning contemporary art pieces from emerging local artists.",
     imageUrl: "https://picsum.photos/seed/art/800/400",
