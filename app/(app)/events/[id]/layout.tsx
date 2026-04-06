@@ -23,6 +23,7 @@ export default function EventLayout({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -157,22 +158,40 @@ export default function EventLayout({
               {isCreator && (
                 <button
                   className="rounded bg-red-500 px-6 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
-                  onClick={async () => {
-                    if (!event) return;
-                    setDeleteError(null);
-                    try {
-                      await api.deleteOrganizationEvent(event.id);
-                      router.push("/events");
-                    } catch (err) {
-                      setDeleteError(err instanceof Error ? err.message : "Failed to delete event.");
-                    }
-                  }}
+                  onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
                 >
                   Delete
                 </button>
               )}
             </div>
             {deleteError && <p className="text-sm text-red-500 mt-2">{deleteError}</p>}
+
+            {showDeleteConfirm && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div className="popup-brand max-w-sm">
+                  <h2 className="text-lg font-bold">Delete event</h2>
+                  <p className="text-sm text-text-muted">Are you sure you want to delete <span className="font-semibold text-text">{event.title}</span>? This cannot be undone.</p>
+                  {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+                  <div className="flex justify-end gap-3">
+                    <button className="btn-regular" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                    <button
+                      className="rounded bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
+                      onClick={async () => {
+                        setDeleteError(null);
+                        try {
+                          await api.deleteOrganizationEvent(event.id);
+                          router.push("/events");
+                        } catch (err) {
+                          setDeleteError(err instanceof Error ? err.message : "Failed to delete event.");
+                        }
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tabs */}
