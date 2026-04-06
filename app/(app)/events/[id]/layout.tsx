@@ -65,7 +65,7 @@ export default function EventLayout({
 
   if (loading || !event) {
     return (
-      <div className="mx-auto max-w-4xl px-8 py-10 text-sm text-gray-500">
+      <div className="mx-auto max-w-4xl px-8 py-10 text-sm text-text-muted">
         Loading…
       </div>
     );
@@ -76,39 +76,39 @@ export default function EventLayout({
       {/* RIGHT PAGEBAR */}
       <PagebarContent>
         <aside className="w-full">
-          <div className="rounded-md bg-white shadow-sm border border-gray-200 overflow-hidden">
+          <div className="rounded-md bg-bg-light border border-border overflow-hidden">
             {/* Identity row */}
             <div className="flex items-center gap-3 px-4 py-4">
               <div
-                className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold text-gray-600">
+                className="h-10 w-10 rounded-full bg-highlight flex items-center justify-center text-sm font-bold text-text-muted">
                 {event.title.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-black">{event.title}</p>
-                <p className="truncate text-xs text-gray-600">{orgName || `Org #${event.organizationId}`}</p>
+                <p className="truncate text-sm font-semibold text-text">{event.title}</p>
+                <p className="truncate text-xs text-text-muted">{orgName || `Org #${event.organizationId}`}</p>
               </div>
             </div>
 
-            <div className="border-t border-gray-200"/>
+            <div className="border-t border-border-muted"/>
 
             {/* Details */}
             <div className="px-4 py-4">
-              <h3 className="text-sm font-bold text-black">Details</h3>
+              <h3 className="text-sm font-bold text-text">Details</h3>
               <div className="mt-3 space-y-3 text-sm">
                 <div className="flex justify-between gap-4">
-                  <span className="text-gray-700">Organization:</span>
-                  <span className="font-semibold text-black">{orgName || `#${event.organizationId}`}</span>
+                  <span className="text-text-muted">Organization:</span>
+                  <span className="font-semibold text-text">{orgName || `#${event.organizationId}`}</span>
                 </div>
                 {event.creatorName && (
                   <div className="flex justify-between gap-4">
-                    <span className="text-gray-700">Posted by:</span>
-                    <span className="font-semibold text-black">{event.creatorName}</span>
+                    <span className="text-text-muted">Posted by:</span>
+                    <span className="font-semibold text-text">{event.creatorName}</span>
                   </div>
                 )}
                 {event.startDate && (
                   <div className="flex justify-between gap-4">
-                    <span className="text-gray-700">Start date:</span>
-                    <span className="font-semibold text-black">
+                    <span className="text-text-muted">Start date:</span>
+                    <span className="font-semibold text-text">
                       {new Date(event.startDate).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
@@ -119,20 +119,20 @@ export default function EventLayout({
                 )}
                 {event.ageLimit !== undefined && event.ageLimit > 0 && (
                   <div className="flex justify-between gap-4">
-                    <span className="text-gray-700">Age limit:</span>
-                    <span className="font-semibold text-black">{event.ageLimit}+</span>
+                    <span className="text-text-muted">Age limit:</span>
+                    <span className="font-semibold text-text">{event.ageLimit}+</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="border-t border-gray-200"/>
+            <div className="border-t border-border-muted"/>
 
             {/* Signup */}
             <div className="px-4 py-4">
               <button
                 type="button"
-                className="w-full rounded bg-gray-200 py-2 text-sm font-medium text-black"
+                className="w-full rounded bg-highlight py-2 text-sm font-medium text-text"
               >
                 Not signed up
               </button>
@@ -143,26 +143,26 @@ export default function EventLayout({
 
       {/* Page contents */}
       <div className="mx-auto max-w-4xl px-8 py-10">
-        <div className="rounded-lg bg-white p-6 shadow-sm">
+        <div className="rounded-lg bg-bg-light p-6 shadow-sm">
           {/* Header row */}
           <div className="flex items-start justify-between gap-6 grid grid-cols-1 xl:grid-cols-2">
             <div className="flex items-start gap-4">
               <div
-                className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-600">
+                className="w-12 h-12 rounded-full bg-highlight flex items-center justify-center text-lg font-bold text-text-muted">
                 {event.title.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-black">{event.title}</h1>
-                <div className="mt-1 flex items-center gap-2 text-xs text-black">
-                  <span className="font-semibold text-black">{orgName || `Org #${event.organizationId}`}</span>
+                <h1 className="text-xl font-bold text-text">{event.title}</h1>
+                <div className="mt-1 flex items-center gap-2 text-xs text-text-muted">
+                  <span className="font-semibold text-text-muted">{orgName || `Org #${event.organizationId}`}</span>
                 </div>
               </div>
             </div>
 
             <div>
               <div className="flex items-center xl:justify-end gap-3">
-                <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Share</button>
-                <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Save</button>
+                <button className="rounded bg-highlight px-6 py-2 text-sm font-semibold text-text">Share</button>
+                <button className="rounded bg-highlight px-6 py-2 text-sm font-semibold text-text">Save</button>
                 {isCreator && (
                   <button
                     className="rounded bg-red-500 px-6 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
