@@ -6,7 +6,6 @@ import CreateEventModal from "@/components/events/CreateEventModal";
 import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { api, OrganizationEvent, Attachment } from "@/lib/api";
-import { mockEvents } from "@/lib/mockEvents";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
@@ -67,7 +66,7 @@ export default function EventsPage() {
         >
           {events.map((event) => (
             <EventCard
-              key={`api-${event.id}`}
+              key={event.id}
               id={String(event.id)}
               title={event.title}
               description={event.description}
@@ -81,11 +80,6 @@ export default function EventsPage() {
               createdDate={event.createdDate ? new Date(event.createdDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}
             />
           ))}
-          {mockEvents
-            .filter((mock) => !events.some((e) => String(e.id) === mock.id))
-            .map((event) => (
-              <EventCard key={`mock-${event.id}`} {...event} mock />
-            ))}
         </div>
       </div>
 

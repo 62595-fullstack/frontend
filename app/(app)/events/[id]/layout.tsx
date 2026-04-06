@@ -6,7 +6,6 @@ import PagebarContent from "@/components/pagebar/PagebarContent";
 import EventTabs from "@/components/events/EventTabs";
 import { EventContext } from "@/components/events/EventContext";
 import { getEventById, OrganizationEvent, api } from "@/lib/api";
-import { mockEvents } from "@/lib/mockEvents";
 
 export default function EventLayout({
   children,
@@ -18,30 +17,20 @@ export default function EventLayout({
   const { id } = use(params);
   const [event, setEvent] = useState<OrganizationEvent | null>(null);
   const [orgName, setOrgName] = useState<string>("");
-  const [isMock, setIsMock] = useState(false);
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const mock = mockEvents.find((e) => e.id === id);
-      if (!mock) {
-        const found = await getEventById(Number(id));
-        if (found) {
-          setEvent(found);
-          const org = await api.getOrganizationById(found.organizationId);
-          if (org) setOrgName(org.name);
-          setLoading(false);
-          return;
-        }
-        setMissing(true);
+      const found = await getEventById(Number(id));
+      if (found) {
+        setEvent(found);
+        const org = await api.getOrganizationById(found.organizationId);
+        if (org) setOrgName(org.name);
         setLoading(false);
         return;
       }
-
-      setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null, startDate: mock.startDate, ageLimit: mock.ageLimit, creatorName: mock.posterName });
-      setOrgName(mock.posterOrganization);
-      setIsMock(true);
+      setMissing(true);
       setLoading(false);
     }
     load();
@@ -132,14 +121,7 @@ export default function EventLayout({
                 {event.title.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-black">{event.title}</h1>
-                  {isMock && (
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-yellow-200 text-yellow-800">
-                      Mock
-                    </span>
-                  )}
-                </div>
+                <h1 className="text-xl font-bold text-black">{event.title}</h1>
                 <div className="mt-1 flex items-center gap-2 text-xs text-black">
                   <span className="font-semibold text-black">{orgName || `Org #${event.organizationId}`}</span>
                 </div>
