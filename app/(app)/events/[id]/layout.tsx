@@ -145,7 +145,7 @@ export default function EventLayout({
       <div className="mx-auto max-w-4xl px-8 py-10">
         <div className="rounded-lg bg-white p-6 shadow-sm">
           {/* Header row */}
-          <div className="flex items-start justify-between gap-6 grid grid-rows-2 md:grid-rows-1">
+          <div className="flex items-start justify-between gap-6 grid grid-cols-1 xl:grid-cols-2">
             <div className="flex items-start gap-4">
               <div
                 className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-600">
