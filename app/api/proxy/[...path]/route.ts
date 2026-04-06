@@ -31,6 +31,11 @@ async function forward(req: Request, path: string[]) {
 
   const body = await res.text();
 
+  if (res.status === 401) {
+    const cookieStore = await cookies();
+    cookieStore.delete("token");
+  }
+
   const contentType = res.headers.get("content-type");
   return new NextResponse(body || null, {
     status: res.status,
