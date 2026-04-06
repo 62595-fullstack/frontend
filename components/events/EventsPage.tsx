@@ -5,16 +5,18 @@ import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
-import { api, OrganizationEvent, Attachment } from "@/lib/api";
+import { api, OrganizationEvent, Organization, Attachment } from "@/lib/api";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
+  const [orgs, setOrgs] = useState<Organization[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   async function loadAllEvents() {
-    const orgs = await api.getOrganizations();
-    const orgList = Array.isArray(orgs) ? orgs : [];
+    const orgData = await api.getOrganizations();
+    const orgList = Array.isArray(orgData) ? orgData : [];
+    setOrgs(orgList);
     const results = await Promise.all(orgList.map((org) => api.getOrganizationEvents(org.id)));
     setEvents(results.flatMap((data) => Array.isArray(data) ? data : []));
   }
@@ -73,7 +75,7 @@ export default function EventsPage() {
               attachment={event.attachment}
               posterName={event.creatorName || "Unknown"}
               posterAvatar=""
-              posterOrganization={String(event.organizationId)}
+              posterOrganization={orgs.find((o) => o.id === event.organizationId)?.name ?? String(event.organizationId)}
               createdDate={event.createdDate ? new Date(event.createdDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}
             />
           ))}
