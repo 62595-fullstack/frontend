@@ -13,7 +13,7 @@ export default function Page() {
 
   useEffect(() => {
     api.getOrganizations().then((data) => {
-      setOrganizations(Array.isArray(data) ? data : JSON.parse(data as unknown as string));
+      setOrganizations(Array.isArray(data) ? data : []);
     });
   }, []);
 
@@ -22,7 +22,7 @@ export default function Page() {
     try {
       await api.createOrganization(data);
       const updated = await api.getOrganizations();
-      setOrganizations(Array.isArray(updated) ? updated : JSON.parse(updated as unknown as string));
+      setOrganizations(Array.isArray(updated) ? updated : []);
       setShowModal(false);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Failed to create organization.");
