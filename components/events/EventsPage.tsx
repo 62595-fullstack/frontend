@@ -19,7 +19,9 @@ export default function EventsPage() {
     const orgList = Array.isArray(orgData) ? orgData : [];
     setOrgs(orgList);
     const results = await Promise.all(orgList.map((org) => api.getOrganizationEvents(org.id)));
-    setEvents(results.flatMap((data) => Array.isArray(data) ? data : []));
+    const allEvents = results.flatMap((data) => Array.isArray(data) ? data : []);
+    allEvents.sort((a, b) => new Date(b.createdDate ?? 0).getTime() - new Date(a.createdDate ?? 0).getTime());
+    setEvents(allEvents);
   }
 
   useEffect(() => {
