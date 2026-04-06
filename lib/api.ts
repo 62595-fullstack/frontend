@@ -59,6 +59,7 @@ export type OrganizationEvent = {
   title: string;
   description: string;
   attachment: Attachment | null;
+  createdDate?: string;
 };
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;

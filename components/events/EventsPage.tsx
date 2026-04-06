@@ -76,7 +76,7 @@ export default function EventsPage() {
               likes={0}
               comments={0}
               shares={0}
-              createdDate=""
+              createdDate={event.createdDate ? new Date(event.createdDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}
             />
           ))}
           {mockEvents
