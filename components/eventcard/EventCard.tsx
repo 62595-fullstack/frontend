@@ -13,6 +13,7 @@ interface EventCardProps {
     comments: number;
     shares: number;
     createdDate: string;
+    mock?: boolean;
 }
 
 export default function EventCard({
@@ -27,6 +28,7 @@ export default function EventCard({
     comments,
     shares,
     createdDate,
+    mock,
 }: EventCardProps) {
     return (
         <div className="card w-full md:w-3/4 lg:max-w-3xl flex flex-col flex-shrink-0">
@@ -45,6 +47,11 @@ export default function EventCard({
                     <span className="text-xs text-text-muted font-normal">•</span>
                     <span className="text-xs text-text-muted font-normal">Posted: {createdDate}</span>
                 </div>
+                {mock && (
+                    <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded bg-yellow-200 text-yellow-800">
+                        Mock
+                    </span>
+                )}
             </div>
 
             {/* Event image */}

@@ -18,6 +18,7 @@ export default function EventLayout({
   const { id } = use(params);
   const [event, setEvent] = useState<OrganizationEvent | null>(null);
   const [orgName, setOrgName] = useState<string>("");
+  const [isMock, setIsMock] = useState(false);
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
 
@@ -40,6 +41,7 @@ export default function EventLayout({
 
       setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null });
       setOrgName(mock.posterOrganization);
+      setIsMock(true);
       setLoading(false);
     }
     load();
@@ -110,7 +112,14 @@ export default function EventLayout({
                 {event.title.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-black">{event.title}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-black">{event.title}</h1>
+                  {isMock && (
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-yellow-200 text-yellow-800">
+                      Mock
+                    </span>
+                  )}
+                </div>
                 <div className="mt-1 flex items-center gap-2 text-xs text-black">
                   <span className="font-semibold text-black">{orgName || `Org #${event.organizationId}`}</span>
                 </div>
