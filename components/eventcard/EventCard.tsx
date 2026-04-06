@@ -70,7 +70,6 @@ export default function EventCard({
 
             {/* Content */}
             <div className="p-4 space-y-3">
-                <h2 className="text-xl font-bold text-text">{posterOrganization}</h2>
                 <p className="text-text-muted text-sm">{description}</p>
 
                 <Link
