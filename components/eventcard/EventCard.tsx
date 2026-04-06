@@ -57,7 +57,7 @@ export default function EventCard({
                 <img
                     src={`data:${attachment.fileType};base64,${attachment.content}`}
                     alt={title}
-                    className="w-full aspect-video object-cover"
+                    className="mb-4 w-full aspect-video object-cover"
                 />
             )}
 
@@ -69,8 +69,10 @@ export default function EventCard({
             </div>*/}
 
             {/* Content */}
-            <div className="p-4 space-y-3">
-                <p className="text-text-muted text-sm">{description}</p>
+            <div className="px-4 pb-4 space-y-3">
+                {description && (
+                    <p className="text-text-muted text-sm">{description}</p>
+                )}
 
                 <Link
                     href={`/events/${id}`}
