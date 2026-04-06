@@ -27,7 +27,7 @@ export default function EventCard({
     return (
         <div className="card w-full md:w-3/4 lg:max-w-3xl flex flex-col flex-shrink-0">
             {/* Top bar - Poster info */}
-            <div className="flex items-center gap-3 p-4">
+            <div className="flex items-center p-4">
                 {posterAvatar && (
                     <img
                         src={posterAvatar}
@@ -35,9 +35,11 @@ export default function EventCard({
                         className="w-10 h-10 rounded-full object-cover"
                     />
                 )}
-                <div className="flex flex-col">
-                    <span className="text-lg text-text font-semibold leading-tight">{posterOrganization}</span>
+                <div className="flex flex-col space-y-2">
+                    <span className="text-2xl text-text font-semibold leading-tight">{title}</span>
                     <div className="flex items-baseline gap-2">
+                        <span className="text-xs text-text-muted">{posterOrganization}</span>
+                        <span className="text-xs text-text-muted">•</span>
                         <span className="text-xs text-text-muted">by {posterName}</span>
                         <span className="text-xs text-text-muted">•</span>
                         <span className="text-xs text-text-muted">Posted: {createdDate}</span>
@@ -68,7 +70,7 @@ export default function EventCard({
 
             {/* Content */}
             <div className="p-4 space-y-3">
-                <h2 className="text-2xl font-bold text-text">{title}</h2>
+                <h2 className="text-xl font-bold text-text">{posterOrganization}</h2>
                 <p className="text-text-muted text-sm">{description}</p>
 
                 <Link
