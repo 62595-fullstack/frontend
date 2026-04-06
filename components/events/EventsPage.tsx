@@ -79,9 +79,11 @@ export default function EventsPage() {
               createdDate=""
             />
           ))}
-          {mockEvents.map((event) => (
-            <EventCard key={`mock-${event.id}`} {...event} attachment={null} />
-          ))}
+          {mockEvents
+            .filter((mock) => !events.some((e) => String(e.id) === mock.id))
+            .map((event) => (
+              <EventCard key={`mock-${event.id}`} {...event} attachment={null} />
+            ))}
         </div>
       </div>
 
