@@ -16,20 +16,26 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     setLoading(true)
+    console.log('[Login] form submitted — email:', email, '| password length:', password.length)
 
     try {
+      console.log('[Login] sending POST /api/login')
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
+      console.log('[Login] response status:', res.status, res.statusText)
 
       if (res.ok) {
+        console.log('[Login] login successful, redirecting to /')
         router.push('/')
       } else {
+        console.log('[Login] login failed, showing error')
         setError('Invalid email or password.')
       }
-    } catch {
+    } catch (err) {
+      console.error('[Login] fetch error:', err)
       setError('Could not reach the server. Please try again.')
     } finally {
       setLoading(false)
