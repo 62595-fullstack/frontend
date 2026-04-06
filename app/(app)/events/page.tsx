@@ -15,23 +15,13 @@ export default function Page() {
 
   async function loadAllEvents() {
     const orgs = await api.getOrganizations();
-    const orgList = Array.isArray(orgs) ? orgs : JSON.parse(orgs as unknown as string);
-    const results = await Promise.all(
-      orgList.map((org: { id: number }) => api.getOrganizationEvents(org.id))
-    );
-    const all = results.flatMap((data) =>
-      Array.isArray(data) ? data : JSON.parse(data as unknown as string)
-    );
-    setEvents(all);
+    const orgList = Array.isArray(orgs) ? orgs : [];
+    const results = await Promise.all(orgList.map((org) => api.getOrganizationEvents(org.id)));
+    setEvents(results.flatMap((data) => Array.isArray(data) ? data : []));
   }
 
   useEffect(() => {
-    api.getOrganizations().then((orgs) => {
-      const orgList = Array.isArray(orgs) ? orgs : JSON.parse(orgs as unknown as string);
-      Promise.all(orgList.map((org: { id: number }) => api.getOrganizationEvents(org.id))).then((results) => {
-        setEvents(results.flatMap((data) => Array.isArray(data) ? data : JSON.parse(data as unknown as string)));
-      });
-    });
+    loadAllEvents();
   }, []);
 
   async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number }) {
@@ -71,7 +61,23 @@ export default function Page() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {mockEvents.map((event) => (
-            <EventCard key={event.id} {...event} attachment={null} />
+            <EventCard key={`mock-${event.id}`} {...event} attachment={null} />
+          ))}
+          {events.map((event) => (
+            <EventCard
+              key={`api-${event.id}`}
+              id={String(event.id)}
+              title={event.title}
+              description={event.description}
+              attachment={event.attachment}
+              posterName="Unknown"
+              posterAvatar=""
+              posterOrganization={String(event.organizationId)}
+              likes={0}
+              comments={0}
+              shares={0}
+              createdDate=""
+            />
           ))}
         </div>
       </div>
