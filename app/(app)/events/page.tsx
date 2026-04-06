@@ -60,9 +60,6 @@ export default function Page() {
           className="overflow-y-auto h-full gap-4 p-4 flex flex-col items-center"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {mockEvents.map((event) => (
-            <EventCard key={`mock-${event.id}`} {...event} attachment={null} />
-          ))}
           {events.map((event) => (
             <EventCard
               key={`api-${event.id}`}
@@ -78,6 +75,9 @@ export default function Page() {
               shares={0}
               createdDate=""
             />
+          ))}
+          {mockEvents.map((event) => (
+            <EventCard key={`mock-${event.id}`} {...event} attachment={null} />
           ))}
         </div>
       </div>
