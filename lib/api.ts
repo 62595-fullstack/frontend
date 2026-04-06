@@ -1,3 +1,5 @@
+export const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, '');
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api/proxy${path}`, {
     ...init,

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { API_BASE } from '@/lib/api'
 
 export async function POST(req: NextRequest) {
   console.log('[login] received POST request')
@@ -7,7 +8,7 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
   console.log('[login] parsed body — email:', email, '| password length:', password?.length ?? 0)
 
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_BASE}/login/${encodeURIComponent(email)}?password=${encodeURIComponent(password)}`
+  const backendUrl = `${API_BASE}/login/${encodeURIComponent(email)}?password=${encodeURIComponent(password)}`
   console.log('[login] calling backend:', backendUrl.replace(/password=[^&]+/, 'password=***'))
 
   const res = await fetch(backendUrl)

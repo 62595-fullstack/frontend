@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+import { API_BASE } from "@/lib/api";
 
 async function forward(req: Request, path: string[]) {
   if (!API_BASE) {
