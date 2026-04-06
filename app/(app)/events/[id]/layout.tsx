@@ -1,7 +1,7 @@
 'use client'
 
 import { use, useEffect, useState } from "react";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import EventTabs from "@/components/events/EventTabs";
 import { EventContext } from "@/components/events/EventContext";
@@ -15,11 +15,14 @@ export default function EventLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
   const [event, setEvent] = useState<OrganizationEvent | null>(null);
   const [orgName, setOrgName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isCreator, setIsCreator] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -27,8 +30,14 @@ export default function EventLayout({
         const found = await getEventById(Number(id));
         if (found) {
           setEvent(found);
-          const org = await api.getOrganizationById(found.organizationId);
+          const [org, myBinding] = await Promise.all([
+            api.getOrganizationById(found.organizationId),
+            api.getUserOrganizationBindingForCurrentUser(found.organizationId).catch(() => null),
+          ]);
           if (org) setOrgName(org.name);
+          if (myBinding && myBinding.id === found.userOrganizationBindingId) {
+            setIsCreator(true);
+          }
           setLoading(false);
           return;
         }
@@ -145,7 +154,25 @@ export default function EventLayout({
             <div className="flex items-center gap-3">
               <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Share</button>
               <button className="rounded bg-gray-200 px-6 py-2 text-sm font-semibold text-black">Save</button>
+              {isCreator && (
+                <button
+                  className="rounded bg-red-500 px-6 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"
+                  onClick={async () => {
+                    if (!event) return;
+                    setDeleteError(null);
+                    try {
+                      await api.deleteOrganizationEvent(event.id);
+                      router.push("/events");
+                    } catch (err) {
+                      setDeleteError(err instanceof Error ? err.message : "Failed to delete event.");
+                    }
+                  }}
+                >
+                  Delete
+                </button>
+              )}
             </div>
+            {deleteError && <p className="text-sm text-red-500 mt-2">{deleteError}</p>}
           </div>
 
           {/* Tabs */}

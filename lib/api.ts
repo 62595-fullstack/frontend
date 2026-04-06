@@ -169,6 +169,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify(event),
     }),
+  deleteOrganizationEvent: (id: number) =>
+    request<void>(`/OrganizationEvents/${id}`, { method: "DELETE" }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
