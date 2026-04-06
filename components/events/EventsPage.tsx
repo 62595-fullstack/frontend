@@ -24,7 +24,7 @@ export default function EventsPage() {
     loadAllEvents();
   }, []);
 
-  async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number }) {
+  async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number; startDate: string; ageLimit: number }) {
     setCreateError(null);
     try {
       const bindings = await api.getUserOrganizationBindings(data.organizationId);
@@ -36,6 +36,8 @@ export default function EventsPage() {
         title: data.title,
         description: data.description,
         attachment: data.attachment,
+        startDate: data.startDate,
+        ageLimit: data.ageLimit,
       });
       await loadAllEvents();
       setShowModal(false);

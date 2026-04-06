@@ -39,7 +39,7 @@ export default function EventLayout({
         return;
       }
 
-      setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null });
+      setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null, startDate: mock.startDate, ageLimit: mock.ageLimit });
       setOrgName(mock.posterOrganization);
       setIsMock(true);
       setLoading(false);
@@ -84,6 +84,20 @@ export default function EventLayout({
                   <span className="text-gray-700">Organization:</span>
                   <span className="font-semibold text-black">{orgName || `#${event.organizationId}`}</span>
                 </div>
+                {event.startDate && (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-gray-700">Start date:</span>
+                    <span className="font-semibold text-black">
+                      {new Date(event.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                )}
+                {event.ageLimit !== undefined && event.ageLimit > 0 && (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-gray-700">Age limit:</span>
+                    <span className="font-semibold text-black">{event.ageLimit}+</span>
+                  </div>
+                )}
               </div>
             </div>
 

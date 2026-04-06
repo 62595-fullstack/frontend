@@ -12,6 +12,8 @@ export const mockEvents: {
   comments: number;
   shares: number;
   createdDate: string;
+  startDate: string;
+  ageLimit: number;
 }[] = [
   {
     id: "9001",
@@ -25,6 +27,8 @@ export const mockEvents: {
     comments: 38,
     shares: 12,
     createdDate: "Feb 15, 2026",
+    startDate: "Jun 20, 2026",
+    ageLimit: 18,
   },
   {
     id: "9002",
@@ -38,6 +42,8 @@ export const mockEvents: {
     comments: 52,
     shares: 27,
     createdDate: "Feb 10, 2026",
+    startDate: "Sep 5, 2026",
+    ageLimit: 0,
   },
   {
     id: "9003",
@@ -51,6 +57,8 @@ export const mockEvents: {
     comments: 45,
     shares: 8,
     createdDate: "Jan 28, 2026",
+    startDate: "May 10, 2026",
+    ageLimit: 18,
   },
   {
     id: "9004",
@@ -64,6 +72,8 @@ export const mockEvents: {
     comments: 14,
     shares: 3,
     createdDate: "Feb 17, 2026",
+    startDate: "Apr 12, 2026",
+    ageLimit: 0,
   },
   {
     id: "9005",
@@ -77,5 +87,7 @@ export const mockEvents: {
     comments: 23,
     shares: 19,
     createdDate: "Feb 5, 2026",
+    startDate: "Mar 28, 2026",
+    ageLimit: 0,
   },
 ];
