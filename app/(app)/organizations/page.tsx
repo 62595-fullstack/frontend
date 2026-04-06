@@ -13,6 +13,7 @@ export default function Page() {
 
   useEffect(() => {
     api.getOrganizations().then((data) => {
+      console.log("organizations:", data);
       setOrganizations(Array.isArray(data) ? data : []);
     });
   }, []);
@@ -48,10 +49,10 @@ export default function Page() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {organizations.map((org) => (
-            <div key={org.id} className="bg-gray-800 rounded-lg p-5 shadow-lg">
-              <h2 className="text-xl font-bold text-white">{org.name}</h2>
-              {org.description && (
-                <p className="text-gray-300 text-sm mt-2">{org.description}</p>
+            <div key={org.Id} className="bg-gray-800 rounded-lg p-5 shadow-lg">
+              <h2 className="text-xl font-bold text-white">{org.Name}</h2>
+              {org.Description && (
+                <p className="text-gray-300 text-sm mt-2">{org.Description}</p>
               )}
             </div>
           ))}

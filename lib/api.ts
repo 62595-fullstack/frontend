@@ -30,11 +30,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!body) return undefined as T;
-  if (!isJson) return body as T;
-  return JSON.parse(body) as T;
+  try { return JSON.parse(body) as T; } catch { return body as T; }
 }
 
-export type Organization = { id: number; name: string; description: string };
+export type Organization = { Id: number; Name: string; Description: string };
 
 export type Post = {
   id: number;
