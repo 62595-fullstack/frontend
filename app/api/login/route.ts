@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 401 })
   }
 
-  const token = await res.text()
+  const token = await res.json() as string
   const cookieStore = await cookies()
   cookieStore.set('token', token, { httpOnly: true, sameSite: 'lax', path: '/' })
   return NextResponse.json({ ok: true })
