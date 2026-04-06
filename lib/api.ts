@@ -166,3 +166,7 @@ export const api = {
   deleteGdprByUserId: (userId: number) =>
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
 };
+
+export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
+  return request<OrganizationEvent | null>(`/OrganizationEvents/event/${eventId}`);
+}
