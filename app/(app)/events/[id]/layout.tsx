@@ -19,24 +19,38 @@ export default function EventLayout({
   const [orgName, setOrgName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
-      const found = await getEventById(Number(id));
-      if (found) {
-        setEvent(found);
-        const org = await api.getOrganizationById(found.organizationId);
-        if (org) setOrgName(org.name);
+      try {
+        const found = await getEventById(Number(id));
+        if (found) {
+          setEvent(found);
+          const org = await api.getOrganizationById(found.organizationId);
+          if (org) setOrgName(org.name);
+          setLoading(false);
+          return;
+        }
+        setMissing(true);
         setLoading(false);
-        return;
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : "Failed to load event.");
+        setLoading(false);
       }
-      setMissing(true);
-      setLoading(false);
     }
     load();
   }, [id]);
 
   if (missing) return notFound();
+
+  if (loadError) {
+    return (
+      <div className="mx-auto max-w-4xl px-8 py-10 text-sm text-danger">
+        {loadError}
+      </div>
+    );
+  }
 
   if (loading || !event) {
     return (

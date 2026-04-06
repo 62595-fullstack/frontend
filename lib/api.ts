@@ -28,7 +28,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         message = body;
       }
     }
-/*    throw new Error(message);*/
+    throw new Error(message);
   }
 
   if (!body) return undefined as T;

@@ -12,6 +12,7 @@ export default function EventsPage() {
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   async function loadAllEvents() {
     const orgData = await api.getOrganizations();
@@ -22,7 +23,7 @@ export default function EventsPage() {
   }
 
   useEffect(() => {
-    loadAllEvents();
+    loadAllEvents().catch((err) => setLoadError(err instanceof Error ? err.message : "Failed to load events."));
   }, []);
 
   async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number; startDate: string; ageLimit: number }) {
@@ -59,6 +60,8 @@ export default function EventsPage() {
         <h1 className="text-5xl font-bold text-text flex-1 text-center">Events</h1>
         <CreateButton onClick={() => setShowModal(true)} label="event"/>
       </div>
+
+      {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
       {/* Scrollable card list */}
       <div className="w-full max-w-5xl flex-1 min-h-0 rounded-lg overflow-hidden">
