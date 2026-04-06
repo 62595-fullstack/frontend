@@ -155,6 +155,10 @@ export const api = {
     request<UserOrganizationBinding[]>(
       `/UserOrganizationBinding/${organizationId}`
     ),
+  getUserOrganizationBindingForCurrentUser: (organizationId: number) =>
+    request<UserOrganizationBinding>(
+      `/UserOrganizationBinding/${organizationId}/me`
+    ),
 
   // events
   getOrganizationEvents: (organizationId: number) =>
