@@ -72,7 +72,7 @@ export default function EventsPage() {
               title={event.title}
               description={event.description}
               attachment={event.attachment}
-              posterName="Unknown"
+              posterName={event.creatorName || "Unknown"}
               posterAvatar=""
               posterOrganization={String(event.organizationId)}
               likes={0}

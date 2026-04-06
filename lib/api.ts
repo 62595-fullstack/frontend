@@ -62,6 +62,7 @@ export type OrganizationEvent = {
   createdDate?: string;
   startDate?: string;
   ageLimit?: number;
+  creatorName?: string;
 };
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;

@@ -39,7 +39,7 @@ export default function EventLayout({
         return;
       }
 
-      setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null, startDate: mock.startDate, ageLimit: mock.ageLimit });
+      setEvent({ id: Number(mock.id), organizationId: 0, userOrganizationBindingId: 0, title: mock.title, description: mock.description, attachment: null, startDate: mock.startDate, ageLimit: mock.ageLimit, creatorName: mock.posterName });
       setOrgName(mock.posterOrganization);
       setIsMock(true);
       setLoading(false);
@@ -84,6 +84,12 @@ export default function EventLayout({
                   <span className="text-gray-700">Organization:</span>
                   <span className="font-semibold text-black">{orgName || `#${event.organizationId}`}</span>
                 </div>
+                {event.creatorName && (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-gray-700">Posted by:</span>
+                    <span className="font-semibold text-black">{event.creatorName}</span>
+                  </div>
+                )}
                 {event.startDate && (
                   <div className="flex justify-between gap-4">
                     <span className="text-gray-700">Start date:</span>
