@@ -35,11 +35,13 @@ export default function EventCard({
                         className="w-10 h-10 rounded-full object-cover"
                     />
                 )}
-                <div className="flex items-baseline gap-2">
-                    <span className="text-2xl text-text font-semibold">{posterName}</span>
-                    <span className="text-xs text-text">Organization: {posterOrganization}</span>
-                    <span className="text-xs text-text-muted font-normal">•</span>
-                    <span className="text-xs text-text-muted font-normal">Posted: {createdDate}</span>
+                <div className="flex flex-col">
+                    <span className="text-lg text-text font-semibold leading-tight">{posterOrganization}</span>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-xs text-text-muted">by {posterName}</span>
+                        <span className="text-xs text-text-muted">•</span>
+                        <span className="text-xs text-text-muted">Posted: {createdDate}</span>
+                    </div>
                 </div>
                 {mock && (
                     <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded bg-yellow-200 text-yellow-800">
@@ -66,7 +68,7 @@ export default function EventCard({
 
             {/* Content */}
             <div className="p-4 space-y-3">
-                <h2 className="text-xl font-bold text-text">{title}</h2>
+                <h2 className="text-2xl font-bold text-text">{title}</h2>
                 <p className="text-text-muted text-sm">{description}</p>
 
                 <Link
