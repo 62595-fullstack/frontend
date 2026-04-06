@@ -4,9 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
 
-  const body = JSON.stringify({ Email: email, PasswordHash: password })
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/login/${encodeURIComponent(body)}`
+    `${process.env.NEXT_PUBLIC_API_BASE}/login/${encodeURIComponent(email)}?password=${encodeURIComponent(password)}`
   )
 
   if (!res.ok) {
