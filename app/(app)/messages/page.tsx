@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
@@ -374,7 +375,7 @@ export default function Page() {
                 }`}
               >
                 <div className="relative flex-shrink-0">
-                  <img src={c.avatar} alt={c.name} className="w-7 h-7 rounded-full object-cover" />
+                  <Image src={c.avatar} alt={c.name} width={28} height={28} className="rounded-full object-cover" />
                   {c.online && (
                     <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border border-white rounded-full" />
                   )}
@@ -389,10 +390,12 @@ export default function Page() {
       {/* Header */}
       <div className="flex items-center gap-3 px-6 py-4 bg-bg-light border-b border-brand shadow-sm">
         <div className="relative">
-          <img
+          <Image
             src={activeContact.avatar}
             alt={activeContact.name}
-            className="w-10 h-10 rounded-full object-cover"
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
           />
           {activeContact.online && (
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" />
@@ -414,9 +417,7 @@ export default function Page() {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
       >
         {messages.map((msg, index) => {
-          const prevMsg = messages[index - 1];
           const nextMsg = messages[index + 1];
-          const sameAsPrev = prevMsg?.sender === msg.sender;
           const sameAsNext = nextMsg?.sender === msg.sender;
 
           return (
@@ -427,10 +428,12 @@ export default function Page() {
               {msg.sender === "them" && (
                 <div className="w-7 flex-shrink-0">
                   {!sameAsNext && (
-                    <img
+                    <Image
                       src={activeContact.avatar}
                       alt={activeContact.name}
-                      className="w-7 h-7 rounded-full object-cover mb-1"
+                      width={28}
+                      height={28}
+                      className="rounded-full object-cover mb-1"
                     />
                   )}
                 </div>

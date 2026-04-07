@@ -9,8 +9,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
 
-  const contentType = res.headers.get("content-type") ?? "";
-  const isJson = contentType.includes("application/json");
   const body = await res.text();
 
   if (!res.ok) {

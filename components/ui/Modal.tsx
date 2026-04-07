@@ -2,7 +2,8 @@
 // TODO: Add proper types when backend API is finalized
 'use client'
 
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 
 // Field type definitions
 interface BaseField {
@@ -316,11 +317,13 @@ export default function Modal({
               onChange={(e) => handleFileChange(field, e)}
             />
             {preview && (
-              <div className="relative mt-1">
-                <img
+              <div className="relative mt-1 h-48">
+                <Image
                   src={preview}
                   alt="Preview"
-                  className="w-full max-h-48 object-cover rounded-lg border border-brand"
+                  fill
+                  className="object-cover rounded-lg border border-brand"
+                  unoptimized
                 />
                 <button
                   type="button"

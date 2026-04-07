@@ -17,15 +17,19 @@ export default function EventsPage() {
   async function loadAllEvents() {
     const orgData = await api.getOrganizations();
     const orgList = Array.isArray(orgData) ? orgData : [];
-    setOrgs(orgList);
     const results = await Promise.all(orgList.map((org) => api.getOrganizationEvents(org.id)));
     const allEvents = results.flatMap((data) => Array.isArray(data) ? data : []);
     allEvents.sort((a, b) => new Date(b.createdDate ?? 0).getTime() - new Date(a.createdDate ?? 0).getTime());
-    setEvents(allEvents);
+    return { orgList, allEvents };
   }
 
   useEffect(() => {
-    loadAllEvents().catch((err) => setLoadError(err instanceof Error ? err.message : "Failed to load events."));
+    loadAllEvents()
+      .then(({ orgList, allEvents }) => {
+        setOrgs(orgList);
+        setEvents(allEvents);
+      })
+      .catch((err) => setLoadError(err instanceof Error ? err.message : "Failed to load events."));
   }, []);
 
   async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number; startDate: string; ageLimit: number }) {
@@ -43,7 +47,9 @@ export default function EventsPage() {
         startDate: data.startDate,
         ageLimit: data.ageLimit,
       });
-      await loadAllEvents();
+      const { orgList, allEvents } = await loadAllEvents();
+      setOrgs(orgList);
+      setEvents(allEvents);
       setShowModal(false);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Failed to create event.");

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Attachment } from "@/lib/api";
 
 interface EventCardProps {
@@ -29,10 +30,13 @@ export default function EventCard({
             {/* Top bar - Poster info */}
             <div className="flex items-center p-4">
                 {posterAvatar && (
-                    <img
+                    <Image
                         src={posterAvatar}
                         alt={posterName}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full object-cover"
+                        unoptimized
                     />
                 )}
                 <div className="flex flex-col space-y-2">
@@ -54,11 +58,15 @@ export default function EventCard({
 
             {/* Event image */}
             {attachment && (
-                <img
-                    src={`data:${attachment.fileType};base64,${attachment.content}`}
-                    alt={title}
-                    className="mb-4 w-full aspect-video object-cover"
-                />
+                <div className="relative mb-4 w-full aspect-video">
+                    <Image
+                        src={`data:${attachment.fileType};base64,${attachment.content}`}
+                        alt={title}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                    />
+                </div>
             )}
 
             {/* Stats bar */}
