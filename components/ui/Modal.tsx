@@ -2,7 +2,8 @@
 // TODO: Add proper types when backend API is finalized
 'use client'
 
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 
 // Field type definitions
 interface BaseField {
@@ -32,7 +33,18 @@ interface FileField extends BaseField {
   accept?: string;
 }
 
-type Field = TextField | TextAreaField | DropdownField | FileField;
+interface DateField extends BaseField {
+  type: "date";
+}
+
+interface NumberField extends BaseField {
+  type: "number";
+  placeholder?: string;
+  min?: number;
+  max?: number;
+}
+
+type Field = TextField | TextAreaField | DropdownField | FileField | DateField | NumberField;
 
 interface ModalProps {
   title: string;
@@ -61,6 +73,8 @@ export default function Modal({
       } else if (field.type === "file") {
         initial[field.name] = null;
         initial[`${field.name}Preview`] = "";
+      } else if (field.type === "number") {
+        initial[field.name] = "";
       } else {
         initial[field.name] = "";
       }
@@ -238,6 +252,49 @@ export default function Modal({
           </div>
         );
 
+      case "date":
+        return (
+          <div key={field.name} className="flex flex-col gap-1">
+            <label className="text-sm font-medium">
+              {field.label} {field.required && <span className="text-field-required">*</span>}
+            </label>
+            <input
+              type="date"
+              value={values[field.name]}
+              onChange={(e) => setValue(field.name, e.target.value)}
+              className={`input-field ${
+                hasError ? "border-field-required" : "border-brand focus-within:ring-2 focus-within:ring-bg-brand"
+              } transition-colors`}
+            />
+            {hasError && (
+              <span className="text-field-required text-xs">{field.label} is required.</span>
+            )}
+          </div>
+        );
+
+      case "number":
+        return (
+          <div key={field.name} className="flex flex-col gap-1">
+            <label className="text-sm font-medium">
+              {field.label} {field.required && <span className="text-field-required">*</span>}
+            </label>
+            <input
+              type="number"
+              value={values[field.name]}
+              onChange={(e) => setValue(field.name, e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder={field.placeholder}
+              min={field.min}
+              max={field.max}
+              className={`input-field ${
+                hasError ? "border-field-required" : "border-brand focus-within:ring-2 focus-within:ring-bg-brand"
+              } transition-colors`}
+            />
+            {hasError && (
+              <span className="text-field-required text-xs">{field.label} is required.</span>
+            )}
+          </div>
+        );
+
       case "file":
         const preview = values[`${field.name}Preview`];
         return (
@@ -260,11 +317,13 @@ export default function Modal({
               onChange={(e) => handleFileChange(field, e)}
             />
             {preview && (
-              <div className="relative mt-1">
-                <img
+              <div className="relative mt-1 h-48">
+                <Image
                   src={preview}
                   alt="Preview"
-                  className="w-full max-h-48 object-cover rounded-lg border border-brand"
+                  fill
+                  className="object-cover rounded-lg border border-brand"
+                  unoptimized
                 />
                 <button
                   type="button"

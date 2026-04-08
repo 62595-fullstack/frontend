@@ -14,9 +14,9 @@ export default async function RootLayout({children}: Readonly<{ children: React.
 
   return (
     <PagebarProvider>
-      <div className="flex min-h-screen">
+      <div className="grid h-screen grid-cols-[18rem_1fr_18rem] overflow-hidden">
         <Sidebar/>
-        <main className="flex-1">{children}</main>
+        <main className="overflow-auto">{children}</main>
         <Pagebar/>
       </div>
     </PagebarProvider>

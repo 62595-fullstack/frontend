@@ -10,12 +10,15 @@ export default function Page() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getOrganizations().then((data) => {
-      console.log("organizations:", data);
-      setOrganizations(Array.isArray(data) ? data : []);
-    });
+    api.getOrganizations()
+      .then((data) => {
+        console.log("organizations:", data);
+        setOrganizations(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => setLoadError(err instanceof Error ? err.message : "Failed to load organizations."));
   }, []);
 
   async function handleCreate(data: { name: string; description: string }) {
@@ -41,6 +44,8 @@ export default function Page() {
         <h1 className="text-5xl font-bold flex-1 text-center">Organizations</h1>
         <CreateButton onClick={() => setShowModal(true)} label="organization"/>
       </div>
+
+      {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
       {/* Scrollable list */}
       <div className="w-full max-w-5xl flex-1 min-h-0 rounded-lg overflow-hidden">

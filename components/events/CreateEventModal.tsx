@@ -6,7 +6,7 @@ import { api, Organization, Attachment } from "@/lib/api";
 
 interface CreateEventModalProps {
   onClose: () => void;
-  onSubmit: (data: { title: string; description: string; attachment: Attachment | null; organizationId: number }) => Promise<void>;
+  onSubmit: (data: { title: string; description: string; attachment: Attachment | null; organizationId: number; startDate: string; ageLimit: number }) => Promise<void>;
   error?: string | null;
 }
 
@@ -33,6 +33,8 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
           description: values.description,
           attachment: values.image,
           organizationId: values.organization,
+          startDate: values.startDate,
+          ageLimit: values.ageLimit === "" ? 0 : Number(values.ageLimit),
         });
       }}
       fields={[
@@ -56,6 +58,19 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
           label: "Description",
           placeholder: "Describe your event (optional)",
           rows: 4,
+        },
+        {
+          type: "date",
+          name: "startDate",
+          label: "Start Date",
+          required: true,
+        },
+        {
+          type: "number",
+          name: "ageLimit",
+          label: "Age Limit",
+          placeholder: "0 = no limit",
+          min: 0,
         },
         {
           type: "file",
