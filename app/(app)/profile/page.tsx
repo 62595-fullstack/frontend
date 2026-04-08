@@ -160,7 +160,7 @@ export default function Page() {
                   <div className="p-4">
                     <p className="text-sm font-semibold text-gray-900">Intro</p>
                     <p className="mt-2 text-sm text-gray-700">
-                      Add a short bio here. Keep it 1–2 lines, like Facebook.
+                      Add a short bio here.
                     </p>
 
                     <ul className="mt-3 space-y-2 text-sm text-gray-700">
