@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { PagebarAction, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import EventTabs from "@/components/events/EventTabs";
 import { EventContext } from "@/components/events/EventContext";
 import { getEventById, OrganizationEvent, api } from "@/lib/api";
@@ -73,72 +74,42 @@ export default function EventLayout({
 
   return (
     <EventContext.Provider value={event}>
-      {/* RIGHT PAGEBAR */}
-      <PagebarContent>
-        <aside className="w-full">
-          <div className="rounded-md bg-bg-light border border-border overflow-hidden">
-            {/* Identity row */}
-            <div className="flex items-center gap-3 px-4 py-4">
-              <div
-                className="h-10 w-10 rounded-full bg-highlight flex items-center justify-center text-sm font-bold text-text-muted">
-                {event.title.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-text">{event.title}</p>
-                <p className="truncate text-xs text-text-muted">{orgName || `Org #${event.organizationId}`}</p>
-              </div>
-            </div>
+      <PagebarContent title="Event details">
+        <PagebarSection eyebrow="Live event" title={event.title}>
+          <PagebarStat
+            label="Organization"
+            value={orgName || `#${event.organizationId}`}
+            tone="accent"
+          />
+          <PagebarStat
+            label="Age limit"
+            value={event.ageLimit && event.ageLimit > 0 ? `${event.ageLimit}+` : "Open"}
+          />
+          {event.startDate ? (
+            <PagebarStat
+              label="Starts"
+              value={new Date(event.startDate).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            />
+          ) : null}
+        </PagebarSection>
 
-            <div className="border-t border-border-muted"/>
+        <PagebarSection eyebrow="Actions" title="Participation">
+          <PagebarAction>Not signed up</PagebarAction>
+          <PagebarAction>Share with friends</PagebarAction>
+        </PagebarSection>
 
-            {/* Details */}
-            <div className="px-4 py-4">
-              <h3 className="text-sm font-bold text-text">Details</h3>
-              <div className="mt-3 space-y-3 text-sm">
-                <div className="flex justify-between gap-4">
-                  <span className="text-text-muted">Organization:</span>
-                  <span className="font-semibold text-text">{orgName || `#${event.organizationId}`}</span>
-                </div>
-                {event.creatorName && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-text-muted">Posted by:</span>
-                    <span className="font-semibold text-text">{event.creatorName}</span>
-                  </div>
-                )}
-                {event.startDate && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-text-muted">Start date:</span>
-                    <span className="font-semibold text-text">
-                      {new Date(event.startDate).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric"
-                      })}
-                    </span>
-                  </div>
-                )}
-                {event.ageLimit !== undefined && event.ageLimit > 0 && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-text-muted">Age limit:</span>
-                    <span className="font-semibold text-text">{event.ageLimit}+</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-border-muted"/>
-
-            {/* Signup */}
-            <div className="px-4 py-4">
-              <button
-                type="button"
-                className="w-full rounded bg-highlight py-2 text-sm font-medium text-text"
-              >
-                Not signed up
-              </button>
-            </div>
-          </div>
-        </aside>
+        <PagebarSection eyebrow="Posted by" title="Creator">
+          <p className="text-sm text-text">
+            <span className="font-semibold">{event.creatorName || "Unknown creator"}</span>
+          </p>
+          <p className="text-sm leading-6 text-text-muted">
+            Use the tabs in the main view to inspect rules, comments, the bracket, and participant details.
+          </p>
+        </PagebarSection>
       </PagebarContent>
 
       {/* Page contents */}
