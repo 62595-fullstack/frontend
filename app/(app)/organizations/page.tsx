@@ -41,6 +41,7 @@ export default function Page() {
 
       {/* Header row */}
       <div className="flex items-center w-full max-w-5xl mb-6">
+        <div className="w-12 flex-shrink-0" />
         <h1 className="text-5xl font-bold flex-1 text-center">Organizations</h1>
         <CreateButton onClick={() => setShowModal(true)} label="organization"/>
       </div>
