@@ -13,7 +13,7 @@ export default function Page() {
           <li className="btn-sidebar">Read</li>
         </ul>
       </PagebarContent>
-      <h1 className="text-5xl font-bold text-text mb-6">Notifications</h1>
+      <h1 className="text-3xl lg:text-5xl font-bold text-text mb-6">Notifications</h1>
     </div>
   );
 }

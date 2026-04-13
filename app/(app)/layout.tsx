@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import React from "react";
 import { PagebarProvider } from "@/components/pagebar/PagebarContext";
-import Sidebar from "@/components/sidebar/Sidebar";
+import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
 import Pagebar from "@/components/pagebar/Pagebar";
 import { redirect } from "next/navigation";
 import { checkIfLoggedIn } from "@/lib/auth";
@@ -14,9 +14,9 @@ export default async function RootLayout({children}: Readonly<{ children: React.
 
   return (
     <PagebarProvider>
-      <div className="grid h-screen grid-cols-[18rem_1fr_18rem] overflow-hidden">
-        <Sidebar/>
-        <main className="overflow-auto">{children}</main>
+      <div className="flex h-screen overflow-hidden">
+        <SidebarWrapper/>
+        <main className="flex-1 overflow-auto">{children}</main>
         <Pagebar/>
       </div>
     </PagebarProvider>
