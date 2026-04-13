@@ -10,10 +10,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   const body = await res.text();
+  const contentType = res.headers.get("content-type") ?? "";
+  const isHtmlResponse = contentType.includes("text/html");
 
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
     if (body) {
+      if (isHtmlResponse) {
+        if (body.includes("ERR_NGROK_8012") || /ngrok/i.test(body)) {
+          message =
+            "The API tunnel is reachable, but ngrok cannot connect to the backend service at localhost:5000 (ERR_NGROK_8012).";
+        } else {
+          message = "The API returned an HTML error page instead of JSON.";
+        }
+      } else {
       try {
         const parsed = JSON.parse(body);
         // ASP.NET Core ProblemDetails
@@ -25,11 +35,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       } catch {
         message = body;
       }
+      }
     }
     throw new Error(message);
   }
 
   if (!body) return undefined as T;
+  if (isHtmlResponse) {
+    throw new Error("The API returned HTML instead of JSON.");
+  }
   try { return JSON.parse(body) as T; } catch { return body as T; }
 }
 
@@ -65,6 +79,15 @@ export type OrganizationEvent = {
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;
 
+type RawOrganization = {
+  Id?: number;
+  id?: number;
+  Name?: string;
+  name?: string;
+  Description?: string;
+  description?: string;
+};
+
 type RawPost = {
   Id?: number;
   Title?: string;
@@ -78,6 +101,63 @@ type RawPostsEnvelope = {
   Result?: RawPost[] | string;
 };
 
+type RawEvent = {
+  Id?: number;
+  id?: number;
+  OrganizationId?: number;
+  organizationId?: number;
+  UserOrganizationBindingId?: number;
+  userOrganizationBindingId?: number;
+  Title?: string;
+  title?: string;
+  Description?: string;
+  description?: string;
+  Attachment?: Attachment | null;
+  attachment?: Attachment | null;
+  CreatedDate?: string;
+  createdDate?: string;
+  StartDate?: string;
+  startDate?: string;
+  AgeLimit?: number;
+  ageLimit?: number;
+  CreatorName?: string;
+  creatorName?: string;
+};
+
+type RawEventsEnvelope = {
+  Result?: RawEvent[] | string;
+};
+
+type RawOrganizationsEnvelope = {
+  Result?: RawOrganization[] | string;
+};
+
+function parseJsonish(data: unknown): unknown {
+  if (typeof data !== "string") return data;
+  try {
+    return JSON.parse(data);
+  } catch {
+    return data;
+  }
+}
+
+function unwrapResult(data: unknown): unknown {
+  const payload = parseJsonish(data);
+  if (payload && typeof payload === "object" && "Result" in payload) {
+    return parseJsonish((payload as { Result?: unknown }).Result);
+  }
+  return payload;
+}
+
+function parseArrayResponse<TRaw, TParsed>(
+  data: unknown,
+  normalize: (raw: TRaw) => TParsed
+): TParsed[] {
+  const payload = unwrapResult(data);
+  if (!Array.isArray(payload)) return [];
+  return payload.map((item) => normalize(item as TRaw));
+}
+
 function normalizePost(raw: RawPost): Post {
   return {
     id: raw.Id ?? 0,
@@ -88,41 +168,43 @@ function normalizePost(raw: RawPost): Post {
   };
 }
 
+function normalizeOrganization(raw: RawOrganization): Organization {
+  return {
+    id: raw.Id ?? raw.id ?? 0,
+    name: raw.Name ?? raw.name ?? "",
+    description: raw.Description ?? raw.description ?? "",
+  };
+}
+
 function parsePostsResponse(data: unknown): Post[] {
-  let payload = data;
+  return parseArrayResponse<RawPost, Post>(data, normalizePost);
+}
 
-  // If whole payload is stringified JSON
-  if (typeof payload === "string") {
-    try {
-      payload = JSON.parse(payload);
-    } catch {
-      return [];
-    }
-  }
+function parseOrganizationsResponse(data: unknown): Organization[] {
+  return parseArrayResponse<RawOrganization, Organization>(
+    data,
+    normalizeOrganization
+  );
+}
 
-  // Case 1: direct array
-  if (Array.isArray(payload)) {
-    return payload.map((item) => normalizePost(item as RawPost));
-  }
+function normalizeEvent(raw: RawEvent): OrganizationEvent {
+  return {
+    id: raw.Id ?? raw.id ?? 0,
+    organizationId: raw.OrganizationId ?? raw.organizationId ?? 0,
+    userOrganizationBindingId:
+      raw.UserOrganizationBindingId ?? raw.userOrganizationBindingId ?? 0,
+    title: raw.Title ?? raw.title ?? "",
+    description: raw.Description ?? raw.description ?? "",
+    attachment: raw.Attachment ?? raw.attachment ?? null,
+    createdDate: raw.CreatedDate ?? raw.createdDate ?? "",
+    startDate: raw.StartDate ?? raw.startDate ?? "",
+    ageLimit: raw.AgeLimit ?? raw.ageLimit ?? 0,
+    creatorName: raw.CreatorName ?? raw.creatorName ?? "",
+  };
+}
 
-  // Case 2: { Result: [...] } or { Result: "..." }
-  if (payload && typeof payload === "object" && "Result" in payload) {
-    let result = (payload as RawPostsEnvelope).Result;
-
-    if (typeof result === "string") {
-      try {
-        result = JSON.parse(result);
-      } catch {
-        return [];
-      }
-    }
-
-    if (Array.isArray(result)) {
-      return result.map((item) => normalizePost(item as RawPost));
-    }
-  }
-
-  return [];
+function parseEventsResponse(data: unknown): OrganizationEvent[] {
+  return parseArrayResponse<RawEvent, OrganizationEvent>(data, normalizeEvent);
 }
 
 export const api = {
@@ -138,9 +220,22 @@ export const api = {
   },
 
   // organizations
-  getOrganizations: () => request<Organization[]>("/organizations"),
-  getOrganizationById: (id: number) =>
-    request<Organization>(`/organizations/${id}`),
+  getOrganizations: async (): Promise<Organization[]> => {
+    const data = await request<unknown>("/organizations");
+    return parseOrganizationsResponse(data);
+  },
+  getOrganizationById: async (id: number): Promise<Organization> => {
+    const data = await request<unknown>(`/organizations/${id}`);
+    const parsed = parseOrganizationsResponse(data);
+    if (parsed[0]) return parsed[0];
+
+    const payload = unwrapResult(data);
+    if (payload && typeof payload === "object") {
+      return normalizeOrganization(payload as RawOrganization);
+    }
+
+    return { id, name: "", description: "" };
+  },
   createOrganization: (org: { name: string; description: string }) =>
     request<string>(`/organizations`, {
       method: "POST",
@@ -160,8 +255,10 @@ export const api = {
     ),
 
   // events
-  getOrganizationEvents: (organizationId: number) =>
-    request<OrganizationEvent[]>(`/OrganizationEvents/${organizationId}`),
+  getOrganizationEvents: async (organizationId: number): Promise<OrganizationEvent[]> => {
+    const data = await request<unknown>(`/OrganizationEvents/${organizationId}`);
+    return parseEventsResponse(data);
+  },
   createOrganizationEvent: (event: OrganizationEvent) =>
     request<string>(`/OrganizationEvents`, {
       method: "POST",

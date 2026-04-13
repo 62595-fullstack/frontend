@@ -13,7 +13,7 @@ function Card({ children }: { children: React.ReactNode }) {
 }
 
 function formatPostTime(iso?: string) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
 
@@ -25,6 +25,49 @@ function formatPostTime(iso?: string) {
     minute: "2-digit",
   });
 }
+
+type CurrentUserProfile = {
+  name: string;
+  bio?: string;
+  website?: string;
+  city?: string;
+  company?: string;
+  school?: string;
+  friendsCount?: number;
+};
+
+function getInitials(name?: string) {
+  const parts = (name ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (parts.length === 0) return "YP";
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
+}
+
+function formatFriendsCount(count?: number) {
+  if (typeof count !== "number" || !Number.isFinite(count)) {
+    return "Friends count unavailable";
+  }
+
+  return `${count.toLocaleString()} friend${count === 1 ? "" : "s"}`;
+}
+
+function detailRows(profile: CurrentUserProfile) {
+  return [
+    profile.company ? `Works at ${profile.company}` : null,
+    profile.school ? `Studied at ${profile.school}` : null,
+    profile.city ? `Lives in ${profile.city}` : null,
+    profile.website ? `Website: ${profile.website}` : null,
+  ].filter((value): value is string => Boolean(value));
+}
+
+const fallbackProfile: CurrentUserProfile = {
+  name: "Your Profile",
+  bio: "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details.",
+};
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<"posts" | "about" | "friends">(
@@ -43,9 +86,11 @@ export default function Page() {
       try {
         const data = await api.getPosts();
         if (!cancelled) setPosts(data ?? []);
-      } catch (e: unknown) {
+      } catch (error) {
         if (!cancelled) {
-          setPostsError((e as Error)?.message ?? "Failed to load posts");
+          setPostsError(
+            error instanceof Error ? error.message : "Failed to load posts"
+          );
         }
       } finally {
         if (!cancelled) setPostsLoading(false);
@@ -67,6 +112,8 @@ export default function Page() {
     });
   }, [posts]);
 
+  const aboutRows = detailRows(fallbackProfile);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gray-100 font-sans">
       <div className="flex w-full gap-4 px-6 py-6">
@@ -74,7 +121,7 @@ export default function Page() {
           <Card>
             <div className="relative h-56 rounded-t-xl bg-gradient-to-r from-blue-600 to-indigo-600">
               <button className="absolute bottom-3 right-3 rounded-lg bg-white/90 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-white">
-                📷 Edit cover photo
+                Edit cover photo
               </button>
             </div>
 
@@ -82,34 +129,33 @@ export default function Page() {
               <div className="-mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex items-end gap-3">
                   <div className="relative">
-                    <div className="h-28 w-28 rounded-full border-4 border-white bg-gray-300" />
+                    <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-gray-300 text-3xl font-bold text-gray-700">
+                      {getInitials(fallbackProfile.name)}
+                    </div>
                     <button className="absolute bottom-1 right-1 rounded-full bg-white p-2 shadow hover:bg-gray-50">
-                      📷
+                      Edit
                     </button>
                   </div>
 
                   <div className="pb-1">
                     <h1 className="text-2xl font-bold text-gray-900">
-                      Your Name
+                      {fallbackProfile.name}
                     </h1>
-                    <p className="text-sm text-gray-500">1,234 friends</p>
-                    <div className="mt-2 flex -space-x-2">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-8 w-8 rounded-full border-2 border-white bg-gray-300"
-                        />
-                      ))}
+                    <p className="text-sm text-gray-500">
+                      {formatFriendsCount(fallbackProfile.friendsCount)}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
+                      <span>Profile API not available on the current backend.</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 sm:pb-2">
                   <button className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-200">
-                    ✏️ Edit profile
+                    Edit profile
                   </button>
                   <button className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-200">
-                    ⋯
+                    More
                   </button>
                 </div>
               </div>
@@ -160,24 +206,15 @@ export default function Page() {
                   <div className="p-4">
                     <p className="text-sm font-semibold text-gray-900">Intro</p>
                     <p className="mt-2 text-sm text-gray-700">
-                      Add a short bio here.
+                      {fallbackProfile.bio}
                     </p>
 
                     <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                      <li>
-                        🏢 Works at{" "}
-                        <span className="font-semibold">Company</span>
-                      </li>
-                      <li>
-                        🎓 Studied at{" "}
-                        <span className="font-semibold">School</span>
-                      </li>
-                      <li>
-                        📍 Lives in <span className="font-semibold">City</span>
-                      </li>
-                      <li>
-                        🔗 <span className="font-semibold">your-site.com</span>
-                      </li>
+                      {aboutRows.length > 0 ? (
+                        aboutRows.map((row) => <li key={row}>{row}</li>)
+                      ) : (
+                        <li>No additional profile details available yet.</li>
+                      )}
                     </ul>
 
                     <button className="mt-4 w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-200">
@@ -191,11 +228,9 @@ export default function Page() {
                 <Card>
                   <div className="p-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-900">
-                        Posts
-                      </p>
+                      <p className="text-sm font-semibold text-gray-900">Posts</p>
                       {postsLoading ? (
-                        <span className="text-xs text-gray-500">Loading…</span>
+                        <span className="text-xs text-gray-500">Loading...</span>
                       ) : (
                         <span className="text-xs text-gray-500">
                           {sortedPosts.length} total
@@ -209,34 +244,34 @@ export default function Page() {
                   </div>
                 </Card>
 
-                {sortedPosts.map((post: Post) => (
-                  <Card key={post.id}>
+                {sortedPosts.map((post: Post, index: number) => (
+                  <Card
+                    key={`${post.id || "post"}-${post.createdDate || "no-date"}-${post.title || "untitled"}-${index}`}
+                  >
                     <div className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gray-300" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 text-xs font-semibold text-gray-700">
+                          {getInitials(fallbackProfile.name)}
+                        </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-900">
-                            Your Name
+                            {fallbackProfile.name}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {formatPostTime(post.createdDate)} · 🌐
+                            {formatPostTime(post.createdDate)} | Public
                           </p>
                         </div>
                       </div>
                       <button className="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-100">
-                        ⋯
+                        More
                       </button>
                     </div>
 
                     <div className="space-y-2 px-4 pb-3 text-sm text-gray-800">
-                      {post.title ? (
-                        <p className="font-semibold">{post.title}</p>
-                      ) : null}
+                      {post.title ? <p className="font-semibold">{post.title}</p> : null}
 
                       <p className="whitespace-pre-wrap">
-                        {post.bodytext?.trim()
-                          ? post.bodytext
-                          : "(No body text)"}
+                        {post.bodytext?.trim() ? post.bodytext : "(No body text)"}
                       </p>
                     </div>
 
@@ -244,13 +279,13 @@ export default function Page() {
 
                     <div className="grid grid-cols-3 gap-2 border-t p-2 text-sm font-semibold text-gray-700">
                       <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
-                        👍 Like
+                        Like
                       </button>
                       <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
-                        💬 Comment
+                        Comment
                       </button>
                       <button className="rounded-lg px-3 py-2 hover:bg-gray-100">
-                        ↗️ Share
+                        Share
                       </button>
                     </div>
                   </Card>
@@ -258,9 +293,7 @@ export default function Page() {
 
                 {!postsLoading && !postsError && sortedPosts.length === 0 && (
                   <Card>
-                    <div className="p-4 text-sm text-gray-700">
-                      No posts yet.
-                    </div>
+                    <div className="p-4 text-sm text-gray-700">No posts yet.</div>
                   </Card>
                 )}
               </div>
@@ -274,20 +307,24 @@ export default function Page() {
 
                 <div className="space-y-2 text-sm text-gray-700">
                   <p>
-                    <span className="font-semibold">Bio:</span> Add a short bio
-                    here.
+                    <span className="font-semibold">Bio:</span>{" "}
+                    {fallbackProfile.bio || "No bio available."}
                   </p>
                   <p>
-                    <span className="font-semibold">Works at:</span> Company
+                    <span className="font-semibold">Works at:</span>{" "}
+                    {fallbackProfile.company || "Not provided"}
                   </p>
                   <p>
-                    <span className="font-semibold">Studied at:</span> School
+                    <span className="font-semibold">Studied at:</span>{" "}
+                    {fallbackProfile.school || "Not provided"}
                   </p>
                   <p>
-                    <span className="font-semibold">Lives in:</span> City
+                    <span className="font-semibold">Lives in:</span>{" "}
+                    {fallbackProfile.city || "Not provided"}
                   </p>
                   <p>
-                    <span className="font-semibold">Website:</span> your-site.com
+                    <span className="font-semibold">Website:</span>{" "}
+                    {fallbackProfile.website || "Not provided"}
                   </p>
                 </div>
               </div>
@@ -299,21 +336,8 @@ export default function Page() {
               <div className="space-y-4 p-4">
                 <p className="text-sm font-semibold text-gray-900">Friends</p>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 rounded-lg bg-gray-50 p-3"
-                    >
-                      <div className="h-12 w-12 rounded-full bg-gray-300" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">
-                          Friend {i + 1}
-                        </p>
-                        <p className="text-xs text-gray-500">Mutual friend</p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
+                  The current backend does not expose a friends list yet.
                 </div>
               </div>
             </Card>

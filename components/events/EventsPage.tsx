@@ -90,6 +90,12 @@ export default function EventsPage() {
               createdDate={event.createdDate ? new Date(event.createdDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}
             />
           ))}
+
+          {!loadError && events.length === 0 && (
+            <div className="w-full md:w-3/4 lg:max-w-3xl rounded-lg border border-dashed border-gray-300 bg-white/70 p-8 text-center text-sm text-gray-600">
+              No events were returned from the API.
+            </div>
+          )}
         </div>
       </div>
 
