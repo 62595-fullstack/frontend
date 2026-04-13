@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, Post } from "@/lib/api";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -113,9 +114,25 @@ export default function Page() {
   }, [posts]);
 
   const aboutRows = detailRows(fallbackProfile);
+  const pagebarTitle =
+    activeTab === "posts" ? "Profile overview" : activeTab === "about" ? "About profile" : "Friend network";
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gray-100 font-sans">
+      <PagebarContent title="Profile">
+        <PagebarSection eyebrow="Identity" title={pagebarTitle}>
+          <div className="grid grid-cols-2 gap-3">
+            <PagebarStat label="Posts" value={sortedPosts.length} tone="accent" />
+            <PagebarStat label="Friends" value={fallbackProfile.friendsCount ?? "N/A"} />
+          </div>
+          <PagebarList>
+            <PagebarListItem active={activeTab === "posts"} title="Posts" meta="Latest activity and publishing history" />
+            <PagebarListItem active={activeTab === "about"} title="About" meta="Bio, location, work, and school details" />
+            <PagebarListItem active={activeTab === "friends"} title="Friends" meta="Relationship graph and social context" />
+          </PagebarList>
+        </PagebarSection>
+      </PagebarContent>
+
       <div className="flex w-full gap-4 px-6 py-6">
         <div className="min-w-0 flex-1 space-y-4">
           <Card>
@@ -343,12 +360,6 @@ export default function Page() {
             </Card>
           )}
         </div>
-
-        <PagebarContent>
-          <ul className="space-y-2">
-            <li className="text-sm font-semibold text-gray-800">Profile</li>
-          </ul>
-        </PagebarContent>
       </div>
     </div>
   );

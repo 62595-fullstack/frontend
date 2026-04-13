@@ -95,7 +95,8 @@ body {
     @apply
       bg-bg
       p-8
-      h-screen
+      h-full
+      min-h-0
       text-text
       font-sans;
 }

@@ -5,6 +5,7 @@ import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { PagebarAction, PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, OrganizationEvent, Organization, Attachment } from "@/lib/api";
 
 export default function EventsPage() {
@@ -56,11 +57,41 @@ export default function EventsPage() {
     }
   }
 
+  const scheduledCount = events.filter((event) => Boolean(event.startDate)).length;
+  const featuredEvent = events[0];
+
   return (
     <div className="page p-8">
       {/* Pagebar – empty for now */}
       <PagebarContent title="Events">
-        <h2>Events pagebar</h2>
+        <PagebarSection eyebrow="Overview" title="Event pulse">
+          <div className="grid grid-cols-2 gap-3">
+            <PagebarStat label="Live feed" value={events.length} tone="accent" />
+            <PagebarStat label="Scheduled" value={scheduledCount} tone="success" />
+          </div>
+          <PagebarStat label="Organizations" value={orgs.length} />
+        </PagebarSection>
+
+        <PagebarSection eyebrow="Actions" title="Manage events">
+          <PagebarAction onClick={() => setShowModal(true)}>Create a new event</PagebarAction>
+          <PagebarAction>Review recent activity</PagebarAction>
+        </PagebarSection>
+
+        <PagebarSection eyebrow="Featured" title="Latest posted event">
+          {featuredEvent ? (
+            <PagebarList>
+              <PagebarListItem
+                active
+                title={featuredEvent.title}
+                meta={`${orgs.find((org) => org.id === featuredEvent.organizationId)?.name ?? "Unknown organization"}${featuredEvent.startDate ? ` • ${new Date(featuredEvent.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}`}
+              />
+            </PagebarList>
+          ) : (
+            <p className="text-sm text-text-muted">
+              Event details will appear here once the API returns data.
+            </p>
+          )}
+        </PagebarSection>
       </PagebarContent>
 
       {/* Header row */}

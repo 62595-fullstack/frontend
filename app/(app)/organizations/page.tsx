@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import CreateOrganizationModal from "@/components/organizations/CreateOrganizationModal";
 import CreateButton from "@/components/ui/CreateButton";
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { PagebarAction, PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, Organization } from "@/lib/api";
 
 export default function Page() {
@@ -33,10 +34,42 @@ export default function Page() {
     }
   }
 
+  const describedCount = organizations.filter((org) => org.description?.trim()).length;
+  const newestOrganizations = organizations.slice(0, 3);
+
   return (
     <div className="page">
       <PagebarContent title="Organizations">
-        <h2>Organizations pagebar</h2>
+        <PagebarSection eyebrow="Overview" title="Network health">
+          <div className="grid grid-cols-2 gap-3">
+            <PagebarStat label="Organizations" value={organizations.length} tone="accent" />
+            <PagebarStat label="With bio" value={describedCount} />
+          </div>
+        </PagebarSection>
+
+        <PagebarSection eyebrow="Actions" title="Organization tools">
+          <PagebarAction onClick={() => setShowModal(true)}>Create organization</PagebarAction>
+          <PagebarAction>Invite collaborators</PagebarAction>
+        </PagebarSection>
+
+        <PagebarSection eyebrow="Directory" title="Recently loaded">
+          {newestOrganizations.length > 0 ? (
+            <PagebarList>
+              {newestOrganizations.map((org, index) => (
+                <PagebarListItem
+                  key={org.id}
+                  active={index === 0}
+                  title={org.name}
+                  meta={org.description?.trim() || "No description yet"}
+                />
+              ))}
+            </PagebarList>
+          ) : (
+            <p className="text-sm text-text-muted">
+              Organizations will show here after the first successful fetch.
+            </p>
+          )}
+        </PagebarSection>
       </PagebarContent>
 
       {/* Header row */}
