@@ -58,11 +58,6 @@ export default function EventsPage() {
 
   return (
     <div className="page p-8">
-      {/* Pagebar – empty for now */}
-      <PagebarContent title="Events">
-        <h2>Events pagebar</h2>
-      </PagebarContent>
-
       {/* Header row */}
       <div className="flex items-center w-full max-w-5xl mb-6">
         <h1 className="text-5xl font-bold text-text flex-1 text-center">Events</h1>
