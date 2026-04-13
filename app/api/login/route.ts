@@ -1,28 +1,33 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { API_BASE } from '@/lib/api'
 
 export async function POST(req: NextRequest) {
+  console.log('[login] received POST request')
+
   const { email, password } = await req.json()
+  console.log('[login] parsed body — email:', email, '| password length:', password?.length ?? 0)
 
-  // DEV BYPASS - TODO: REMOVE BEFORE PROD
-  if (process.env.NODE_ENV === 'development') {
-    const cookieStore = await cookies()
-    cookieStore.set('session', '1', { httpOnly: true, sameSite: 'lax', path: '/' })
-    return NextResponse.json({ ok: true })
-  }
-  // END DEV BYPASS
+  const backendUrl = `${API_BASE}/login/${encodeURIComponent(email)}?password=${encodeURIComponent(password)}`
+  console.log('[login] calling backend:', backendUrl.replace(/password=[^&]+/, 'password=***'))
 
-  const body = JSON.stringify({ Email: email, PasswordHash: password })
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/login/${encodeURIComponent(body)}`
-  )
-  const text = await res.text()
+  const res = await fetch(backendUrl)
+  console.log('[login] backend response status:', res.status, res.statusText)
 
-  if (text.toLowerCase() === 'true') {
-    const cookieStore = await cookies()
-    cookieStore.set('session', '1', { httpOnly: true, sameSite: 'lax', path: '/' })
-    return NextResponse.json({ ok: true })
+  if (!res.ok) {
+    console.log('[login] backend rejected credentials, returning 401')
+    return NextResponse.json({ ok: false }, { status: 401 })
   }
 
-  return NextResponse.json({ ok: false }, { status: 401 })
+  const token = await res.json() as string
+  console.log('[login] received token, length:', token?.length ?? 0)
+
+  const cookieStore = await cookies()
+  const hadExistingToken = cookieStore.has('token')
+  console.log('[login] existing token cookie present:', hadExistingToken)
+
+  cookieStore.set('token', token, { httpOnly: true, sameSite: 'lax', path: '/' })
+  console.log('[login] token cookie set, returning ok')
+
+  return NextResponse.json({ ok: true })
 }

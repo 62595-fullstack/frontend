@@ -16,20 +16,26 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     setLoading(true)
+    console.log('[Login] form submitted — email:', email, '| password length:', password.length)
 
     try {
+      console.log('[Login] sending POST /api/login')
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
+      console.log('[Login] response status:', res.status, res.statusText)
 
       if (res.ok) {
+        console.log('[Login] login successful, redirecting to /')
         router.push('/')
       } else {
+        console.log('[Login] login failed, showing error')
         setError('Invalid email or password.')
       }
-    } catch {
+    } catch (err) {
+      console.error('[Login] fetch error:', err)
       setError('Could not reach the server. Please try again.')
     } finally {
       setLoading(false)
@@ -37,7 +43,7 @@ export default function Login() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="page relative justify-center">
       <button
         onClick={toggleTheme}
         className="absolute bottom-4 left-4 btn-brand"
@@ -46,15 +52,15 @@ export default function Login() {
       </button>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">BookFace</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-text">BookFace</h1>
         </div>
 
-        <div className="rounded-2xl bg-white px-8 pt-8 pb-10 shadow-sm ring-1 ring-gray-200">
-          <p className="mb-6 text-md text-gray-500 text-center">Sign in to your account</p>
+        <div className="popup-brand">
+          <p className="mb-6 text-md text-text text-center">Sign in to your account</p>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-text mb-1.5">
                 Email
               </label>
               <input
@@ -64,13 +70,13 @@ export default function Login() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+                className="input-field"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="password" className="block text-sm font-medium text-text">
                   Password
                 </label>
                 <a href="#" className="text-xs text-gray-500 hover:text-gray-900 transition">
@@ -84,18 +90,18 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+                className="input-field"
               />
             </div>
 
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-danger text-sm">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 active:bg-gray-800 disabled:opacity-50"
+              className="btn-brand mt-2 w-full font-semibold disabled:opacity-50"
             >
               {loading ? 'Signing in…' : 'Sign in'}
             </button>

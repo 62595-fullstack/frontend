@@ -1,3 +1,5 @@
+export const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, '');
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api/proxy${path}`, {
     ...init,
@@ -7,8 +9,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
 
-  const contentType = res.headers.get("content-type") ?? "";
-  const isJson = contentType.includes("application/json");
   const body = await res.text();
 
   if (!res.ok) {
@@ -30,8 +30,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!body) return undefined as T;
-  if (!isJson) return body as T;
-  return JSON.parse(body) as T;
+  try { return JSON.parse(body) as T; } catch { return body as T; }
 }
 
 export type Organization = { id: number; name: string; description: string };
@@ -54,9 +53,14 @@ export type Attachment = {
 export type OrganizationEvent = {
   id: number;
   organizationId: number;
+  userOrganizationBindingId: number;
   title: string;
   description: string;
   attachment: Attachment | null;
+  createdDate?: string;
+  startDate?: string;
+  ageLimit?: number;
+  creatorName?: string;
 };
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;
@@ -150,6 +154,10 @@ export const api = {
     request<UserOrganizationBinding[]>(
       `/UserOrganizationBinding/${organizationId}`
     ),
+  getUserOrganizationBindingForCurrentUser: (organizationId: number) =>
+    request<UserOrganizationBinding>(
+      `/UserOrganizationBinding/${organizationId}/me`
+    ),
 
   // events
   getOrganizationEvents: (organizationId: number) =>
@@ -159,8 +167,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify(event),
     }),
+  deleteOrganizationEvent: (id: number) =>
+    request<void>(`/OrganizationEvents/${id}`, { method: "DELETE" }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
 };
+
+export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
+  return request<OrganizationEvent | null>(`/OrganizationEvents/event/${eventId}`);
+}
