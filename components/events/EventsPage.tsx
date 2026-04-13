@@ -61,7 +61,7 @@ export default function EventsPage() {
       {/* Header row */}
       <div className="flex items-center w-full max-w-5xl mb-6">
         <div className="w-12 flex-shrink-0" />
-        <h1 className="text-5xl font-bold text-text flex-1 text-center">Events</h1>
+        <h1 className="text-3xl lg:text-5xl font-bold text-text flex-1 text-center">Events</h1>
         <CreateButton onClick={() => setShowModal(true)} label="event"/>
       </div>
 
