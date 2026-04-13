@@ -94,9 +94,7 @@ body {
     align-items: center;
     @apply
       bg-bg
-      p-8
-      h-full
-      min-h-0
+      h-screen
       text-text
       font-sans;
 }
@@ -126,6 +124,9 @@ body {
       py-1
       rounded-lg
       text-sm
+      lg:text-lg
+      xl:text-xl
+      2xl:text-2xl
       text-text
       transition-all
       cursor-pointer
