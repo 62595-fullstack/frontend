@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/useTheme";
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
@@ -24,7 +24,16 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-72 h-full bg-bg text-text p-4 flex flex-col flex-shrink-0">
+    <aside className="w-full md:w-72 h-full bg-bg text-text p-4 flex flex-col flex-shrink-0">
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="self-end mb-4 p-2 text-text-muted hover:text-text"
+          aria-label="Close menu"
+        >
+          ✕
+        </button>
+      )}
       <div className="flex-1">
         <nav>
           <ul className="space-y-2">
