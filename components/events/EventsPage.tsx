@@ -5,6 +5,7 @@ import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
 import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
+import { PagebarAction, PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, OrganizationEvent, Organization, Attachment } from "@/lib/api";
 
 export default function EventsPage() {
@@ -56,23 +57,54 @@ export default function EventsPage() {
     }
   }
 
+  const scheduledCount = events.filter((event) => Boolean(event.startDate)).length;
+  const featuredEvent = events[0];
+
   return (
     <div className="page p-8">
       {/* Pagebar – empty for now */}
       <PagebarContent title="Events">
-        <h2>Events pagebar</h2>
+        <PagebarSection eyebrow="Overview" title="Event pulse">
+          <div className="grid grid-cols-2 gap-3">
+            <PagebarStat label="Live feed" value={events.length} tone="accent" />
+            <PagebarStat label="Scheduled" value={scheduledCount} tone="success" />
+          </div>
+          <PagebarStat label="Organizations" value={orgs.length} />
+        </PagebarSection>
+
+        <PagebarSection eyebrow="Actions" title="Manage events">
+          <PagebarAction onClick={() => setShowModal(true)}>Create a new event</PagebarAction>
+          <PagebarAction>Review recent activity</PagebarAction>
+        </PagebarSection>
+
+        <PagebarSection eyebrow="Featured" title="Latest posted event">
+          {featuredEvent ? (
+            <PagebarList>
+              <PagebarListItem
+                active
+                title={featuredEvent.title}
+                meta={`${orgs.find((org) => org.id === featuredEvent.organizationId)?.name ?? "Unknown organization"}${featuredEvent.startDate ? ` • ${new Date(featuredEvent.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}`}
+              />
+            </PagebarList>
+          ) : (
+            <p className="text-sm text-text-muted">
+              Event details will appear here once the API returns data.
+            </p>
+          )}
+        </PagebarSection>
       </PagebarContent>
 
       {/* Header row */}
-      <div className="flex items-center w-full max-w-5xl mb-6">
-        <h1 className="text-5xl font-bold text-text flex-1 text-center">Events</h1>
+      <div className="flex items-center w-full max-w-5xl pt-8 px-8 mb-6">
+        <div className="w-12 flex-shrink-0" />
+        <h1 className="text-3xl lg:text-5xl font-bold text-text flex-1 text-center">Events</h1>
         <CreateButton onClick={() => setShowModal(true)} label="event"/>
       </div>
 
       {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
       {/* Scrollable card list */}
-      <div className="w-full max-w-5xl flex-1 min-h-0 rounded-lg overflow-hidden">
+      <div className="w-full flex-1 min-h-0 rounded-lg overflow-hidden">
         <div
           className="overflow-y-auto h-full gap-4 p-4 flex flex-col items-center"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
@@ -90,6 +122,12 @@ export default function EventsPage() {
               createdDate={event.createdDate ? new Date(event.createdDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}
             />
           ))}
+
+          {!loadError && events.length === 0 && (
+            <div className="w-full md:w-3/4 lg:max-w-3xl rounded-lg border border-dashed border-gray-300 bg-white/70 p-8 text-center text-sm text-gray-600">
+              No events were returned from the API.
+            </div>
+          )}
         </div>
       </div>
 

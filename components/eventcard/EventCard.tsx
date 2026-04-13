@@ -26,7 +26,7 @@ export default function EventCard({
     mock,
 }: EventCardProps) {
     return (
-        <div className="card w-full md:w-3/4 lg:max-w-3xl flex flex-col flex-shrink-0">
+        <div className="card w-full lg:w-3/4 lg:max-w-3xl flex flex-col flex-shrink-0">
             {/* Top bar - Poster info */}
             <div className="flex items-center p-4">
                 {posterAvatar && (

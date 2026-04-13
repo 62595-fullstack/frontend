@@ -363,7 +363,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col h-screen font-sans">
+    <div className="flex h-full min-h-0 flex-col font-sans">
       <PagebarContent title="Conversations">
         <ul className="space-y-1">
           {mockConversations.map((c) => (
