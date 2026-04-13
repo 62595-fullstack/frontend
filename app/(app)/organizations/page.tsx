@@ -88,7 +88,9 @@ export default function Page() {
           className="overflow-y-auto h-full p-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div
+            className="grid gap-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
+          >
             {organizations.map((org) => (
               <OrganizationCard key={org.id} organization={org} />
             ))}
