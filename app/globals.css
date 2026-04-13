@@ -124,6 +124,8 @@ body {
       py-1
       rounded-lg
       text-sm
+      lg:text-lg
+      2xl:text-2xl
       text-text
       transition-all
       cursor-pointer
