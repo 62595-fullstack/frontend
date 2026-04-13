@@ -24,7 +24,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   ];
 
   return (
-    <aside className="w-full md:w-72 h-full bg-bg text-text py-4 pl-4 flex flex-col flex-shrink-0">
+    <aside className="w-full md:w-50 lg:w-60 h-full bg-bg text-text py-4 pl-4 flex flex-col flex-shrink-0">
       {onClose && (
         <button
           onClick={onClose}
@@ -36,7 +36,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       )}
       <div className="flex-1">
         <nav>
-          <ul className="space-y-2">
+          <ul className="space-y-2 xl:space-y-3 2xl:space-y-4">
             {links.map(({ href, label }) => {
               const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
