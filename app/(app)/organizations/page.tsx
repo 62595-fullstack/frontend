@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CreateOrganizationModal from "@/components/organizations/CreateOrganizationModal";
+import OrganizationCard from "@/components/organizations/OrganizationCard";
 import CreateButton from "@/components/ui/CreateButton";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { api, Organization } from "@/lib/api";
@@ -47,20 +48,17 @@ export default function Page() {
 
       {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
-      {/* Scrollable list */}
-      <div className="w-full max-w-5xl flex-1 min-h-0 rounded-lg overflow-hidden">
+      {/* Card grid */}
+      <div className="w-full max-w-5xl flex-1 min-h-0 overflow-hidden">
         <div
-          className="overflow-y-auto h-full space-y-4 p-4"
+          className="overflow-y-auto h-full p-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {organizations.map((org) => (
-            <div key={org.id} className="bg-gray-800 rounded-lg p-5 shadow-lg">
-              <h2 className="text-xl font-bold text-white">{org.name}</h2>
-              {org.description && (
-                <p className="text-gray-300 text-sm mt-2">{org.description}</p>
-              )}
-            </div>
-          ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {organizations.map((org) => (
+              <OrganizationCard key={org.id} organization={org} />
+            ))}
+          </div>
         </div>
       </div>
 
