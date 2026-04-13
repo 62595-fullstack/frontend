@@ -76,10 +76,15 @@ export default function EventLayout({
     <EventContext.Provider value={event}>
       <PagebarContent title="Event details">
         <PagebarSection eyebrow="Live event" title={event.title}>
-          <div className="grid grid-cols-2 gap-3">
-            <PagebarStat label="Organization" value={orgName || `#${event.organizationId}`} tone="accent" />
-            <PagebarStat label="Age limit" value={event.ageLimit && event.ageLimit > 0 ? `${event.ageLimit}+` : "Open"} />
-          </div>
+          <PagebarStat
+            label="Organization"
+            value={orgName || `#${event.organizationId}`}
+            tone="accent"
+          />
+          <PagebarStat
+            label="Age limit"
+            value={event.ageLimit && event.ageLimit > 0 ? `${event.ageLimit}+` : "Open"}
+          />
           {event.startDate ? (
             <PagebarStat
               label="Starts"
