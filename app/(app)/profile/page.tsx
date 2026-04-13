@@ -99,7 +99,6 @@ export default function Page() {
     }
 
     load();
-
     return () => {
       cancelled = true;
     };

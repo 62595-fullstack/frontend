@@ -97,10 +97,6 @@ type RawPost = {
   OrganizationEventId?: number;
 };
 
-type RawPostsEnvelope = {
-  Result?: RawPost[] | string;
-};
-
 type RawEvent = {
   Id?: number;
   id?: number;
@@ -122,14 +118,6 @@ type RawEvent = {
   ageLimit?: number;
   CreatorName?: string;
   creatorName?: string;
-};
-
-type RawEventsEnvelope = {
-  Result?: RawEvent[] | string;
-};
-
-type RawOrganizationsEnvelope = {
-  Result?: RawOrganization[] | string;
 };
 
 function parseJsonish(data: unknown): unknown {
