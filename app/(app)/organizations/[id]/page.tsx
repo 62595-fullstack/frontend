@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { api, Organization, OrganizationEvent } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
 import PagebarContent from "@/components/pagebar/PagebarContent";
@@ -184,6 +185,13 @@ export default function OrganizationProfilePage() {
                       {event.description}
                     </p>
                   )}
+
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="btn-brand mt-3 text-sm"
+                  >
+                    View Event
+                  </Link>
                 </div>
               ))
             )}
