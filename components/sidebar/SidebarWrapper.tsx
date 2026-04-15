@@ -12,7 +12,7 @@ export default function SidebarWrapper({ isOpen, onOpen, onClose }: Props) {
   return (
     <>
       <button
-        className="md:hidden fixed top-4 left-4 z-[60] p-2 rounded text-text bg-bg"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded text-text bg-bg"
         onClick={isOpen ? onClose : onOpen}
         aria-label="Open menu"
       >
@@ -21,12 +21,12 @@ export default function SidebarWrapper({ isOpen, onOpen, onClose }: Props) {
         <div className="w-6 h-0.5 bg-current" />
       </button>
 
-      <div className={`hidden md:flex h-full`}>
+      <div className={`hidden lg:flex h-full`}>
         <Sidebar />
       </div>
 
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex">
           <Sidebar onClose={onClose} />
         </div>
       )}
