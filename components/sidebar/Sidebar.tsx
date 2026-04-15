@@ -35,7 +35,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                   <Link
                     href={href}
                     onClick={onClose}
-                    className={`btn-sidebar ${isActive && "bg-brand text-bg-dark"} ${label === 'Home' ? "text-2xl font-bold mb-12 mt-12 lg:mt-4" : ""}`}
+                    className={`btn-sidebar ${isActive && "bg-brand text-bg-dark"} ${label === 'Home' ? "text-2xl font-bold mb-8 mt-22 lg:mt-4 lg:mb-12" : ""}`}
                   >
                     {label}
                   </Link>
