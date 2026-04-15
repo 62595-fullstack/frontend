@@ -79,7 +79,7 @@ export default function OrganizationProfilePage() {
       </PagebarContent>
 
       {/* Cover photo card */}
-      <div className="w-full max-w-5xl space-y-4 px-4">
+      <div className="w-full max-w-5xl p-4 space-y-4">
         <div className="rounded-xl bg-bg-light shadow-sm overflow-hidden">
           {/* Cover */}
           <div className="relative">
