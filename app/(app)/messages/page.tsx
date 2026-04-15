@@ -61,109 +61,115 @@ export default function Page() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col font-sans">
-      <PagebarContent title="Conversations">
-        <ul className="space-y-1">
-          {mockConversations.map((c) => (
-            <li key={c.id}>
-              <button
-                onClick={() => { setActiveId(c.id); setInput(""); }}
-                className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-all cursor-pointer ${
-                  c.id === activeId ? "bg-brand text-bg-dark" : "hover:bg-highlight text-text"
-                }`}
-              >
-                <div className="relative flex-shrink-0">
-                  <Image src={c.avatar} alt={c.name} width={28} height={28} className="rounded-full object-cover" />
-                  {c.online && (
-                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border border-white rounded-full" />
-                  )}
-                </div>
-                <span className="truncate">{c.name}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </PagebarContent>
-
-      {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 bg-bg-light border-b border-brand shadow-sm">
-        <div className="relative">
-          <Image
-            src={activeContact.avatar}
-            alt={activeContact.name}
-            width={40}
-            height={40}
-            className="rounded-full object-cover"
-          />
-          {activeContact.online && (
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" />
-          )}
-        </div>
-        <div>
-          <p className="font-semibold text-text">{activeContact.name}</p>
-          <p
-            className={`text-xs ${activeContact.online ? "text-green-500" : "text-text-muted"}`}
-          >
-            {activeContact.online ? "Active now" : "Offline"}
-          </p>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div
-        className="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-      >
-        {messages.map((msg, index) => {
-          const nextMsg = messages[index + 1];
-          const sameAsNext = nextMsg?.sender === msg.sender;
-
-          return (
-            <div
-              key={msg.id}
-              className={`flex items-end gap-2 ${msg.sender === "me" ? "flex-row-reverse" : "flex-row"}`}
-            >
-              {msg.sender === "them" && (
-                <div className="w-7 flex-shrink-0">
-                  {!sameAsNext && (
-                    <Image
-                      src={activeContact.avatar}
-                      alt={activeContact.name}
-                      width={28}
-                      height={28}
-                      className="rounded-full object-cover mb-1"
-                    />
-                  )}
-                </div>
-              )}
-              <div className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}>
-                <div
-                  className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
-                    msg.sender === "me"
-                      ? "bg-brand text-bg-dark rounded-br-sm"
-                      : "bg-bg-light text-text rounded-bl-sm shadow-sm"
+    <div className="page">
+      <div className="flex-col h-full w-full font-sans">
+        <PagebarContent title="Conversations">
+          <ul className="space-y-1">
+            {mockConversations.map((c) => (
+              <li key={c.id}>
+                <button
+                  onClick={() => {
+                    setActiveId(c.id);
+                    setInput("");
+                  }}
+                  className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-all cursor-pointer ${
+                    c.id === activeId ? "bg-brand text-bg-dark" : "hover:bg-highlight text-text"
                   }`}
                 >
-                  {msg.text}
-                </div>
-                {!sameAsNext && (
-                  <span className="text-xs text-text-muted mt-1">{msg.timestamp}
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
+                  <div className="relative flex-shrink-0">
+                    <Image src={c.avatar} alt={c.name} width={28} height={28} className="rounded-full object-cover"/>
+                    {c.online && (
+                      <span
+                        className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border border-white rounded-full"/>
+                    )}
+                  </div>
+                  <span className="truncate">{c.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </PagebarContent>
 
-      {/* Input */}
-      <div className="px-6 py-4 bg-bg-light border-t border-brand flex items-end gap-3">
-        <div className="relative flex-1">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-6 py-4 bg-bg-light border-b border-brand shadow-sm">
+          <div className="relative">
+            <Image
+              src={activeContact.avatar}
+              alt={activeContact.name}
+              width={40}
+              height={40}
+              className="rounded-full object-cover"
+            />
+            {activeContact.online && (
+              <span
+                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"/>
+            )}
+          </div>
+          <div>
+            <p className="font-semibold text-text">{activeContact.name}</p>
+            <p
+              className={`text-xs ${activeContact.online ? "text-green-500" : "text-text-muted"}`}
+            >
+              {activeContact.online ? "Active now" : "Offline"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col h-full border">
+          {/* Messages */}
           <div
-            className="flex items-end flex-1 rounded-2xl border border-brand bg-bg-input-field focus-within:ring-2 focus-within:ring-bg-brand pr-2"
-            style={{ scrollbarWidth: "none" } as React.CSSProperties}
+            className="flex flex-col flex-1 w-full overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark justify-end"
           >
+            {messages.map((msg, index) => {
+              const nextMsg = messages[index + 1];
+              const sameAsNext = nextMsg?.sender === msg.sender;
+
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex items-end gap-2 ${msg.sender === "me" ? "flex-row-reverse" : "flex-row"}`}
+                >
+                  {msg.sender === "them" && (
+                    <div className="w-7 flex-shrink-0">
+                      {!sameAsNext && (
+                        <Image
+                          src={activeContact.avatar}
+                          alt={activeContact.name}
+                          width={28}
+                          height={28}
+                          className="rounded-full object-cover mb-1"
+                        />
+                      )}
+                    </div>
+                  )}
+                  <div className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}>
+                    <div
+                      className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                        msg.sender === "me"
+                          ? "bg-brand text-bg-dark rounded-br-sm"
+                          : "bg-bg-light text-text rounded-bl-sm shadow-sm"
+                      }`}
+                    >
+                      {msg.text}
+                    </div>
+                    {!sameAsNext && (
+                      <span className="text-xs text-text-muted mt-1">{msg.timestamp}
+                  </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={bottomRef}/>
+          </div>
+
+          {/* Input */}
+          <div className="flex w-full px-6 py-4 bg-bg-light border-t border-brand items-end gap-3">
+            <div className="relative flex-1">
+              <div
+                className="flex items-end flex-1 rounded-2xl border border-brand bg-bg-input-field focus-within:ring-2 focus-within:ring-bg-brand pr-2"
+                style={{ scrollbarWidth: "none" } as React.CSSProperties}
+              >
             <textarea
               ref={textareaRef}
               value={input}
@@ -171,31 +177,33 @@ export default function Page() {
               onKeyDown={handleKeyDown}
               placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
               rows={1}
-              className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40 overflow-y-auto"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+              className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40"
+              style={{ scrollbarWidth: "none" } as React.CSSProperties}
             />
-            <div className="relative">
-              <button
-                onClick={() => setShowPicker((prev) => !prev)}
-                className="text-lg pb-2.5 leading-none"
-              >
-                😊
-              </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowPicker((prev) => !prev)}
+                    className="text-lg pb-2.5 leading-none"
+                  >
+                    😊
+                  </button>
 
-              {showPicker && (
-                <div className="absolute bottom-full right-0 mb-2">
-                  <EmojiPicker onEmojiClick={onEmojiClick} />
+                  {showPicker && (
+                    <div className="absolute bottom-full right-0 mb-2">
+                      <EmojiPicker onEmojiClick={onEmojiClick}/>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
+            <button
+              onClick={handleSend}
+              className="btn-brand font-semibold px-5 py-2 rounded-2xl text-sm"
+            >
+              Send
+            </button>
           </div>
         </div>
-        <button
-          onClick={handleSend}
-          className="btn-brand font-semibold px-5 py-2 rounded-2xl text-sm"
-        >
-          Send
-        </button>
       </div>
     </div>
   );
