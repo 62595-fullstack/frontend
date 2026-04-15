@@ -118,8 +118,9 @@ export default function Page() {
         <div className="flex flex-col flex-1 min-h-0">
           {/* Messages */}
           <div
-            className="flex flex-col flex-1 w-full overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark justify-end"
+            className="flex flex-col flex-1 w-full overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark"
           >
+            <div className="flex-1" />
             {messages.map((msg, index) => {
               const nextMsg = messages[index + 1];
               const sameAsNext = nextMsg?.sender === msg.sender;
