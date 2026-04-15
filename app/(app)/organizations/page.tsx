@@ -83,9 +83,9 @@ export default function Page() {
       {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
       {/* Card grid */}
-      <div className="w-full max-w-5xl flex-1 min-h-0 overflow-hidden">
+      <div className="w-full max-w-5xl flex-1 min-h-0 overflow-y-auto">
         <div
-          className="overflow-y-auto p-4 h-full"
+          className="p-4 h-full"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           <div

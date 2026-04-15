@@ -118,7 +118,7 @@ export default function Page() {
     activeTab === "posts" ? "Profile overview" : activeTab === "about" ? "About profile" : "Friend network";
 
   return (
-    <div className="page !items-center overflow-hidden">
+    <div className="page !items-center overflow-y-auto">
       <PagebarContent title="Profile">
         <PagebarSection eyebrow="Identity" title={pagebarTitle}>
           <div className="grid grid-cols-2 gap-3">
@@ -135,7 +135,7 @@ export default function Page() {
 
       <div className="w-full max-w-5xl flex-1 min-h-0">
         <div
-          className="overflow-y-auto h-full p-4 space-y-4"
+          className="h-full p-4 space-y-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           <Card>
