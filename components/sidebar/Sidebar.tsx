@@ -25,16 +25,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
 
   return (
     <aside className="w-72 h-full bg-bg text-text p-4 flex flex-col flex-shrink-0">
-      {onClose && (
-        <button
-          onClick={onClose}
-          className="self-end mb-4 p-2 text-text-muted hover:text-text"
-          aria-label="Close menu"
-        >
-          ✕
-        </button>
-      )}
-      <div className="flex-1">
+<div className="flex-1">
         <nav>
           <ul className="space-y-2 xl:space-y-3 2xl:space-y-4">
             {links.map(({ href, label }) => {
