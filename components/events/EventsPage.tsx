@@ -105,7 +105,6 @@ export default function EventsPage() {
       <div className="w-full flex-1 min-h-0 rounded-lg overflow-y-auto">
         <div
           className="h-full gap-4 p-4 flex flex-col items-center"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {events.map((event) => (
             <EventCard

@@ -186,7 +186,6 @@ export default function Page() {
             <div className="relative flex-1">
               <div
                 className="flex items-end flex-1 rounded-2xl border border-brand bg-bg-input-field focus-within:ring-2 focus-within:ring-bg-brand pr-2"
-                style={{ scrollbarWidth: "none" } as React.CSSProperties}
               >
             <textarea
               ref={textareaRef}
@@ -196,7 +195,6 @@ export default function Page() {
               placeholder="Type a message..."
               rows={1}
               className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40"
-              style={{ scrollbarWidth: "none" } as React.CSSProperties}
             />
                 <div className="relative">
                   <button

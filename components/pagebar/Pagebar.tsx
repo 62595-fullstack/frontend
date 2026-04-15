@@ -23,7 +23,6 @@ export default function Pagebar({ onClose }: { onClose?: () => void }) {
       </div>
       <div
         className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
       >
         {content}
       </div>

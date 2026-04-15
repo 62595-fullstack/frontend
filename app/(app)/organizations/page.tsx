@@ -84,7 +84,6 @@ export default function Page() {
       <div className="w-full max-w-5xl flex-1 min-h-0 overflow-y-auto">
         <div
           className="p-4 h-full"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           <div
             className="grid gap-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
