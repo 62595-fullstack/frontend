@@ -175,7 +175,7 @@ export default function Page() {
               value={input}
               onChange={handleInput}
               onKeyDown={handleKeyDown}
-              placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
+              placeholder="Type a message..."
               rows={1}
               className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40"
               style={{ scrollbarWidth: "none" } as React.CSSProperties}
