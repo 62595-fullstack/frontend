@@ -1,6 +1,7 @@
 "use client";
 
-import Sidebar from "./Sidebar";
+import Pagebar from "./Pagebar";
+import { usePagebar } from "./PagebarContext";
 import React from "react";
 
 interface Props {
@@ -9,13 +10,17 @@ interface Props {
   onClose: () => void;
 }
 
-export default function SidebarWrapper({ isOpen, onOpen, onClose }: Props) {
+export default function PagebarWrapper({ isOpen, onOpen, onClose }: Props) {
+  const { content } = usePagebar();
+
+  if (!content) return null;
+
   return (
     <>
       <button
-        className="lg:hidden fixed top-6 left-6 z-[60] btn-brand border-brand/40 p-2 text-sm"
+        className="md:hidden fixed top-6 right-6 z-[60] btn-brand border-brand/40 p-2 text-sm"
         onClick={isOpen ? onClose : onOpen}
-        aria-label="Open menu"
+        aria-label="Open page menu"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24"
              stroke="currentColor" strokeWidth={2}>
@@ -23,14 +28,14 @@ export default function SidebarWrapper({ isOpen, onOpen, onClose }: Props) {
         </svg>
       </button>
 
-      <div className={`hidden lg:flex h-full`}>
-        <Sidebar/>
+      <div className="hidden md:flex h-full">
+        <Pagebar/>
       </div>
 
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex" onClick={onClose}>
+        <div className="md:hidden fixed inset-0 z-50 flex justify-end" onClick={onClose}>
           <div onClick={(e) => e.stopPropagation()}>
-            <Sidebar onClose={onClose}/>
+            <Pagebar onClose={onClose}/>
           </div>
         </div>
       )}

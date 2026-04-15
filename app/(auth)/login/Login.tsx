@@ -43,7 +43,7 @@ export default function Login() {
   }
 
   return (
-    <div className="page relative justify-center">
+    <div className="page relative justify-center p-4">
       <button
         onClick={toggleTheme}
         className="absolute bottom-4 left-4 btn-brand"
