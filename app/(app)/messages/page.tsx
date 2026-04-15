@@ -115,7 +115,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="flex flex-col h-full border">
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Messages */}
           <div
             className="flex flex-col flex-1 w-full overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark justify-end"
