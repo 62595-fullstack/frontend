@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import { Message, mockConversations } from "@/lib/useMessages";
+import { Message, mockConversations, parseTimeToMinutes } from "@/lib/useMessages";
 
 export default function Page() {
   const [activeId, setActiveId] = useState(mockConversations[0].id);
@@ -122,17 +123,30 @@ export default function Page() {
           >
             <div className="flex-1" />
             {messages.map((msg, index) => {
+              const prevMsg = messages[index - 1];
               const nextMsg = messages[index + 1];
               const sameAsNext = nextMsg?.sender === msg.sender;
+              const showTimeSeparator = prevMsg &&
+                parseTimeToMinutes(msg.timestamp) - parseTimeToMinutes(prevMsg.timestamp) > 60;
+              const showTimeSeparatorNext = msg && nextMsg &&
+                parseTimeToMinutes(nextMsg.timestamp) - parseTimeToMinutes(msg.timestamp) > 60;
+              const showImageAndTimestamp = !sameAsNext || showTimeSeparatorNext;
 
               return (
+                <React.Fragment key={msg.id}>
+                  {showTimeSeparator && (
+                    <div className="flex items-center gap-3 py-2">
+                      <div className="flex-1 h-px bg-text-muted/25" />
+                      <span className="text-xs text-text-muted px-1">{msg.timestamp}</span>
+                      <div className="flex-1 h-px bg-text-muted/25" />
+                    </div>
+                  )}
                 <div
-                  key={msg.id}
                   className={`flex items-end gap-2 ${msg.sender === "me" ? "flex-row-reverse" : "flex-row"}`}
                 >
                   {msg.sender === "them" && (
                     <div className="w-7 flex-shrink-0">
-                      {!sameAsNext && (
+                      {showImageAndTimestamp && (
                         <Image
                           src={activeContact.avatar}
                           alt={activeContact.name}
@@ -153,12 +167,13 @@ export default function Page() {
                     >
                       {msg.text}
                     </div>
-                    {!sameAsNext && (
+                    {showImageAndTimestamp && (
                       <span className="text-xs text-text-muted mt-1">{msg.timestamp}
                   </span>
                     )}
                   </div>
                 </div>
+                </React.Fragment>
               );
             })}
             <div ref={bottomRef}/>

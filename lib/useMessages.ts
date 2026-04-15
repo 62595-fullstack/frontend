@@ -13,6 +13,11 @@ export interface Contact {
   messages: Message[];
 }
 
+export function parseTimeToMinutes(ts: string): number {
+  const [h, m] = ts.split(":").map(Number);
+  return h * 60 + m;
+}
+
 export const mockConversations: Contact[] = [
   {
     id: "1",
