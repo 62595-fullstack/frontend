@@ -24,7 +24,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   ];
 
   return (
-    <aside className="w-full md:w-50 lg:w-60 h-full bg-bg text-text py-4 pl-4 flex flex-col flex-shrink-0">
+    <aside className="w-72 h-full bg-bg text-text py-4 pl-4 flex flex-col flex-shrink-0">
       {onClose && (
         <button
           onClick={onClose}
