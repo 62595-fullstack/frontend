@@ -162,7 +162,9 @@ export default function Page() {
                       className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
                         msg.sender === "me"
                           ? "bg-brand text-bg-dark rounded-br-sm"
-                          : "bg-bg-light text-text rounded-bl-sm shadow-sm"
+                          : showImageAndTimestamp
+                            ? "bg-bg-light text-text rounded-bl-sm shadow-sm"
+                            : "bg-bg-light text-text rounded-2xl shadow-sm"
                       }`}
                     >
                       {msg.text}
