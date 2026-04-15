@@ -17,7 +17,7 @@ export default function PagebarWrapper({ isOpen, onOpen, onClose }: Props) {
   return (
     <>
       <button
-        className="md:hidden fixed top-4 right-4 z-50 p-2 rounded text-text bg-bg"
+        className="md:hidden fixed top-4 right-4 z-[60] p-2 rounded text-text bg-bg"
         onClick={onOpen}
         aria-label="Open page menu"
       >
