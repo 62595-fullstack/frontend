@@ -74,10 +74,8 @@ export default function Page() {
       </PagebarContent>
 
       {/* Header row */}
-      <div className="flex items-center w-full max-w-5xl p-8">
-        <div className="w-12 flex-shrink-0" />
-        <h1 className="text-3xl lg:text-5xl font-bold flex-1 text-center">Organizations</h1>
-        <CreateButton onClick={() => setShowModal(true)} label="organization"/>
+      <div className="flex items-center justify-center w-full max-w-5xl p-8">
+        <h1 className="text-3xl lg:text-5xl font-bold text-center">Organizations</h1>
       </div>
 
       {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
