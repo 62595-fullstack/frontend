@@ -12,7 +12,7 @@ export default function SidebarWrapper({ isOpen, onOpen, onClose }: Props) {
   return (
     <>
       <button
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded text-text bg-bg"
+        className="lg:hidden fixed top-6 left-6 z-[60] p-2 rounded text-text bg-bg"
         onClick={isOpen ? onClose : onOpen}
         aria-label="Open menu"
       >

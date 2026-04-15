@@ -136,7 +136,6 @@ export default function Page() {
       <div className="w-full max-w-5xl flex-1 min-h-0">
         <div
           className="h-full p-4 space-y-4"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           <Card>
             <div className="relative h-40 md:h-56 rounded-t-xl bg-brand/20">
