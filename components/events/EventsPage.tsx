@@ -61,7 +61,7 @@ export default function EventsPage() {
   const featuredEvent = events[0];
 
   return (
-    <div className="page p-8">
+    <div className="page">
       {/* Pagebar – empty for now */}
       <PagebarContent title="Events">
         <PagebarSection eyebrow="Overview" title="Event pulse">
