@@ -95,7 +95,7 @@ export default function EventsPage() {
       </PagebarContent>
 
       {/* Header row */}
-      <div className="flex items-center w-full max-w-5xl pt-8 px-8 mb-6">
+      <div className="flex items-center w-full max-w-5xl p-8">
         <div className="w-12 flex-shrink-0" />
         <h1 className="text-3xl lg:text-5xl font-bold text-text flex-1 text-center">Events</h1>
         <CreateButton onClick={() => setShowModal(true)} label="event"/>
@@ -104,9 +104,9 @@ export default function EventsPage() {
       {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
       {/* Scrollable card list */}
-      <div className="w-full flex-1 min-h-0 rounded-lg overflow-hidden">
+      <div className="w-full flex-1 min-h-0 rounded-lg p-4 overflow-hidden">
         <div
-          className="overflow-y-auto h-full gap-4 p-4 flex flex-col items-center"
+          className="overflow-y-auto h-full gap-4 flex flex-col items-center"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {events.map((event) => (
