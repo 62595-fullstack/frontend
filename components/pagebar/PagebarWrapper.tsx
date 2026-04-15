@@ -31,8 +31,10 @@ export default function PagebarWrapper({ isOpen, onOpen, onClose }: Props) {
       </div>
 
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex justify-end">
-          <Pagebar onClose={onClose} />
+        <div className="md:hidden fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <Pagebar onClose={onClose} />
+          </div>
         </div>
       )}
     </>

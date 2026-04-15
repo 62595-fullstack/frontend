@@ -26,8 +26,10 @@ export default function SidebarWrapper({ isOpen, onOpen, onClose }: Props) {
       </div>
 
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <Sidebar onClose={onClose} />
+        <div className="lg:hidden fixed inset-0 z-50 flex" onClick={onClose}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <Sidebar onClose={onClose} />
+          </div>
         </div>
       )}
     </>
