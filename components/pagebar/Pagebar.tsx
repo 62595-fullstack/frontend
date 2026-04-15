@@ -8,7 +8,7 @@ export default function Pagebar({ onClose }: { onClose?: () => void }) {
   if (!content) return null;
 
   return (
-    <aside className="flex h-full min-h-0 w-72 flex-shrink-0 flex-col border-l border-border/60 bg-[radial-gradient(circle_at_top,_rgba(124,92,255,0.12),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_16%),var(--bg)] text-text">
+    <aside className="flex h-full min-h-0 w-72 flex-shrink-0 flex-col border-l border-border/60 bg-bg text-text">
       <div className="border-b border-border/60 px-5 py-5 flex items-center justify-between">
         <h2 className="text-2xl font-semibold tracking-tight text-text">{title}</h2>
         {onClose && (
