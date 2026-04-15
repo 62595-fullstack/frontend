@@ -65,7 +65,7 @@ export function PagebarAction({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-2xl border border-border/70 bg-bg/70 px-4 py-3 text-left text-sm text-text transition hover:border-brand/50 hover:bg-highlight/40"
+      className="btn-regular flex w-full items-center justify-between text-left text-sm"
     >
       <span>{children}</span>
       <span className="text-text-muted">+</span>
