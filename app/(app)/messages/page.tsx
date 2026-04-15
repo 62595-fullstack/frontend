@@ -62,7 +62,7 @@ export default function Page() {
 
   return (
     <div className="page">
-      <div className="flex-col h-full w-full font-sans">
+      <div className="flex flex-col h-full w-full font-sans">
         <PagebarContent title="Conversations">
           <ul className="space-y-1">
             {mockConversations.map((c) => (
