@@ -20,25 +20,34 @@ export const mockConversations: Contact[] = [
     avatar: "https://picsum.photos/seed/jane/100/100",
     online: true,
     messages: [
-      { id: "1", text: "Hey! Are you going to the Tech Conference next week?", sender: "them", timestamp: "10:01" },
-      { id: "2", text: "Yes! I just signed up actually. Are you presenting?", sender: "me", timestamp: "10:03" },
+      { id: "1", text: "Hey! Are you going to the Tech Conference next week?", sender: "them", timestamp: "15:01" },
+      { id: "2", text: "Yes! I just signed up actually. Are you presenting?", sender: "me", timestamp: "15:03" },
       {
         id: "3",
         text: "I am! Doing a talk on AI in web development. Should be fun.",
         sender: "them",
-        timestamp: "10:04"
+        timestamp: "15:04"
       },
-      { id: "4", text: "That sounds awesome, I'll make sure to catch your talk.", sender: "me", timestamp: "10:05" },
+      { id: "4", text: "That sounds awesome, I'll make sure to catch your talk.", sender: "me", timestamp: "15:05" },
       {
         id: "5",
         text: "Thanks! Let me know if you want to grab coffee before it starts.",
         sender: "them",
-        timestamp: "10:06"
+        timestamp: "15:06"
       },
-      { id: "6", text: "Definitely, let's do that!", sender: "me", timestamp: "10:07" },
-      { id: "7", text: "okay", sender: "them", timestamp: "10:10" },
-      { id: "8", text: "thx", sender: "them", timestamp: "10:11" },
-      { id: "9", text: "bye", sender: "them", timestamp: "10:12" },
+      { id: "6", text: "Definitely, let's do that!", sender: "me", timestamp: "15:07" },
+      { id: "7", text: "okay", sender: "them", timestamp: "15:10" },
+      { id: "8", text: "thx", sender: "them", timestamp: "15:11" },
+      { id: "9", text: "bye", sender: "them", timestamp: "15:12" },
+      { id: "10", text: "Do you know if the conference has a workshop track this year?", sender: "them", timestamp: "15:15" },
+      { id: "11", text: "I think so, I saw something about hands-on AI sessions in the schedule.", sender: "me", timestamp: "15:16" },
+      { id: "12", text: "Oh nice! I might sign up for one of those after my talk.", sender: "them", timestamp: "15:17" },
+      { id: "13", text: "You should, it'd be good to step back and just learn for a bit.", sender: "me", timestamp: "15:18" },
+      { id: "14", text: "Exactly. Presenting is great but I miss just being an attendee sometimes.", sender: "them", timestamp: "15:20" },
+      { id: "15", text: "Ha, I know that feeling. What hotel are you staying at?", sender: "me", timestamp: "15:21" },
+      { id: "16", text: "The Grand Meridian, right across from the venue.", sender: "them", timestamp: "15:22" },
+      { id: "17", text: "Same one! We can walk over together in the mornings.", sender: "me", timestamp: "15:23" },
+      { id: "18", text: "Perfect, that's settled then. See you there!", sender: "them", timestamp: "15:24" },
     ],
   },
   {
@@ -161,9 +170,9 @@ export const mockConversations: Contact[] = [
     avatar: "https://picsum.photos/seed/priya/100/100",
     online: true,
     messages: [
-      { id: "1", text: "The new office space looks amazing!", sender: "them", timestamp: "10:30" },
-      { id: "2", text: "I know, the rooftop terrace is my favourite part.", sender: "me", timestamp: "10:33" },
-      { id: "3", text: "We should have lunch up there sometime.", sender: "them", timestamp: "10:34" },
+      { id: "1", text: "The new office space looks amazing!", sender: "them", timestamp: "15:30" },
+      { id: "2", text: "I know, the rooftop terrace is my favourite part.", sender: "me", timestamp: "15:33" },
+      { id: "3", text: "We should have lunch up there sometime.", sender: "them", timestamp: "15:34" },
     ],
   },
   {
