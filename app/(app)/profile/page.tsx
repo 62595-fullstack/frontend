@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
-import { api, Post } from "@/lib/api";
+import { api, FriendSummary, Post } from "@/lib/api";
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -25,6 +25,18 @@ function formatPostTime(iso?: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatFriendSince(iso?: string) {
+  if (!iso) return "Friends since unknown date";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Friends since unknown date";
+
+  return `Friends since ${d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })}`;
 }
 
 type CurrentUserProfile = {
@@ -78,6 +90,9 @@ export default function Page() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsError, setPostsError] = useState<string | null>(null);
+  const [friends, setFriends] = useState<FriendSummary[]>([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [friendsError, setFriendsError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +120,34 @@ export default function Page() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFriends() {
+      setFriendsLoading(true);
+      setFriendsError(null);
+      try {
+        const data = await api.getMyFriends();
+        if (!cancelled) {
+          setFriends(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setFriendsError(
+            error instanceof Error ? error.message : "Failed to load friends"
+          );
+        }
+      } finally {
+        if (!cancelled) setFriendsLoading(false);
+      }
+    }
+
+    loadFriends();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const sortedPosts = useMemo(() => {
     return [...posts].sort((a: Post, b: Post) => {
       const ad = new Date(a?.createdDate ?? 0).getTime();
@@ -113,7 +156,14 @@ export default function Page() {
     });
   }, [posts]);
 
-  const aboutRows = detailRows(fallbackProfile);
+  const profile = useMemo<CurrentUserProfile>(() => {
+    return {
+      ...fallbackProfile,
+      friendsCount: friends.length,
+    };
+  }, [friends.length]);
+
+  const aboutRows = detailRows(profile);
   const pagebarTitle =
     activeTab === "posts" ? "Profile overview" : activeTab === "about" ? "About profile" : "Friend network";
 
@@ -123,7 +173,7 @@ export default function Page() {
         <PagebarSection eyebrow="Identity" title={pagebarTitle}>
           <div className="grid grid-cols-2 gap-3">
             <PagebarStat label="Posts" value={sortedPosts.length} tone="accent" />
-            <PagebarStat label="Friends" value={fallbackProfile.friendsCount ?? "N/A"} />
+            <PagebarStat label="Friends" value={friendsLoading ? "..." : profile.friendsCount ?? 0} />
           </div>
           <PagebarList>
             <PagebarListItem active={activeTab === "posts"} title="Posts" meta="Latest activity and publishing history" />
@@ -150,7 +200,7 @@ export default function Page() {
                 <div className="flex items-end gap-3">
                   <div className="relative">
                     <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-bg bg-bg-light text-3xl font-bold text-brand">
-                      {getInitials(fallbackProfile.name)}
+                      {getInitials(profile.name)}
                     </div>
                     <button className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:bg-highlight">
                       Edit
@@ -159,13 +209,17 @@ export default function Page() {
 
                   <div className="pb-1">
                     <h1 className="text-2xl font-bold text-text">
-                      {fallbackProfile.name}
+                      {profile.name}
                     </h1>
                     <p className="text-sm text-text-muted">
-                      {formatFriendsCount(fallbackProfile.friendsCount)}
+                      {friendsLoading ? "Loading friends..." : formatFriendsCount(profile.friendsCount)}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs text-text-muted">
-                      <span>Profile API not available on the current backend.</span>
+                      <span>
+                        {friendsError
+                          ? "Friends could not be loaded from the backend."
+                          : "Friends are loaded from the backend dummy data."}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -253,7 +307,7 @@ export default function Page() {
                   <div className="p-4">
                     <p className="text-sm font-semibold text-text">Intro</p>
                     <p className="mt-2 text-sm text-text-muted">
-                      {fallbackProfile.bio}
+                      {profile.bio}
                     </p>
 
                     <ul className="mt-3 space-y-2 text-sm text-text-muted">
@@ -298,11 +352,11 @@ export default function Page() {
                     <div className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bg text-xs font-semibold text-brand">
-                          {getInitials(fallbackProfile.name)}
+                          {getInitials(profile.name)}
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-text">
-                            {fallbackProfile.name}
+                            {profile.name}
                           </p>
                           <p className="text-xs text-text-muted">
                             {formatPostTime(post.createdDate)} | Public
@@ -355,23 +409,23 @@ export default function Page() {
                 <div className="space-y-2 text-sm text-text-muted">
                   <p>
                     <span className="font-semibold text-text">Bio:</span>{" "}
-                    {fallbackProfile.bio || "No bio available."}
+                    {profile.bio || "No bio available."}
                   </p>
                   <p>
                     <span className="font-semibold text-text">Works at:</span>{" "}
-                    {fallbackProfile.company || "Not provided"}
+                    {profile.company || "Not provided"}
                   </p>
                   <p>
                     <span className="font-semibold text-text">Studied at:</span>{" "}
-                    {fallbackProfile.school || "Not provided"}
+                    {profile.school || "Not provided"}
                   </p>
                   <p>
                     <span className="font-semibold text-text">Lives in:</span>{" "}
-                    {fallbackProfile.city || "Not provided"}
+                    {profile.city || "Not provided"}
                   </p>
                   <p>
                     <span className="font-semibold text-text">Website:</span>{" "}
-                    {fallbackProfile.website || "Not provided"}
+                    {profile.website || "Not provided"}
                   </p>
                 </div>
               </div>
@@ -383,9 +437,54 @@ export default function Page() {
               <div className="space-y-4 p-4">
                 <p className="text-sm font-semibold text-text">Friends</p>
 
-                <div className="rounded-lg bg-bg p-4 text-sm text-text-muted">
-                  The current backend does not expose a friends list yet.
-                </div>
+                {friendsError ? (
+                  <div className="rounded-lg bg-bg p-4 text-sm text-danger">
+                    {friendsError}
+                  </div>
+                ) : null}
+
+                {friendsLoading ? (
+                  <div className="rounded-lg bg-bg p-4 text-sm text-text-muted">
+                    Loading friends...
+                  </div>
+                ) : null}
+
+                {!friendsLoading && !friendsError && friends.length === 0 ? (
+                  <div className="rounded-lg bg-bg p-4 text-sm text-text-muted">
+                    No friends found for the current user.
+                  </div>
+                ) : null}
+
+                {!friendsLoading && !friendsError && friends.length > 0 ? (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {friends.map((friend) => (
+                      <div
+                        key={friend.id}
+                        className="rounded-xl border border-border-muted bg-bg p-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
+                            {getInitials(friend.userName || friend.firstName)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-text">
+                              {friend.userName || friend.firstName}
+                            </p>
+                            <p className="truncate text-xs text-text-muted">
+                              {friend.email}
+                            </p>
+                            <p className="mt-2 text-xs text-text-muted">
+                              {formatFriendSince(friend.friendsSince)}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                            {friend.age}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </Card>
           )}

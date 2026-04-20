@@ -78,6 +78,14 @@ export type OrganizationEvent = {
 };
 export type UserOrganizationBinding = { id: number };
 export type GdprDeleteResult = boolean;
+export type FriendSummary = {
+  id: string;
+  email: string;
+  firstName: string;
+  userName: string;
+  age: number;
+  friendsSince: string;
+};
 
 type RawOrganization = {
   Id?: number;
@@ -258,6 +266,9 @@ export const api = {
   // GDPR
   deleteGdprByUserId: (userId: number) =>
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
+
+  // users
+  getMyFriends: () => request<FriendSummary[]>(`/users/me/friends`),
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
