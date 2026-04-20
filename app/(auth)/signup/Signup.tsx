@@ -3,9 +3,11 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function Login() {
+export default function Signup() {
   const router = useRouter()
+  const [firstName, setFirstName] = useState('')
   const [email, setEmail] = useState('')
+  const [age, setAge] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -14,26 +16,21 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    console.log('[Login] form submitted — email:', email, '| password length:', password.length)
 
     try {
-      console.log('[Login] sending POST /api/login')
-      const res = await fetch('/api/login', {
+      const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, firstName, age: parseInt(age, 10) }),
       })
-      console.log('[Login] response status:', res.status, res.statusText)
 
       if (res.ok) {
-        console.log('[Login] login successful, redirecting to /')
-        router.push('/')
+        router.push('/login')
       } else {
-        console.log('[Login] login failed, showing error')
-        setError('Invalid email or password.')
+        const data = await res.json().catch(() => ({}))
+        setError(data.message ?? 'Registration failed. Please try again.')
       }
-    } catch (err) {
-      console.error('[Login] fetch error:', err)
+    } catch {
       setError('Could not reach the server. Please try again.')
     } finally {
       setLoading(false)
@@ -48,9 +45,25 @@ export default function Login() {
         </div>
 
         <div className="popup-brand">
-          <p className="mb-6 text-md text-text text-center">Sign in to your account</p>
+          <p className="mb-6 text-md text-text text-center">Create an account</p>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-text mb-1.5">
+                First name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                autoComplete="given-name"
+                placeholder="Your name"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                className="input-field"
+                required
+              />
+            </div>
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text mb-1.5">
                 Email
@@ -63,26 +76,40 @@ export default function Login() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="input-field"
+                required
               />
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-text">
-                  Password
-                </label>
-                <a href="#" className="text-xs text-gray-500 hover:text-gray-900 transition">
-                  {/*Forgot password?*/}
-                </a>
-              </div>
+              <label htmlFor="age" className="block text-sm font-medium text-text mb-1.5">
+                Age
+              </label>
+              <input
+                id="age"
+                type="number"
+                min="1"
+                max="150"
+                placeholder="25"
+                value={age}
+                onChange={e => setAge(e.target.value)}
+                className="input-field"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-text mb-1.5">
+                Password
+              </label>
               <input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="input-field"
+                required
               />
             </div>
 
@@ -95,18 +122,18 @@ export default function Login() {
               disabled={loading}
               className="btn-brand mt-2 w-full font-semibold disabled:opacity-50"
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'Creating account…' : 'Sign up'}
             </button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-sm text-text-muted">
-          Don&apos;t have an account?{' '}
-          <a href="/signup" className="font-medium text-text hover:underline">
-            Sign up
+          Already have an account?{' '}
+          <a href="/login" className="font-medium text-text hover:underline">
+            Sign in
           </a>
         </p>
       </div>
     </div>
-  );
+  )
 }
