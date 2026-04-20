@@ -36,12 +36,10 @@ export default function EventsPage() {
   async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number; startDate: string; ageLimit: number }) {
     setCreateError(null);
     try {
-      const binding = await api.getUserOrganizationBindingForCurrentUser(data.organizationId);
-      const bindingId = binding?.id ?? 0;
       await api.createOrganizationEvent({
         id: 0,
         organizationId: data.organizationId,
-        userOrganizationBindingId: bindingId,
+        userOrganizationBindingId: 0,
         title: data.title,
         description: data.description,
         attachment: data.attachment,

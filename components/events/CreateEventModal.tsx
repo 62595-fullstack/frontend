@@ -14,10 +14,12 @@ export default function CreateEventModal({ onClose, onSubmit, error }: CreateEve
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   useEffect(() => {
-    api.getOrganizations().then((data) => {
-      const orgs = Array.isArray(data) ? data : JSON.parse(data as unknown as string);
-      setOrganizations(orgs);
-    });
+    Promise.all([api.getOrganizations(), api.getUserOrganizationBindingsForCurrentUser()])
+      .then(([orgsData, bindings]) => {
+        const allOrgs: Organization[] = Array.isArray(orgsData) ? orgsData : JSON.parse(orgsData as unknown as string);
+        const boundOrgIds = new Set(bindings.map((b) => b.organizationId));
+        setOrganizations(allOrgs.filter((org) => boundOrgIds.has(org.id)));
+      });
   }, []);
 
   return (

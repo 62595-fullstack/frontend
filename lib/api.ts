@@ -76,7 +76,7 @@ export type OrganizationEvent = {
   ageLimit?: number;
   creatorName?: string;
 };
-export type UserOrganizationBinding = { id: number };
+export type UserOrganizationBinding = { id: number; organizationId: number };
 export type GdprDeleteResult = boolean;
 
 type RawOrganization = {
@@ -237,6 +237,8 @@ export const api = {
     request<UserOrganizationBinding[]>(
       `/UserOrganizationBinding/${organizationId}`
     ),
+  getUserOrganizationBindingsForCurrentUser: () =>
+    request<UserOrganizationBinding[]>(`/UserOrganizationBinding/me`),
   getUserOrganizationBindingForCurrentUser: (organizationId: number) =>
     request<UserOrganizationBinding>(
       `/UserOrganizationBinding/${organizationId}/me`
