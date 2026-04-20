@@ -4,6 +4,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import RequiredMark from '@/components/ui/RequiredMark'
 
 // Field type definitions
 interface BaseField {
@@ -171,7 +172,7 @@ export default function Modal({
         return (
           <div key={field.name} className="flex flex-col gap-1">
             <label className="text-sm font-medium">
-              {field.label} {field.required && <span className="text-field-required">*</span>}
+              {field.label} {field.required && <RequiredMark />}
             </label>
             <input
               type="text"
@@ -192,7 +193,7 @@ export default function Modal({
         return (
           <div key={field.name} className="flex flex-col gap-1">
             <label className="text-sm font-medium">
-              {field.label} {field.required && <span className="text-field-required">*</span>}
+              {field.label} {field.required && <RequiredMark />}
             </label>
             <textarea
               value={values[field.name]}
@@ -214,7 +215,7 @@ export default function Modal({
         return (
           <div key={field.name} className="flex flex-col gap-1">
             <label className="text-sm font-medium">
-              {field.label} {field.required && <span className="text-field-required">*</span>}
+              {field.label} {field.required && <RequiredMark />}
             </label>
             <div ref={(el) => { dropdownRefs.current[field.name] = el; }} className="relative">
               <button
@@ -256,7 +257,7 @@ export default function Modal({
         return (
           <div key={field.name} className="flex flex-col gap-1">
             <label className="text-sm font-medium">
-              {field.label} {field.required && <span className="text-field-required">*</span>}
+              {field.label} {field.required && <RequiredMark />}
             </label>
             <input
               type="date"
@@ -276,7 +277,7 @@ export default function Modal({
         return (
           <div key={field.name} className="flex flex-col gap-1">
             <label className="text-sm font-medium">
-              {field.label} {field.required && <span className="text-field-required">*</span>}
+              {field.label} {field.required && <RequiredMark />}
             </label>
             <input
               type="number"
@@ -300,7 +301,7 @@ export default function Modal({
         return (
           <div key={field.name} className="flex flex-col gap-2">
             <label className="text-sm font-medium">
-              {field.label} {field.required && <span className="text-field-required">*</span>}
+              {field.label} {field.required && <RequiredMark />}
             </label>
             <button
               type="button"
