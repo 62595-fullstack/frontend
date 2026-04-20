@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import RequiredMark from '@/components/ui/RequiredMark'
 
 export default function Signup() {
   const router = useRouter()
@@ -51,7 +52,7 @@ export default function Signup() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-text mb-1.5">
-                First name
+                First name <RequiredMark />
               </label>
               <input
                 id="firstName"
@@ -67,7 +68,7 @@ export default function Signup() {
 
             <div>
               <label htmlFor="lastName" className="block text-sm font-medium text-text mb-1.5">
-                Last name
+                Last name <RequiredMark />
               </label>
               <input
                 id="lastName"
@@ -83,7 +84,7 @@ export default function Signup() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text mb-1.5">
-                Email
+                Email <RequiredMark />
               </label>
               <input
                 id="email"
@@ -99,7 +100,7 @@ export default function Signup() {
 
             <div>
               <label htmlFor="dateOfBirth" className="block text-sm font-medium text-text mb-1.5">
-                Date of birth
+                Date of birth <RequiredMark />
               </label>
               <input
                 id="dateOfBirth"
@@ -113,7 +114,7 @@ export default function Signup() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text mb-1.5">
-                Password
+                Password <RequiredMark />
               </label>
               <input
                 id="password"
