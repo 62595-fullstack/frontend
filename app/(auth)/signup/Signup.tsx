@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 export default function Signup() {
   const router = useRouter()
   const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [age, setAge] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +22,7 @@ export default function Signup() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, age: parseInt(age, 10) }),
+        body: JSON.stringify({ email, password, firstName, lastName, age: parseInt(age, 10) }),
       })
 
       if (res.ok) {
@@ -56,9 +57,25 @@ export default function Signup() {
                 id="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="Your name"
+                placeholder="Your first name"
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
+                className="input-field"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-text mb-1.5">
+                Last name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                autoComplete="family-name"
+                placeholder="Your last name"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
                 className="input-field"
                 required
               />
