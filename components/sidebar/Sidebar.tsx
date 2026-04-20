@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "@/lib/useTheme";
-
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
 
   async function handleSignOut() {
     await fetch("/api/logout", { method: "POST" });
@@ -52,9 +49,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         </button>
       </div>
 
-      <button onClick={toggleTheme} className="btn-brand w-min">
-        {theme === "dark" ? "☀️" : "🌙"}
-      </button>
     </aside>
   );
 }
