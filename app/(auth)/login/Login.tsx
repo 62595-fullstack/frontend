@@ -1,18 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTheme } from '@/lib/useTheme'
 
 export default function Login() {
   const router = useRouter()
-  const { theme, toggleTheme } = useTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     setLoading(true)
@@ -43,13 +41,7 @@ export default function Login() {
   }
 
   return (
-    <div className="page relative justify-center p-4">
-      <button
-        onClick={toggleTheme}
-        className="absolute bottom-4 left-4 btn-brand"
-      >
-        {theme === "dark" ? "☀️" : "🌙"}
-      </button>
+    <div className="page justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-text">BookFace</h1>
