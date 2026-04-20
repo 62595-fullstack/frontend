@@ -8,7 +8,7 @@ export default function Signup() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [age, setAge] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -22,7 +22,7 @@ export default function Signup() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName, age: parseInt(age, 10) }),
+        body: JSON.stringify({ email, password, firstName, lastName, dateOfBirth }),
       })
 
       if (res.ok) {
@@ -98,17 +98,14 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-text mb-1.5">
-                Age
+              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-text mb-1.5">
+                Date of birth
               </label>
               <input
-                id="age"
-                type="number"
-                min="1"
-                max="150"
-                placeholder="25"
-                value={age}
-                onChange={e => setAge(e.target.value)}
+                id="dateOfBirth"
+                type="date"
+                value={dateOfBirth}
+                onChange={e => setDateOfBirth(e.target.value)}
                 className="input-field"
                 required
               />
