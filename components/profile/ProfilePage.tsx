@@ -326,8 +326,8 @@ export default function ProfilePage(props: ProfilePageProps) {
           </div>
         </div>
 
-        {/* Two-column body — shared layout, org always visible, user shows on posts tab */}
-        {(isOrg || activeTab === "posts") && (
+        {/* Posts tab */}
+        {activeTab === "posts" && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Left: About */}
             <div className="space-y-4 lg:col-span-5">
@@ -413,23 +413,31 @@ export default function ProfilePage(props: ProfilePageProps) {
           </div>
         )}
 
-        {/* User about tab */}
-        {!isOrg && activeTab === "about" && (
+        {/* About tab */}
+        {activeTab === "about" && (
           <Card>
             <h2 className="text-sm font-semibold text-text">About</h2>
             <div className="mt-3 space-y-2 text-sm text-text-muted">
-              {[
-                { label: "Bio", value: userProfile.bio },
-                { label: "Works at", value: userProfile.company },
-                { label: "Studied at", value: userProfile.school },
-                { label: "Lives in", value: userProfile.city },
-                { label: "Website", value: userProfile.website },
-              ].map(({ label, value }) => (
-                <p key={label}>
-                  <span className="font-semibold text-text">{label}:</span>{" "}
-                  {value || "Not provided"}
-                </p>
-              ))}
+              {isOrg ? (
+                <>
+                  {isOrg ? (org!.description?.trim() || "No description yet.") : userProfile.bio}
+                </>
+              ) : (
+                <>
+                  {[
+                    { label: "Bio", value: userProfile.bio },
+                    { label: "Works at", value: userProfile.company },
+                    { label: "Studied at", value: userProfile.school },
+                    { label: "Lives in", value: userProfile.city },
+                    { label: "Website", value: userProfile.website },
+                  ].map(({ label, value }) => (
+                    <p key={label}>
+                      <span className="font-semibold text-text">{label}:</span>{" "}
+                      {value || "Not provided"}
+                    </p>
+                  ))}
+                </>
+              )}
             </div>
           </Card>
         )}
