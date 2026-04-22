@@ -376,11 +376,6 @@ export default function ProfilePage(props: ProfilePageProps) {
             ) : (
               <div className="w-full h-40 md:h-56 bg-brand/20"/>
             )}
-            {isOwnProfile && (
-              <button className="absolute bottom-3 right-3 btn-brand text-sm hidden xl:block z-10">
-                Edit cover photo
-              </button>
-            )}
           </div>
 
           {/* Profile info row */}
