@@ -12,8 +12,6 @@ function Card({ children }: { children: React.ReactNode }) {
   return <div className="rounded-xl bg-bg-light shadow-sm p-4">{children}</div>;
 }
 
-// Shared avatar+info row used in both event and post item cards.
-// The org variant (no trailing action) is the base; posts extend it with a "More" button.
 function ItemHeader({
   picture,
   initials,
@@ -93,10 +91,10 @@ export default function ProfilePage(props: ProfilePageProps) {
   const orgId = isOrg ? (props as { variant: "organization"; orgId: number }).orgId : null;
 
   const Tabs = {
-    posts: {
-      id: 'posts',
-      title: 'Posts',
-      description: "Latest activity and publishing history"
+    overview: {
+      id: 'overview',
+      title: isOrg ? 'Events' : 'Posts',
+      description: isOrg ? 'Current organization events' : 'User posts',
     },
     about: {
       id: 'about',
@@ -106,13 +104,13 @@ export default function ProfilePage(props: ProfilePageProps) {
     people: {
       id: 'people',
       title: isOrg ? 'Members' : 'Friends',
-      description: isOrg ? 'Organization members' : 'Relationship graph and social context'
+      description: isOrg ? 'Organization members' : 'User friends'
     },
   } as const;
 
   type Tab = typeof Tabs[keyof typeof Tabs]
 
-  const [activeTab, setActiveTab] = useState<Tab>(Tabs.posts);
+  const [activeTab, setActiveTab] = useState<Tab>(Tabs.overview);
   const [showMenu, setShowMenu] = useState(false);
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -189,7 +187,7 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const pagebarTitle = isOrg
     ? "Organization details"
-    : activeTab === Tabs.posts ? "Profile overview"
+    : activeTab === Tabs.overview ? "Profile overview"
     : activeTab === Tabs.about ? "About profile"
     : "Friend network";
 
@@ -345,7 +343,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         </div>
 
         {/* Posts tab */}
-        {activeTab === Tabs.posts && (
+        {activeTab === Tabs.overview && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Left: About */}
             <div className="space-y-4 lg:col-span-5">
