@@ -93,9 +93,21 @@ export default function ProfilePage(props: ProfilePageProps) {
   const orgId = isOrg ? (props as { variant: "organization"; orgId: number }).orgId : null;
 
   const Tabs = {
-    posts: { id: "posts", title: "Posts", description: "Latest activity..." },
-    about: { id: "about", title: "About", description: "Bio, location..." },
-    people: { id: "people", title: "Friends", description: "Friend network" },
+    posts: {
+      id: 'posts',
+      title: 'Posts',
+      description: "Latest activity and publishing history"
+    },
+    about: {
+      id: 'about',
+      title: 'About',
+      description: isOrg ? 'About this organization' : 'Bio, location, work, and school details'
+    },
+    people: {
+      id: 'people',
+      title: isOrg ? 'Members' : 'Friends',
+      description: isOrg ? 'Organization members' : 'Relationship graph and social context'
+    },
   } as const;
 
   type Tab = typeof Tabs[keyof typeof Tabs]
