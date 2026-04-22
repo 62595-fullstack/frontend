@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
-import { api, Organization, OrganizationEvent, Post } from "@/lib/api";
+import { api, OrgMember, Organization, OrganizationEvent, Post } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -91,6 +91,7 @@ type ProfileUser = {
   detail?: string;
   since: string;
   badge?: string | number;
+  roleId?: number;
 };
 
 type UserProfileData = {
@@ -275,6 +276,8 @@ export default function ProfilePage(props: ProfilePageProps) {
   }
 
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [removingUserId, setRemovingUserId] = useState<string | null>(null);
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
 
   async function handleLeaveOrganization() {
     if (!orgId || leaveLoading) return;
@@ -286,6 +289,50 @@ export default function ProfilePage(props: ProfilePageProps) {
       setLeaveLoading(false);
     }
   }
+
+  async function handleRemoveMember(userId: string) {
+    if (!orgId || removingUserId) return;
+    setRemovingUserId(userId);
+    try {
+      await api.removeOrganizationMember(orgId, userId);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } finally {
+      setRemovingUserId(null);
+    }
+  }
+
+  async function handleChangeRole(userId: string, roleId: number) {
+    if (!orgId || updatingRoleUserId) return;
+    setUpdatingRoleUserId(userId);
+    try {
+      await api.updateOrganizationMemberRole(orgId, userId, roleId);
+      const roleName = roleId === 1000 ? "Admin" : "Member";
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, roleId, badge: roleName } : u));
+    } finally {
+      setUpdatingRoleUserId(null);
+    }
+  }
+
+  useEffect(() => {
+    if (!orgId) return;
+    let cancelled = false;
+    setUsersLoading(true);
+    setUsersLoadingError(null);
+    api.getOrganizationMembers(orgId)
+      .then((members: OrgMember[]) => {
+        if (!cancelled) setUsers(members.map((m) => ({
+          id: m.userId,
+          firstName: m.firstName,
+          lastName: m.lastName,
+          since: "",
+          badge: m.roleName,
+          roleId: m.roleId,
+        })));
+      })
+      .catch((err: unknown) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load members"); })
+      .finally(() => { if (!cancelled) setUsersLoading(false); });
+    return () => { cancelled = true; };
+  }, [orgId]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -735,12 +782,33 @@ export default function ProfilePage(props: ProfilePageProps) {
                           {`${user.firstName} ${user.lastName}`}
                         </p>
                         {user.detail && <p className="truncate text-xs text-text-muted">{user.detail}</p>}
-                        <p className="mt-2 text-xs text-text-muted">{user.since}</p>
+                        {user.since && <p className="mt-2 text-xs text-text-muted">{user.since}</p>}
                       </div>
-                      {user.badge != null && (
-                        <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                          {user.badge}
-                        </span>
+                      {isOrg && isOrgAdmin ? (
+                        <div className="flex flex-col items-end gap-2">
+                          <select
+                            value={user.roleId ?? 999}
+                            disabled={updatingRoleUserId === user.id}
+                            onChange={(e) => handleChangeRole(user.id, Number(e.target.value))}
+                            className="rounded-lg border border-border-muted bg-bg px-2 py-1 text-xs text-text focus:outline-none focus:ring-1 focus:ring-brand disabled:opacity-50 cursor-pointer"
+                          >
+                            <option value={999}>Member</option>
+                            <option value={1000}>Admin</option>
+                          </select>
+                          <button
+                            onClick={() => handleRemoveMember(user.id)}
+                            disabled={removingUserId === user.id}
+                            className="text-xs text-danger hover:bg-highlight rounded-lg px-2 py-1 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                          >
+                            {removingUserId === user.id ? "Removing…" : "Remove"}
+                          </button>
+                        </div>
+                      ) : (
+                        user.badge != null && (
+                          <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                            {user.badge}
+                          </span>
+                        )
                       )}
                     </div>
                   </div>

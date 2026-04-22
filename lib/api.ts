@@ -111,6 +111,15 @@ export type MemberSummary = {
   role: string;
 };
 
+export type OrgMember = {
+  bindingId: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  roleId: number;
+  roleName: string;
+};
+
 type RawOrganization = {
   Id?: number;
   id?: number;
@@ -287,6 +296,12 @@ export const api = {
     request<void>(`/UserOrganizationBinding/join/${organizationId}`, { method: "POST" }),
   leaveOrganization: (organizationId: number) =>
     request<void>(`/UserOrganizationBinding/leave/${organizationId}`, { method: "DELETE" }),
+  getOrganizationMembers: (organizationId: number) =>
+    request<OrgMember[]>(`/UserOrganizationBinding/${organizationId}/members`),
+  removeOrganizationMember: (organizationId: number, userId: string) =>
+    request<void>(`/UserOrganizationBinding/${organizationId}/member/${userId}`, { method: "DELETE" }),
+  updateOrganizationMemberRole: (organizationId: number, userId: string, roleId: number) =>
+    request<void>(`/UserOrganizationBinding/${organizationId}/member/${userId}/role/${roleId}`, { method: "PATCH" }),
 
   // events
   getOrganizationEvents: async (organizationId: number): Promise<OrganizationEvent[]> => {
