@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { api, Organization, OrganizationEvent } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
 import PagebarContent from "@/components/pagebar/PagebarContent";
@@ -79,7 +80,7 @@ export default function OrganizationProfilePage() {
       </PagebarContent>
 
       {/* Cover photo card */}
-      <div className="w-full max-w-5xl space-y-4 px-4">
+      <div className="w-full max-w-5xl p-4 space-y-4">
         <div className="rounded-xl bg-bg-light shadow-sm overflow-hidden">
           {/* Cover */}
           <div className="relative">
@@ -184,6 +185,13 @@ export default function OrganizationProfilePage() {
                       {event.description}
                     </p>
                   )}
+
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="btn-brand mt-3 text-sm"
+                  >
+                    View Event
+                  </Link>
                 </div>
               ))
             )}

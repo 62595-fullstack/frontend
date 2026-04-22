@@ -73,7 +73,7 @@ export default function EventLayout({
   }
 
   return (
-    <EventContext.Provider value={event}>
+    <EventContext.Provider value={{ event, isCreator, setEvent }}>
       <PagebarContent title="Event details">
         <PagebarSection eyebrow="Live event" title={event.title}>
           <PagebarStat
@@ -133,7 +133,6 @@ export default function EventLayout({
             <div>
               <div className="flex items-center xl:justify-end gap-3">
                 <button className="rounded bg-highlight px-6 py-2 text-sm font-semibold text-text">Share</button>
-                <button className="rounded bg-highlight px-6 py-2 text-sm font-semibold text-text">Save</button>
                 {isCreator && (
                   <button
                     className="rounded bg-red-500 px-6 py-2 text-sm font-semibold text-white hover:bg-red-600 active:scale-95 transition-all"

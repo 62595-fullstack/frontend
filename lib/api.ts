@@ -70,13 +70,14 @@ export type OrganizationEvent = {
   userOrganizationBindingId: number;
   title: string;
   description: string;
+  rules: string;
   attachment: Attachment | null;
   createdDate?: string;
   startDate?: string;
   ageLimit?: number;
   creatorName?: string;
 };
-export type UserOrganizationBinding = { id: number };
+export type UserOrganizationBinding = { id: number; organizationId: number };
 export type GdprDeleteResult = boolean;
 export type FriendSummary = {
   id: string;
@@ -116,6 +117,8 @@ type RawEvent = {
   title?: string;
   Description?: string;
   description?: string;
+  Rules?: string;
+  rules?: string;
   Attachment?: Attachment | null;
   attachment?: Attachment | null;
   CreatedDate?: string;
@@ -191,6 +194,7 @@ function normalizeEvent(raw: RawEvent): OrganizationEvent {
       raw.UserOrganizationBindingId ?? raw.userOrganizationBindingId ?? 0,
     title: raw.Title ?? raw.title ?? "",
     description: raw.Description ?? raw.description ?? "",
+    rules: raw.Rules ?? raw.rules ?? "",
     attachment: raw.Attachment ?? raw.attachment ?? null,
     createdDate: raw.CreatedDate ?? raw.createdDate ?? "",
     startDate: raw.StartDate ?? raw.startDate ?? "",
@@ -245,6 +249,8 @@ export const api = {
     request<UserOrganizationBinding[]>(
       `/UserOrganizationBinding/${organizationId}`
     ),
+  getUserOrganizationBindingsForCurrentUser: () =>
+    request<UserOrganizationBinding[]>(`/UserOrganizationBinding/me`),
   getUserOrganizationBindingForCurrentUser: (organizationId: number) =>
     request<UserOrganizationBinding>(
       `/UserOrganizationBinding/${organizationId}/me`
@@ -262,6 +268,11 @@ export const api = {
     }),
   deleteOrganizationEvent: (id: number) =>
     request<void>(`/OrganizationEvents/${id}`, { method: "DELETE" }),
+  updateEvent: (id: number, fields: { description?: string; rules?: string }) =>
+    request<void>(`/OrganizationEvents/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(fields),
+    }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>

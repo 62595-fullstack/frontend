@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
-import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarAction, PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, OrganizationEvent, Organization, Attachment } from "@/lib/api";
@@ -36,14 +35,13 @@ export default function EventsPage() {
   async function handleCreate(data: { title: string; description: string; attachment: Attachment | null; organizationId: number; startDate: string; ageLimit: number }) {
     setCreateError(null);
     try {
-      const binding = await api.getUserOrganizationBindingForCurrentUser(data.organizationId);
-      const bindingId = binding?.id ?? 0;
       await api.createOrganizationEvent({
         id: 0,
         organizationId: data.organizationId,
-        userOrganizationBindingId: bindingId,
+        userOrganizationBindingId: 0,
         title: data.title,
         description: data.description,
+        rules: "",
         attachment: data.attachment,
         startDate: data.startDate,
         ageLimit: data.ageLimit,
@@ -95,19 +93,16 @@ export default function EventsPage() {
       </PagebarContent>
 
       {/* Header row */}
-      <div className="flex items-center w-full max-w-5xl p-8">
-        <div className="w-12 flex-shrink-0" />
-        <h1 className="text-3xl lg:text-5xl font-bold text-text flex-1 text-center">Events</h1>
-        <CreateButton onClick={() => setShowModal(true)} label="event"/>
+      <div className="flex items-center justify-center w-full max-w-3xl p-8">
+        <h1 className="text-3xl lg:text-5xl font-bold text-text text-center">Events</h1>
       </div>
 
       {loadError && <p className="text-danger text-sm mb-4">{loadError}</p>}
 
       {/* Scrollable card list */}
-      <div className="w-full flex-1 min-h-0 rounded-lg p-4 overflow-hidden">
+      <div className="w-full flex-1 min-h-0 rounded-lg overflow-y-auto">
         <div
-          className="overflow-y-auto h-full gap-4 flex flex-col items-center"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+          className="h-full gap-4 p-4 flex flex-col items-center"
         >
           {events.map((event) => (
             <EventCard

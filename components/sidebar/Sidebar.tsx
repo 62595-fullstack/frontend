@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "@/lib/useTheme";
-
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
 
   async function handleSignOut() {
     await fetch("/api/logout", { method: "POST" });
@@ -24,16 +21,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   ];
 
   return (
-    <aside className="w-full md:w-50 lg:w-60 h-full bg-bg text-text py-4 pl-4 flex flex-col flex-shrink-0">
-      {onClose && (
-        <button
-          onClick={onClose}
-          className="self-end mb-4 p-2 text-text-muted hover:text-text"
-          aria-label="Close menu"
-        >
-          ✕
-        </button>
-      )}
+    <aside className="w-72 h-full bg-bg text-text p-4 flex flex-col flex-shrink-0">
       <div className="flex-1">
         <nav>
           <ul className="space-y-2 xl:space-y-3 2xl:space-y-4">
@@ -43,7 +31,8 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                 <li key={href}>
                   <Link
                     href={href}
-                    className={`btn-sidebar ${isActive && "bg-brand text-bg-dark"} ${label === 'Home' ? "text-2xl font-bold mb-12" : ""}`}
+                    onClick={onClose}
+                    className={`btn-sidebar ${isActive && "bg-brand text-bg-dark"} ${label === 'Home' ? "text-2xl font-bold mb-8 mt-22 lg:mt-4 lg:mb-12" : ""}`}
                   >
                     {label}
                   </Link>
@@ -60,9 +49,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         </button>
       </div>
 
-      <button onClick={toggleTheme} className="btn-brand w-min">
-        {theme === "dark" ? "☀️" : "🌙"}
-      </button>
     </aside>
   );
 }

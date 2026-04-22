@@ -3,5 +3,17 @@
 import { createContext, useContext } from "react";
 import { OrganizationEvent } from "@/lib/api";
 
-export const EventContext = createContext<OrganizationEvent | null>(null);
-export const useEvent = () => useContext(EventContext);
+type EventContextValue = {
+  event: OrganizationEvent | null;
+  isCreator: boolean;
+  setEvent: (event: OrganizationEvent) => void;
+};
+
+export const EventContext = createContext<EventContextValue>({
+  event: null,
+  isCreator: false,
+  setEvent: () => {},
+});
+
+export const useEvent = () => useContext(EventContext).event;
+export const useEventContext = () => useContext(EventContext);

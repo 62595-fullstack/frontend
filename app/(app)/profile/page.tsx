@@ -168,7 +168,7 @@ export default function Page() {
     activeTab === "posts" ? "Profile overview" : activeTab === "about" ? "About profile" : "Friend network";
 
   return (
-    <div className="page !items-center">
+    <div className="page !items-center overflow-y-auto">
       <PagebarContent title="Profile">
         <PagebarSection eyebrow="Identity" title={pagebarTitle}>
           <div className="grid grid-cols-2 gap-3">
@@ -183,10 +183,9 @@ export default function Page() {
         </PagebarSection>
       </PagebarContent>
 
-      <div className="w-full max-w-5xl flex-1 min-h-0 overflow-hidden">
+      <div className="w-full max-w-5xl flex-1 min-h-0">
         <div
-          className="overflow-y-auto h-full p-4 space-y-4"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+          className="h-full p-4 space-y-4"
         >
           <Card>
             <div className="relative h-40 md:h-56 rounded-t-xl bg-brand/20">
@@ -202,7 +201,7 @@ export default function Page() {
                     <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-bg bg-bg-light text-3xl font-bold text-brand">
                       {getInitials(profile.name)}
                     </div>
-                    <button className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:bg-highlight">
+                    <button className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                       Edit
                     </button>
                   </div>
@@ -265,10 +264,10 @@ export default function Page() {
                 <div className="flex gap-2 overflow-x-auto py-2 text-sm font-semibold">
                   <button
                     onClick={() => setActiveTab("posts")}
-                    className={`rounded-lg px-3 py-2 ${
+                    className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
                       activeTab === "posts"
-                        ? "bg-brand/20 text-brand"
-                        : "text-text-muted hover:bg-highlight"
+                        ? "bg-brand text-bg-dark"
+                        : "text-text hover:bg-highlight"
                     }`}
                   >
                     Posts
@@ -276,10 +275,10 @@ export default function Page() {
 
                   <button
                     onClick={() => setActiveTab("about")}
-                    className={`rounded-lg px-3 py-2 ${
+                    className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
                       activeTab === "about"
-                        ? "bg-brand/20 text-brand"
-                        : "text-text-muted hover:bg-highlight"
+                        ? "bg-brand text-bg-dark"
+                        : "text-text hover:bg-highlight"
                     }`}
                   >
                     About
@@ -287,10 +286,10 @@ export default function Page() {
 
                   <button
                     onClick={() => setActiveTab("friends")}
-                    className={`rounded-lg px-3 py-2 ${
+                    className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
                       activeTab === "friends"
-                        ? "bg-brand/20 text-brand"
-                        : "text-text-muted hover:bg-highlight"
+                        ? "bg-brand text-bg-dark"
+                        : "text-text hover:bg-highlight"
                     }`}
                   >
                     Friends
@@ -363,7 +362,7 @@ export default function Page() {
                           </p>
                         </div>
                       </div>
-                      <button className="rounded-lg px-2 py-1 text-text-muted hover:bg-highlight">
+                      <button className="rounded-lg px-2 py-1 text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                         More
                       </button>
                     </div>
@@ -378,14 +377,14 @@ export default function Page() {
 
                     <div className="h-64 bg-bg" />
 
-                    <div className="grid grid-cols-3 gap-2 border-t border-border-muted p-2 text-sm font-semibold text-text-muted">
-                      <button className="rounded-lg px-3 py-2 hover:bg-highlight">
+                    <div className="grid grid-cols-3 gap-2 border-t border-border-muted p-2 text-sm font-semibold text-text-muted [&>button]:hover:text-text">
+                      <button className="rounded-lg px-3 py-2 transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                         Like
                       </button>
-                      <button className="rounded-lg px-3 py-2 hover:bg-highlight">
+                      <button className="rounded-lg px-3 py-2 transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                         Comment
                       </button>
-                      <button className="rounded-lg px-3 py-2 hover:bg-highlight">
+                      <button className="rounded-lg px-3 py-2 transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                         Share
                       </button>
                     </div>
