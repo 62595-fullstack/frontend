@@ -463,7 +463,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                       value={bioInput}
                       onChange={(e) => setBioInput(e.target.value)}
                       rows={4}
-                      maxLength={500}
+                      maxLength={512}
                       className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
                     />
                     <div className="flex gap-2">
