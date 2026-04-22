@@ -104,12 +104,14 @@ type UserProfileData = {
 };
 
 export type ProfilePageProps =
-  | { variant: "user" }
+  | { variant: "user"; userId?: string }
   | { variant: "organization"; orgId: number };
 
 export default function ProfilePage(props: ProfilePageProps) {
   const isOrg = props.variant === "organization";
   const orgId = isOrg ? (props as { variant: "organization"; orgId: number }).orgId : null;
+  const userId = !isOrg ? (props as { variant: "user"; userId?: string }).userId : null;
+  const isOwnProfile = !isOrg && !userId;
 
   const Tabs = {
     overview: {
@@ -153,24 +155,26 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [orgError, setOrgError] = useState<string | null>(null);
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
 
+  const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string } | null>(null);
+
   useEffect(() => {
     if (props.variant !== "user") return;
     let cancelled = false;
     setPostsLoading(true);
     setPostsError(null);
-    api.getPosts()
+    api.getPostsByUser(userId ?? "me")
     .then((data) => { if (!cancelled) setPosts(data ?? []); })
     .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
     .finally(() => { if (!cancelled) setPostsLoading(false); });
     return () => { cancelled = true; };
-  }, [props.variant]);
+  }, [props.variant, userId]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
     let cancelled = false;
     setUsersLoading(true);
     setUsersLoadingError(null);
-    api.getMyFriends()
+    api.getFriendsByUser(userId ?? "me")
     .then((friends) => {
       if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
         id: friend.id,
@@ -184,7 +188,16 @@ export default function ProfilePage(props: ProfilePageProps) {
     .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
     .finally(() => { if (!cancelled) setUsersLoading(false); });
     return () => { cancelled = true; };
-  }, [props.variant]);
+  }, [props.variant, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    api.getUserById(userId)
+    .then((user) => { if (!cancelled) setViewedUser({ firstName: user.firstName, lastName: user.lastName }); })
+    .catch(() => { /* silently fall back to showing userId */ });
+    return () => { cancelled = true; };
+  }, [userId]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -205,10 +218,16 @@ export default function ProfilePage(props: ProfilePageProps) {
   ), [posts]);
 
   const userProfile = useMemo<UserProfileData>(() => ({
-    name: "Your Profile",
-    bio: "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details.",
+    name: isOwnProfile
+      ? "Your Profile"
+      : viewedUser
+        ? `${viewedUser.firstName} ${viewedUser.lastName}`
+        : userId ?? "User",
+    bio: isOwnProfile
+      ? "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details."
+      : undefined,
     friendsCount: users.length,
-  }), [users.length]);
+  }), [isOwnProfile, userId, viewedUser, users.length]);
 
   if (isOrg && orgError) {
     return <div className="page"><p className="text-danger">{orgError}</p></div>;
@@ -278,7 +297,7 @@ export default function ProfilePage(props: ProfilePageProps) {
             ) : (
               <div className="w-full h-40 md:h-56 bg-brand/20"/>
             )}
-            {!isOrg && (
+            {isOwnProfile && (
               <button className="absolute bottom-3 right-3 btn-brand text-sm hidden xl:block z-10">
                 Edit cover photo
               </button>
@@ -303,7 +322,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                       {initials}
                     </div>
                   )}
-                  {!isOrg && (
+                  {isOwnProfile && (
                     <button
                       className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                       Edit
@@ -321,7 +340,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               </div>
 
               {/* User-only action buttons */}
-              {!isOrg && (
+              {isOwnProfile && (
                 <>
                   <div className="hidden xl:flex flex-wrap gap-2 xl:pb-2">
                     <button className="btn-brand text-sm">Edit profile</button>
@@ -388,7 +407,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <p className="mt-2 text-sm text-text-muted">
                   {isOrg ? (org!.description?.trim() || "No description yet.") : userProfile.bio}
                 </p>
-                {!isOrg && (
+                {isOwnProfile && (
                   <button className="btn-brand mt-4 w-full text-sm">Edit details</button>
                 )}
               </Card>

@@ -88,6 +88,14 @@ export type FriendSummary = {
   friendsSince: string;
 };
 
+export type UserSummary = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  age?: number;
+};
+
 export type MemberSummary = {
   id: string;
   firstName: string;
@@ -287,7 +295,12 @@ export const api = {
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
 
   // users
-  getMyFriends: () => request<FriendSummary[]>(`/users/me/friends`),
+  getUserById: (userId: string) => request<UserSummary>(`/users/${userId}`),
+  getPostsByUser: async (userId: string): Promise<Post[]> => {
+    const data = await request<unknown>(`/users/${userId}/posts`);
+    return parsePostsResponse(data);
+  },
+  getFriendsByUser: (userId: string) => request<FriendSummary[]>(`/users/${userId}/friends`),
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
