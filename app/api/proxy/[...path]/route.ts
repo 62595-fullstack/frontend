@@ -10,7 +10,8 @@ async function forward(req: Request, path: string[]) {
     );
   }
 
-  const url = `${API_BASE}/${path.join("/")}`;
+  const { search } = new URL(req.url);
+  const url = `${API_BASE}/${path.join("/")}${search}`;
 
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
