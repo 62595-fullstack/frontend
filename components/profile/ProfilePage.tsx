@@ -475,7 +475,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{usersLoadingError}</div>
             )}
             {usersLoading && (
-              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading friends...</div>
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading...</div>
             )}
             {!usersLoading && !usersLoadingError && friends.length === 0 && (
               <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">No friends found for the current
@@ -487,11 +487,11 @@ export default function ProfilePage(props: ProfilePageProps) {
                   <div key={user.id} className="rounded-xl border border-border-muted bg-bg p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                        {getInitials(user.userName || user.firstName)}
+                        {getInitials(user.firstName)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-text">
-                          {user.userName || user.firstName}
+                          {`${user.firstName} ${user.lastName}`}
                         </p>
                         <p className="truncate text-xs text-text-muted">{user.email}</p>
                         <p className="mt-2 text-xs text-text-muted">{formatFriendSince(user.friendsSince)}</p>

@@ -83,7 +83,7 @@ export type FriendSummary = {
   id: string;
   email: string;
   firstName: string;
-  userName: string;
+  lastName: string;
   age: number;
   friendsSince: string;
 };
