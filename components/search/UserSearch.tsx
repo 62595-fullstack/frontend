@@ -60,7 +60,7 @@ export default function UserSearch() {
   const navigateTo = (userId: string) => {
     setOpen(false);
     setQuery("");
-    router.push(`/profile/${userId}`);
+    router.push(`/users/${userId}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
