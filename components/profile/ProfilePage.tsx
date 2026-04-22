@@ -187,8 +187,8 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const pagebarTitle = isOrg
     ? "Organization details"
-    : activeTab === Tabs.overview ? "Profile overview"
-    : activeTab === Tabs.about ? "About profile"
+    : activeTab.id === Tabs.overview.id ? "Profile overview"
+    : activeTab.id === Tabs.about.id ? "About profile"
     : "Friend network";
 
   // The label/count shown in the right-column header card
@@ -331,7 +331,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                     key={tab.id}
                     onClick={() => setActiveTab(tab)}
                     className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
-                      activeTab === tab ? "bg-brand text-bg-dark" : "text-text hover:bg-highlight"
+                      activeTab.id === tab.id ? "bg-brand text-bg-dark" : "text-text hover:bg-highlight"
                     }`}
                   >
                     {tab.title}
@@ -343,7 +343,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         </div>
 
         {/* Posts tab */}
-        {activeTab === Tabs.overview && (
+        {activeTab.id === Tabs.overview.id && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Left: About */}
             <div className="space-y-4 lg:col-span-5">
@@ -430,7 +430,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         )}
 
         {/* About tab */}
-        {activeTab === Tabs.about && (
+        {activeTab.id === Tabs.about.id && (
           <Card>
             <h2 className="text-sm font-semibold text-text">About</h2>
             <div className="mt-3 space-y-2 text-sm text-text-muted">
@@ -459,7 +459,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         )}
 
         {/* User friends tab */}
-        {activeTab === Tabs.people && (
+        {activeTab.id === Tabs.people.id && (
           <Card>
             <h2 className="text-sm font-semibold text-text">Friends</h2>
             {friendsError && (
