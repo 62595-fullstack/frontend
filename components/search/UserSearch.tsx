@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { api, UserSummary } from "@/lib/api";
+import { api, UserSearchResult } from "@/lib/api";
 
 function getInitials(firstName: string, lastName: string) {
   return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase() || "?";
@@ -10,7 +10,7 @@ function getInitials(firstName: string, lastName: string) {
 
 export default function UserSearch() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<UserSummary[]>([]);
+  const [results, setResults] = useState<UserSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -132,7 +132,6 @@ export default function UserSearch() {
                 <p className="text-sm font-semibold text-text">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-xs text-text-muted truncate">{user.email}</p>
               </div>
             </button>
           ))}

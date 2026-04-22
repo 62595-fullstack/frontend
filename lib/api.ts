@@ -88,6 +88,12 @@ export type FriendSummary = {
   friendsSince: string;
 };
 
+export type UserSearchResult = {
+  id: string;
+  firstName: string;
+  lastName: string;
+};
+
 export type UserSummary = {
   id: string;
   email: string;
@@ -296,7 +302,7 @@ export const api = {
 
   // users
   getMe: () => request<UserSummary>(`/users/me`),
-  searchUsers: (query: string) => request<UserSummary[]>(`/users?query=${encodeURIComponent(query)}`),
+  searchUsers: (query: string) => request<UserSearchResult[]>(`/users?query=${encodeURIComponent(query)}`),
   getUserById: (userId: string) => request<UserSummary>(`/users/${userId}`),
   getPostsByUser: async (userId: string): Promise<Post[]> => {
     const data = await request<unknown>(`/users/${userId}/posts`);
