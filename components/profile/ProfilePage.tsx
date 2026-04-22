@@ -208,13 +208,14 @@ export default function ProfilePage(props: ProfilePageProps) {
               ))}
             </PagebarList>
           )}
-          {!isOrg && (
-            <PagebarList>
-              <PagebarListItem active={activeTab === "posts"} title="Posts" meta="Latest activity and publishing history" />
-              <PagebarListItem active={activeTab === "about"} title="About" meta="Bio, location, work, and school details" />
-              <PagebarListItem active={activeTab === "friends"} title="Friends" meta="Relationship graph and social context" />
-            </PagebarList>
-          )}
+          <PagebarList>
+            <PagebarListItem active={activeTab === "posts"} title="Posts" meta="Latest activity and publishing history"/>
+            <PagebarListItem active={activeTab === "about"} title="About" meta="Bio, location, work, and school details"/>
+            {!isOrg && (
+              // Should only show if this is the client user's page
+              <PagebarListItem active={activeTab === "friends"} title="Friends" meta="Relationship graph and social context"/>
+            )}
+          </PagebarList>
         </PagebarSection>
       </PagebarContent>
 
@@ -266,14 +267,9 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <div className="pb-1 text-sm text-text-muted">
                   <h1 className="text-2xl font-bold text-text">{displayName}</h1>
                   {isOrg ? (
-                    <>
-                      {org!.description && (
-                        <p className="">{org!.description}</p>
-                      )}
-                      <p className="">
-                        {events.length} event{events.length !== 1 ? "s" : ""}
-                      </p>
-                    </>
+                    <p className="">
+                      {events.length} event{events.length !== 1 ? "s" : ""}
+                    </p>
                   ) : (
                     <p>
                       {friendsLoading ? "Loading friends..." : formatFriendsCount(userProfile.friendsCount)}
