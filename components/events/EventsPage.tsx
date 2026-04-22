@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import EventCard from "@/components/eventcard/EventCard";
 import CreateEventModal from "@/components/events/CreateEventModal";
-import CreateButton from "@/components/ui/CreateButton"
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarAction, PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, OrganizationEvent, Organization, Attachment } from "@/lib/api";
