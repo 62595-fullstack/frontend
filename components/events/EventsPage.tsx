@@ -42,6 +42,7 @@ export default function EventsPage() {
         userOrganizationBindingId: 0,
         title: data.title,
         description: data.description,
+        rules: "",
         attachment: data.attachment,
         startDate: data.startDate,
         ageLimit: data.ageLimit,
