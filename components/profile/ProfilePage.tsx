@@ -105,7 +105,7 @@ type UserProfileData = {
 
 export type ProfilePageProps =
   | { variant: "user"; userId: string; isOwnProfile?: boolean }
-  | { variant: "organization"; orgId: number; isOrgAdmin?: boolean };
+  | { variant: "organization"; orgId: number; isOrgAdmin?: boolean; isMember?: boolean | null };
 
 export default function ProfilePage(props: ProfilePageProps) {
   const isOrg = props.variant === "organization";
@@ -113,6 +113,7 @@ export default function ProfilePage(props: ProfilePageProps) {
   const userId = !isOrg ? props.userId : null;
   const isOwnProfile = !isOrg && (props.isOwnProfile ?? false);
   const isOrgAdmin = isOrg && (props.isOrgAdmin ?? false);
+  const isMemberProp = isOrg ? (props.isMember ?? null) : null;
 
   const Tabs = {
     overview: {
@@ -167,6 +168,11 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const [isFriend, setIsFriend] = useState<boolean | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
+
+  const [isMember, setIsMember] = useState<boolean | null>(isMemberProp);
+  const [joinLoading, setJoinLoading] = useState(false);
+
+  useEffect(() => { setIsMember(isMemberProp); }, [isMemberProp]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
@@ -261,6 +267,17 @@ export default function ProfilePage(props: ProfilePageProps) {
       }
     } finally {
       setFriendActionLoading(false);
+    }
+  }
+
+  async function handleJoinOrganization() {
+    if (!orgId || joinLoading) return;
+    setJoinLoading(true);
+    try {
+      await api.joinOrganization(orgId);
+      setIsMember(true);
+    } finally {
+      setJoinLoading(false);
     }
   }
 
@@ -411,6 +428,26 @@ export default function ProfilePage(props: ProfilePageProps) {
                   >
                     {isFriend === null ? "…" : friendActionLoading ? "…" : isFriend ? "Remove Friend" : "Add Friend"}
                   </button>
+                </div>
+              )}
+
+              {/* Join organization button */}
+              {isOrg && !isOrgAdmin && isMember === false && (
+                <div className="self-end pb-2">
+                  <button
+                    onClick={handleJoinOrganization}
+                    disabled={joinLoading}
+                    className="btn-brand text-sm disabled:opacity-50"
+                  >
+                    {joinLoading ? "Joining…" : "Join Organization"}
+                  </button>
+                </div>
+              )}
+              {isOrg && !isOrgAdmin && isMember === true && (
+                <div className="self-end pb-2">
+                  <span className="rounded-lg px-3 py-2 text-sm text-text-muted bg-highlight">
+                    Member
+                  </span>
                 </div>
               )}
 

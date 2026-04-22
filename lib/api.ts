@@ -283,6 +283,8 @@ export const api = {
     request<UserOrganizationBinding>(
       `/UserOrganizationBinding/${organizationId}/me`
     ),
+  joinOrganization: (organizationId: number) =>
+    request<void>(`/UserOrganizationBinding/join/${organizationId}`, { method: "POST" }),
 
   // events
   getOrganizationEvents: async (organizationId: number): Promise<OrganizationEvent[]> => {
