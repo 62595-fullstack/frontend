@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import RequiredMark from '@/components/ui/RequiredMark'
 
 export default function Signup() {
   const router = useRouter()
   const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [age, setAge] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -21,7 +23,7 @@ export default function Signup() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, age: parseInt(age, 10) }),
+        body: JSON.stringify({ email, password, firstName, lastName, dateOfBirth }),
       })
 
       if (res.ok) {
@@ -50,13 +52,13 @@ export default function Signup() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-text mb-1.5">
-                First name
+                First name <RequiredMark />
               </label>
               <input
                 id="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="Your name"
+                placeholder="Your first name"
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
                 className="input-field"
@@ -65,8 +67,24 @@ export default function Signup() {
             </div>
 
             <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-text mb-1.5">
+                Last name <RequiredMark />
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                autoComplete="family-name"
+                placeholder="Your last name"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                className="input-field"
+                required
+              />
+            </div>
+
+            <div>
               <label htmlFor="email" className="block text-sm font-medium text-text mb-1.5">
-                Email
+                Email <RequiredMark />
               </label>
               <input
                 id="email"
@@ -81,17 +99,14 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-text mb-1.5">
-                Age
+              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-text mb-1.5">
+                Date of birth <RequiredMark />
               </label>
               <input
-                id="age"
-                type="number"
-                min="1"
-                max="150"
-                placeholder="25"
-                value={age}
-                onChange={e => setAge(e.target.value)}
+                id="dateOfBirth"
+                type="date"
+                value={dateOfBirth}
+                onChange={e => setDateOfBirth(e.target.value)}
                 className="input-field"
                 required
               />
@@ -99,7 +114,7 @@ export default function Signup() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text mb-1.5">
-                Password
+                Password <RequiredMark />
               </label>
               <input
                 id="password"
