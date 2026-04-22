@@ -256,6 +256,11 @@ export const api = {
     }),
   deleteOrganizationEvent: (id: number) =>
     request<void>(`/OrganizationEvents/${id}`, { method: "DELETE" }),
+  updateEvent: (id: number, fields: { description?: string }) =>
+    request<void>(`/OrganizationEvents/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(fields),
+    }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>

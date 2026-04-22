@@ -73,7 +73,7 @@ export default function EventLayout({
   }
 
   return (
-    <EventContext.Provider value={event}>
+    <EventContext.Provider value={{ event, isCreator, setEvent }}>
       <PagebarContent title="Event details">
         <PagebarSection eyebrow="Live event" title={event.title}>
           <PagebarStat
