@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
-import { api, FriendSummary, MemberSummary, Organization, OrganizationEvent, Post } from "@/lib/api";
+import { api, Organization, OrganizationEvent, Post } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -67,6 +67,13 @@ function formatFriendSince(iso?: string) {
   return `Friends since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
 }
 
+function formatMemberSince(iso?: string) {
+  if (!iso) return "Member since unknown date";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Member since unknown date";
+  return `Member since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
+}
+
 function formatFriendsCount(count?: number) {
   if (typeof count !== "number" || !Number.isFinite(count)) return "Friends count unavailable";
   return `${count.toLocaleString()} friend${count === 1 ? "" : "s"}`;
@@ -76,6 +83,15 @@ function formatMembersCount(count?: number) {
   if (typeof count !== "number" || !Number.isFinite(count)) return "Members count unavailable";
   return `${count.toLocaleString()} member${count === 1 ? "" : "s"}`;
 }
+
+type ProfileUser = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  detail?: string;
+  since: string;
+  badge?: string | number;
+};
 
 type UserProfileData = {
   name: string;
@@ -122,13 +138,14 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsError, setPostsError] = useState<string | null>(null);
 
-  const [friends, setFriends] = useState<FriendSummary[]>([]);
-  const [members, setMembers] = useState<MemberSummary[]>([
-    { id: "1", firstName: "Alice", lastName: "Johnson", memberSince: "2023-03-15", role: "Admin" },
-    { id: "2", firstName: "Bob", lastName: "Smith", memberSince: "2023-06-01", role: "Member" },
-    { id: "3", firstName: "Carol", lastName: "White", memberSince: "2024-01-20", role: "Member" },
-    { id: "4", firstName: "David", lastName: "Lee", memberSince: "2024-09-05", role: "Member" },
-  ]);
+  const [users, setUsers] = useState<ProfileUser[]>(
+    isOrg ? [
+      { id: "1", firstName: "Alice", lastName: "Johnson", since: formatMemberSince("2023-03-15"), badge: "Admin" },
+      { id: "2", firstName: "Bob", lastName: "Smith", since: formatMemberSince("2023-06-01"), badge: "Member" },
+      { id: "3", firstName: "Carol", lastName: "White", since: formatMemberSince("2024-01-20"), badge: "Member" },
+      { id: "4", firstName: "David", lastName: "Lee", since: formatMemberSince("2024-09-05"), badge: "Member" },
+    ] : []
+  );
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersLoadingError, setUsersLoadingError] = useState<string | null>(null);
 
@@ -154,7 +171,16 @@ export default function ProfilePage(props: ProfilePageProps) {
     setUsersLoading(true);
     setUsersLoadingError(null);
     api.getMyFriends()
-    .then((data) => { if (!cancelled) setFriends(Array.isArray(data) ? data : []); })
+    .then((friends) => {
+      if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
+        id: friend.id,
+        firstName: friend.firstName,
+        lastName: friend.lastName,
+        detail: friend.email,
+        since: formatFriendSince(friend.friendsSince),
+        badge: friend.age,
+      })) : []);
+    })
     .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
     .finally(() => { if (!cancelled) setUsersLoading(false); });
     return () => { cancelled = true; };
@@ -181,8 +207,8 @@ export default function ProfilePage(props: ProfilePageProps) {
   const userProfile = useMemo<UserProfileData>(() => ({
     name: "Your Profile",
     bio: "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details.",
-    friendsCount: friends.length,
-  }), [friends.length]);
+    friendsCount: users.length,
+  }), [users.length]);
 
   if (isOrg && orgError) {
     return <div className="page"><p className="text-danger">{orgError}</p></div>;
@@ -216,7 +242,7 @@ export default function ProfilePage(props: ProfilePageProps) {
             <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length}
                          tone="accent"/>
             <PagebarStat label={Tabs.users.title}
-                         value={usersLoading ? "..." : (isOrg ? members.length : userProfile.friendsCount)}/>
+                         value={usersLoading ? "..." : users.length}/>
           </div>
           {isOrg && events.length > 0 && (
             <PagebarList>
@@ -289,7 +315,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <div className="pb-1 text-sm text-text-muted">
                   <h1 className="text-2xl font-bold text-text">{displayName}</h1>
                   <p>
-                    {usersLoading ? "..." : (isOrg ? formatMembersCount(members.length) : formatFriendsCount(friends.length))}
+                    {usersLoading ? "..." : (isOrg ? formatMembersCount(users.length) : formatFriendsCount(users.length))}
                   </p>
                 </div>
               </div>
@@ -477,65 +503,36 @@ export default function ProfilePage(props: ProfilePageProps) {
             {usersLoading && (
               <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading...</div>
             )}
-            {!usersLoading && !usersLoadingError && friends.length === 0 && (
-              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">No friends found for the current
-                user.</div>
+            {!usersLoading && !usersLoadingError && users.length === 0 && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">
+                No {Tabs.users.title.toLowerCase()} found.
+              </div>
             )}
-            {!usersLoading && !usersLoadingError && friends.length > 0 && (
+            {!usersLoading && !usersLoadingError && users.length > 0 && (
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-                {friends.map((user: FriendSummary) => (
+                {users.map((user) => (
                   <div key={user.id} className="rounded-xl border border-border-muted bg-bg p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                        {getInitials(user.firstName)}
+                        {getInitials(`${user.firstName} ${user.lastName}`)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-text">
                           {`${user.firstName} ${user.lastName}`}
                         </p>
-                        <p className="truncate text-xs text-text-muted">{user.email}</p>
-                        <p className="mt-2 text-xs text-text-muted">{formatFriendSince(user.friendsSince)}</p>
+                        {user.detail && <p className="truncate text-xs text-text-muted">{user.detail}</p>}
+                        <p className="mt-2 text-xs text-text-muted">{user.since}</p>
                       </div>
-                      <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                        {user.age}
-                      </span>
+                      {user.badge != null && (
+                        <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                          {user.badge}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-
-            {/*
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              {members.map((member) => {
-                const fullName = `${member.firstName} ${member.lastName}`;
-                const memberSince = new Date(member.memberSince);
-                const memberSinceLabel = Number.isNaN(memberSince.getTime())
-                  ? "Member since unknown date"
-                  : `Member since ${memberSince.toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric"
-                  })}`;
-                return (
-                  <div key={member.id} className="rounded-xl border border-border-muted bg-bg p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                        {getInitials(fullName)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-text">{fullName}</p>
-                        <p className="mt-2 text-xs text-text-muted">{memberSinceLabel}</p>
-                      </div>
-                      <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                        {member.role}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            */}
           </Card>
         )}
       </div>
