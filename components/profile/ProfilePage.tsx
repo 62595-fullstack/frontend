@@ -203,17 +203,8 @@ export default function ProfilePage(props: ProfilePageProps) {
       <PagebarContent title={displayName}>
         <PagebarSection eyebrow={isOrg ? "Overview" : "Identity"} title={pagebarTitle}>
           <div className="grid grid-cols-2 gap-3">
-            {isOrg ? (
-              <>
-                <PagebarStat label="Events" value={events.length} tone="accent" />
-                <PagebarStat label="Members" value="N/A" />
-              </>
-            ) : (
-              <>
-                <PagebarStat label="Posts" value={sortedPosts.length} tone="accent" />
-                <PagebarStat label="Friends" value={friendsLoading ? "..." : userProfile.friendsCount ?? 0} />
-              </>
-            )}
+            <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length} tone="accent" />
+            <PagebarStat label={Tabs.people.title} value={isOrg ? "N/A" : (friendsLoading ? "..." : userProfile.friendsCount ?? 0)} />
           </div>
           {isOrg && events.length > 0 && (
             <PagebarList>
