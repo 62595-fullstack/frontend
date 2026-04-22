@@ -445,7 +445,7 @@ export default function ProfilePage(props: ProfilePageProps) {
           </Card>
         )}
 
-        {/* User friends tab */}
+        {/* User friends and organization members tab */}
         {activeTab.id === Tabs.people.id && (
           <Card>
             <h2 className="text-sm font-semibold text-text">{Tabs.people.title}</h2>
