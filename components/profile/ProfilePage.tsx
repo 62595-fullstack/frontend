@@ -281,6 +281,19 @@ export default function ProfilePage(props: ProfilePageProps) {
     }
   }
 
+  const [leaveLoading, setLeaveLoading] = useState(false);
+
+  async function handleLeaveOrganization() {
+    if (!orgId || leaveLoading) return;
+    setLeaveLoading(true);
+    try {
+      await api.leaveOrganization(orgId);
+      setIsMember(false);
+    } finally {
+      setLeaveLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (!orgId) return;
     let cancelled = false;
@@ -438,42 +451,48 @@ export default function ProfilePage(props: ProfilePageProps) {
                   </button>
                 </div>
               )}
-              {isOrg && !isOrgAdmin && isMember === true && (
-                <div className="self-end pb-2">
-                  <span className="rounded-lg px-3 py-2 text-sm text-text-muted bg-highlight">
-                    Member
-                  </span>
-                </div>
-              )}
 
-              {/* User-only action buttons */}
-              {isOwnProfile && (
+              {/* Profile action buttons */}
+              {(isOwnProfile || (isOrg && !isOrgAdmin && isMember === true)) && (
                 <>
-                  <div className="relative xl:hidden self-end">
-                    <button
-                      onClick={() => setShowMenu(!showMenu)}
-                      className="btn-brand p-2 text-sm"
-                      aria-label="Profile menu"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                           stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                      </svg>
-                    </button>
-                    {showMenu && (
-                      <div className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-lg">
-                          Edit cover photo
-                        </button>
-                        {/*<button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
-                          Edit profile
-                        </button>
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">
-                          More
-                        </button>*/}
-                      </div>
-                    )}
-                  </div>
+                  {isOwnProfile && (
+                    <div className="relative xl:hidden self-end">
+                      <button
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="btn-brand p-2 text-sm"
+                        aria-label="Profile menu"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                      </button>
+                      {showMenu && (
+                        <div className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
+                          <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-lg">
+                            Edit cover photo
+                          </button>
+                          {/*<button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
+                            Edit profile
+                          </button>
+                          <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">
+                            More
+                          </button>*/}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {isOrg && !isOrgAdmin && isMember === true && (
+                    <div className="self-end pb-2">
+                      <button
+                        onClick={handleLeaveOrganization}
+                        disabled={leaveLoading}
+                        className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-highlight disabled:opacity-50 transition-all cursor-pointer active:scale-95"
+                      >
+                        {leaveLoading ? "Leaving…" : "Leave Organization"}
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>

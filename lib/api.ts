@@ -285,6 +285,8 @@ export const api = {
     ),
   joinOrganization: (organizationId: number) =>
     request<void>(`/UserOrganizationBinding/join/${organizationId}`, { method: "POST" }),
+  leaveOrganization: (organizationId: number) =>
+    request<void>(`/UserOrganizationBinding/leave/${organizationId}`, { method: "DELETE" }),
 
   // events
   getOrganizationEvents: async (organizationId: number): Promise<OrganizationEvent[]> => {
