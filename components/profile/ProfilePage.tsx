@@ -191,8 +191,6 @@ export default function ProfilePage(props: ProfilePageProps) {
     : activeTab.id === Tabs.about.id ? "About profile"
     : "Friend network";
 
-  // The label/count shown in the right-column header card
-  const itemsLabel = isOrg ? "Events" : "Posts";
   const itemsCount = isOrg ? events.length : sortedPosts.length;
   const itemsCountLabel = isOrg
     ? `${events.length} total`
@@ -354,7 +352,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               {/* Header card — identical structure for both variants */}
               <Card>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-text">{itemsLabel}</h2>
+                  <h2 className="text-sm font-semibold text-text">{Tabs.overview.title}</h2>
                   <span className="text-xs text-text-muted">{itemsCountLabel}</span>
                 </div>
                 {!isOrg && postsError && (
@@ -365,7 +363,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               {/* Empty state — same structure for both */}
               {itemsCount === 0 && !postsLoading && (
                 <Card>
-                  <p className="text-sm text-text-muted">No {itemsLabel.toLowerCase()} yet.</p>
+                  <p className="text-sm text-text-muted">No {Tabs.overview.title.toLowerCase()} yet.</p>
                 </Card>
               )}
 
@@ -423,12 +421,10 @@ export default function ProfilePage(props: ProfilePageProps) {
         {/* About tab */}
         {activeTab.id === Tabs.about.id && (
           <Card>
-            <h2 className="text-sm font-semibold text-text">About</h2>
+            <h2 className="text-sm font-semibold text-text">{Tabs.about.title}</h2>
             <div className="mt-3 space-y-2 text-sm text-text-muted">
               {isOrg ? (
-                <>
-                  {isOrg ? (org!.description?.trim() || "No description yet.") : userProfile.bio}
-                </>
+                <>{org!.description?.trim() || "No description yet."}</>
               ) : (
                 <>
                   {[
@@ -452,7 +448,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         {/* User friends tab */}
         {activeTab.id === Tabs.people.id && (
           <Card>
-            <h2 className="text-sm font-semibold text-text">Friends</h2>
+            <h2 className="text-sm font-semibold text-text">{Tabs.people.title}</h2>
             {friendsError && (
               <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{friendsError}</div>
             )}
