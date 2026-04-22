@@ -28,9 +28,10 @@ function ItemHeader({
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         {picture ? (
-          <img src={picture} alt={title} className="w-10 h-10 rounded-full object-cover" />
+          <img src={picture} alt={title} className="w-10 h-10 rounded-full object-cover"/>
         ) : (
-          <div className="w-10 h-10 rounded-full bg-bg flex items-center justify-center text-xs font-semibold text-brand">
+          <div
+            className="w-10 h-10 rounded-full bg-bg flex items-center justify-center text-xs font-semibold text-brand">
             {initials}
           </div>
         )}
@@ -69,6 +70,11 @@ function formatFriendSince(iso?: string) {
 function formatFriendsCount(count?: number) {
   if (typeof count !== "number" || !Number.isFinite(count)) return "Friends count unavailable";
   return `${count.toLocaleString()} friend${count === 1 ? "" : "s"}`;
+}
+
+function formatMembersCount(count?: number) {
+  if (typeof count !== "number" || !Number.isFinite(count)) return "Members count unavailable";
+  return `${count.toLocaleString()} member${count === 1 ? "" : "s"}`;
 }
 
 type UserProfileData = {
@@ -115,14 +121,20 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsError, setPostsError] = useState<string | null>(null);
+
   const [friends, setFriends] = useState<FriendSummary[]>([]);
-  const [friendsLoading, setFriendsLoading] = useState(false);
-  const [friendsError, setFriendsError] = useState<string | null>(null);
+  const [members, setMembers] = useState<MemberSummary[]>([
+    { id: "1", firstName: "Alice", lastName: "Johnson", memberSince: "2023-03-15", role: "Admin" },
+    { id: "2", firstName: "Bob", lastName: "Smith", memberSince: "2023-06-01", role: "Member" },
+    { id: "3", firstName: "Carol", lastName: "White", memberSince: "2024-01-20", role: "Member" },
+    { id: "4", firstName: "David", lastName: "Lee", memberSince: "2024-09-05", role: "Member" },
+  ]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersLoadingError, setUsersLoadingError] = useState<string | null>(null);
 
   const [org, setOrg] = useState<Organization | null>(null);
   const [orgError, setOrgError] = useState<string | null>(null);
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
-  const [members, setMembers] = useState<MemberSummary[]>([]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
@@ -130,21 +142,21 @@ export default function ProfilePage(props: ProfilePageProps) {
     setPostsLoading(true);
     setPostsError(null);
     api.getPosts()
-      .then((data) => { if (!cancelled) setPosts(data ?? []); })
-      .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
-      .finally(() => { if (!cancelled) setPostsLoading(false); });
+    .then((data) => { if (!cancelled) setPosts(data ?? []); })
+    .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
+    .finally(() => { if (!cancelled) setPostsLoading(false); });
     return () => { cancelled = true; };
   }, [props.variant]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
     let cancelled = false;
-    setFriendsLoading(true);
-    setFriendsError(null);
+    setUsersLoading(true);
+    setUsersLoadingError(null);
     api.getMyFriends()
-      .then((data) => { if (!cancelled) setFriends(Array.isArray(data) ? data : []); })
-      .catch((err) => { if (!cancelled) setFriendsError(err instanceof Error ? err.message : "Failed to load friends"); })
-      .finally(() => { if (!cancelled) setFriendsLoading(false); });
+    .then((data) => { if (!cancelled) setFriends(Array.isArray(data) ? data : []); })
+    .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
+    .finally(() => { if (!cancelled) setUsersLoading(false); });
     return () => { cancelled = true; };
   }, [props.variant]);
 
@@ -152,11 +164,11 @@ export default function ProfilePage(props: ProfilePageProps) {
     if (!orgId) return;
     let cancelled = false;
     api.getOrganizationById(orgId)
-      .then((data) => { if (!cancelled) setOrg(data); })
-      .catch((err) => { if (!cancelled) setOrgError(err instanceof Error ? err.message : "Failed to load organization."); });
+    .then((data) => { if (!cancelled) setOrg(data); })
+    .catch((err) => { if (!cancelled) setOrgError(err instanceof Error ? err.message : "Failed to load organization."); });
     api.getOrganizationEvents(orgId)
-      .then((data) => { if (!cancelled) setEvents(data); })
-      .catch(() => { if (!cancelled) setEvents([]); });
+    .then((data) => { if (!cancelled) setEvents(data); })
+    .catch(() => { if (!cancelled) setEvents([]); });
     return () => { cancelled = true; };
   }, [orgId]);
 
@@ -188,8 +200,8 @@ export default function ProfilePage(props: ProfilePageProps) {
   const pagebarTitle = isOrg
     ? "Organization details"
     : activeTab.id === Tabs.overview.id ? "Profile overview"
-    : activeTab.id === Tabs.about.id ? "About profile"
-    : "Friend network";
+      : activeTab.id === Tabs.about.id ? "About profile"
+        : "Friend network";
 
   const itemsCount = isOrg ? events.length : sortedPosts.length;
   const itemsCountLabel = isOrg
@@ -201,8 +213,10 @@ export default function ProfilePage(props: ProfilePageProps) {
       <PagebarContent title={displayName}>
         <PagebarSection eyebrow={isOrg ? "Overview" : "Identity"} title={pagebarTitle}>
           <div className="grid grid-cols-2 gap-3">
-            <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length} tone="accent" />
-            <PagebarStat label={Tabs.people.title} value={isOrg ? members.length : (friendsLoading ? "..." : userProfile.friendsCount ?? 0)} />
+            <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length}
+                         tone="accent"/>
+            <PagebarStat label={Tabs.people.title}
+                         value={usersLoading ? "..." : (isOrg ? members.length : userProfile.friendsCount)}/>
           </div>
           {isOrg && events.length > 0 && (
             <PagebarList>
@@ -218,7 +232,8 @@ export default function ProfilePage(props: ProfilePageProps) {
           )}
           <PagebarList>
             {Object.values(Tabs).map((tab) => (
-              <PagebarListItem key={tab.id} active={activeTab.id === tab.id} title={tab.title} meta={tab.description} />
+              <PagebarListItem key={tab.id} active={activeTab.id === tab.id} title={tab.title}
+                               meta={tab.description}/>
             ))}
           </PagebarList>
         </PagebarSection>
@@ -235,7 +250,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                 style={{ backgroundImage: `url(${coverPhoto})` }}
               />
             ) : (
-              <div className="w-full h-40 md:h-56 bg-brand/20" />
+              <div className="w-full h-40 md:h-56 bg-brand/20"/>
             )}
             {!isOrg && (
               <button className="absolute bottom-3 right-3 btn-brand text-sm hidden xl:block z-10">
@@ -257,12 +272,14 @@ export default function ProfilePage(props: ProfilePageProps) {
                       className="w-28 h-28 rounded-full border-4 border-bg object-cover"
                     />
                   ) : (
-                    <div className="w-28 h-28 rounded-full bg-bg-light border-4 border-bg flex items-center justify-center text-3xl font-bold text-brand select-none">
+                    <div
+                      className="w-28 h-28 rounded-full bg-bg-light border-4 border-bg flex items-center justify-center text-3xl font-bold text-brand select-none">
                       {initials}
                     </div>
                   )}
                   {!isOrg && (
-                    <button className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
+                    <button
+                      className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                       Edit
                     </button>
                   )}
@@ -271,15 +288,9 @@ export default function ProfilePage(props: ProfilePageProps) {
                 {/* Name + subtitle */}
                 <div className="pb-1 text-sm text-text-muted">
                   <h1 className="text-2xl font-bold text-text">{displayName}</h1>
-                  {isOrg ? (
-                    <p className="">
-                      {events.length} event{events.length !== 1 ? "s" : ""}
-                    </p>
-                  ) : (
-                    <p>
-                      {friendsLoading ? "Loading friends..." : formatFriendsCount(userProfile.friendsCount)}
-                    </p>
-                  )}
+                  <p>
+                    {usersLoading ? "..." : (isOrg ? formatMembersCount(members.length) : formatFriendsCount(friends.length))}
+                  </p>
                 </div>
               </div>
 
@@ -296,15 +307,25 @@ export default function ProfilePage(props: ProfilePageProps) {
                       className="btn-brand p-2 text-sm"
                       aria-label="Profile menu"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                           stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                       </svg>
                     </button>
                     {showMenu && (
-                      <div className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-t-lg">Edit cover photo</button>
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">Edit profile</button>
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">More</button>
+                      <div
+                        className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-t-lg">Edit
+                          cover photo
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">Edit
+                          profile
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">More
+                        </button>
                       </div>
                     )}
                   </div>
@@ -405,7 +426,8 @@ export default function ProfilePage(props: ProfilePageProps) {
                       {post.bodytext?.trim() ? post.bodytext : "(No body text)"}
                     </p>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-border-muted flex gap-1 text-sm font-semibold text-text-muted">
+                  <div
+                    className="mt-3 pt-3 border-t border-border-muted flex gap-1 text-sm font-semibold text-text-muted">
                     {["Like", "Comment", "Share"].map((label) => (
                       <button key={label} className="rounded-lg px-3 py-2 flex-1 hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
                         {label}
@@ -449,68 +471,69 @@ export default function ProfilePage(props: ProfilePageProps) {
         {activeTab.id === Tabs.people.id && (
           <Card>
             <h2 className="text-sm font-semibold text-text">{Tabs.people.title}</h2>
-            {isOrg ? (
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
-                {members.map((member) => {
-                  const fullName = `${member.firstName} ${member.lastName}`;
-                  const memberSince = new Date(member.memberSince);
-                  const memberSinceLabel = Number.isNaN(memberSince.getTime())
-                    ? "Member since unknown date"
-                    : `Member since ${memberSince.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
-                  return (
-                    <div key={member.id} className="rounded-xl border border-border-muted bg-bg p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                          {getInitials(fullName)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-text">{fullName}</p>
-                          <p className="mt-2 text-xs text-text-muted">{memberSinceLabel}</p>
-                        </div>
-                        <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                          {member.role}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <>
-                {friendsError && (
-                  <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{friendsError}</div>
-                )}
-                {friendsLoading && (
-                  <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading friends...</div>
-                )}
-                {!friendsLoading && !friendsError && friends.length === 0 && (
-                  <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">No friends found for the current user.</div>
-                )}
-                {!friendsLoading && !friendsError && friends.length > 0 && (
-                  <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    {friends.map((friend: FriendSummary) => (
-                      <div key={friend.id} className="rounded-xl border border-border-muted bg-bg p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                            {getInitials(friend.userName || friend.firstName)}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-text">
-                              {friend.userName || friend.firstName}
-                            </p>
-                            <p className="truncate text-xs text-text-muted">{friend.email}</p>
-                            <p className="mt-2 text-xs text-text-muted">{formatFriendSince(friend.friendsSince)}</p>
-                          </div>
-                          <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                            {friend.age}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+            {usersLoadingError && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{usersLoadingError}</div>
             )}
+            {usersLoading && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading friends...</div>
+            )}
+            {!usersLoading && !usersLoadingError && friends.length === 0 && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">No friends found for the current
+                user.</div>
+            )}
+            {!usersLoading && !usersLoadingError && friends.length > 0 && (
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                {friends.map((user: FriendSummary) => (
+                  <div key={user.id} className="rounded-xl border border-border-muted bg-bg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
+                        {getInitials(user.userName || user.firstName)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-text">
+                          {user.userName || user.firstName}
+                        </p>
+                        <p className="truncate text-xs text-text-muted">{user.email}</p>
+                        <p className="mt-2 text-xs text-text-muted">{formatFriendSince(user.friendsSince)}</p>
+                      </div>
+                      <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                        {user.age}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              {members.map((member) => {
+                const fullName = `${member.firstName} ${member.lastName}`;
+                const memberSince = new Date(member.memberSince);
+                const memberSinceLabel = Number.isNaN(memberSince.getTime())
+                  ? "Member since unknown date"
+                  : `Member since ${memberSince.toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric"
+                  })}`;
+                return (
+                  <div key={member.id} className="rounded-xl border border-border-muted bg-bg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
+                        {getInitials(fullName)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-text">{fullName}</p>
+                        <p className="mt-2 text-xs text-text-muted">{memberSinceLabel}</p>
+                      </div>
+                      <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                        {member.role}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </Card>
         )}
       </div>
