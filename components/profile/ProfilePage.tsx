@@ -416,18 +416,15 @@ export default function ProfilePage(props: ProfilePageProps) {
                       </svg>
                     </button>
                     {showMenu && (
-                      <div
-                        className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
-                        <button
-                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-t-lg">Edit
-                          cover photo
+                      <div className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
+                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-t-lg">
+                          Edit cover photo
                         </button>
-                        <button
-                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">Edit
-                          profile
+                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
+                          Edit profile
                         </button>
-                        <button
-                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">More
+                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">
+                          More
                         </button>
                       </div>
                     )}
