@@ -105,13 +105,14 @@ type UserProfileData = {
 
 export type ProfilePageProps =
   | { variant: "user"; userId: string; isOwnProfile?: boolean }
-  | { variant: "organization"; orgId: number };
+  | { variant: "organization"; orgId: number; isOrgAdmin?: boolean };
 
 export default function ProfilePage(props: ProfilePageProps) {
   const isOrg = props.variant === "organization";
   const orgId = isOrg ? props.orgId : null;
   const userId = !isOrg ? props.userId : null;
   const isOwnProfile = !isOrg && (props.isOwnProfile ?? false);
+  const isOrgAdmin = isOrg && (props.isOrgAdmin ?? false);
 
   const Tabs = {
     overview: {
@@ -159,6 +160,10 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [editingBio, setEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState("");
   const [bioSaving, setBioSaving] = useState(false);
+
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [descriptionInput, setDescriptionInput] = useState("");
+  const [descriptionSaving, setDescriptionSaving] = useState(false);
 
   const [isFriend, setIsFriend] = useState<boolean | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
@@ -231,6 +236,18 @@ export default function ProfilePage(props: ProfilePageProps) {
     }
   }
 
+  async function handleSaveDescription() {
+    if (descriptionSaving || !orgId) return;
+    setDescriptionSaving(true);
+    try {
+      const updated = await api.updateOrganizationDescription(orgId, descriptionInput);
+      setOrg((prev) => prev ? { ...prev, description: updated.description } : prev);
+      setEditingDescription(false);
+    } finally {
+      setDescriptionSaving(false);
+    }
+  }
+
   async function handleFriendAction() {
     if (!userId || friendActionLoading) return;
     setFriendActionLoading(true);
@@ -251,7 +268,7 @@ export default function ProfilePage(props: ProfilePageProps) {
     if (!orgId) return;
     let cancelled = false;
     api.getOrganizationById(orgId)
-    .then((data) => { if (!cancelled) setOrg(data); })
+    .then((data) => { if (!cancelled) { setOrg(data); setDescriptionInput(data.description ?? ""); } })
     .catch((err) => { if (!cancelled) setOrgError(err instanceof Error ? err.message : "Failed to load organization."); });
     api.getOrganizationEvents(orgId)
     .then((data) => { if (!cancelled) setEvents(data); })
@@ -455,8 +472,33 @@ export default function ProfilePage(props: ProfilePageProps) {
             <div className="space-y-4 lg:col-span-5">
               <Card>
                 <h2 className="text-sm font-semibold text-text">About</h2>
-                {isOrg ? (
-                  <p className="mt-2 text-sm text-text-muted">{org!.description?.trim() || "No description yet."}</p>
+                {isOrg && editingDescription ? (
+                  <div className="mt-2 space-y-2">
+                    <textarea
+                      value={descriptionInput}
+                      onChange={(e) => setDescriptionInput(e.target.value)}
+                      rows={4}
+                      maxLength={512}
+                      className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={handleSaveDescription} disabled={descriptionSaving} className="btn-brand text-sm flex-1 disabled:opacity-50">
+                        {descriptionSaving ? "Saving…" : "Save"}
+                      </button>
+                      <button onClick={() => { setEditingDescription(false); setDescriptionInput(org?.description ?? ""); }} className="text-sm flex-1 rounded-lg px-3 py-2 hover:bg-highlight text-text-muted">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : isOrg ? (
+                  <>
+                    <p className="mt-2 text-sm text-text-muted">{org!.description?.trim() || (isOrgAdmin ? "Add a description for this organization." : "No description yet.")}</p>
+                    {isOrgAdmin && (
+                      <button onClick={() => setEditingDescription(true)} className="btn-brand mt-4 w-full text-sm">
+                        {org!.description?.trim() ? "Edit description" : "Add description"}
+                      </button>
+                    )}
+                  </>
                 ) : editingBio ? (
                   <div className="mt-2 space-y-2">
                     <textarea
@@ -568,7 +610,36 @@ export default function ProfilePage(props: ProfilePageProps) {
             <h2 className="text-sm font-semibold text-text">{Tabs.about.title}</h2>
             <div className="mt-3 space-y-2 text-sm text-text-muted">
               {isOrg ? (
-                <>{org!.description?.trim() || "No description yet."}</>
+                <>
+                  {editingDescription ? (
+                    <div className="space-y-2">
+                      <textarea
+                        value={descriptionInput}
+                        onChange={(e) => setDescriptionInput(e.target.value)}
+                        rows={4}
+                        maxLength={512}
+                        className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={handleSaveDescription} disabled={descriptionSaving} className="btn-brand text-sm flex-1 disabled:opacity-50">
+                          {descriptionSaving ? "Saving…" : "Save"}
+                        </button>
+                        <button onClick={() => { setEditingDescription(false); setDescriptionInput(org?.description ?? ""); }} className="text-sm flex-1 rounded-lg px-3 py-2 hover:bg-highlight text-text-muted">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p>{org!.description?.trim() || (isOrgAdmin ? "Add a description for this organization." : "No description yet.")}</p>
+                      {isOrgAdmin && (
+                        <button onClick={() => setEditingDescription(true)} className="btn-brand mt-4 w-full text-sm">
+                          {org!.description?.trim() ? "Edit description" : "Add description"}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </>
               ) : (
                 <>
                   {[

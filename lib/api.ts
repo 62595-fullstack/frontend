@@ -77,7 +77,7 @@ export type OrganizationEvent = {
   ageLimit?: number;
   creatorName?: string;
 };
-export type UserOrganizationBinding = { id: number; organizationId: number };
+export type UserOrganizationBinding = { id: number; organizationId: number; roleId?: number };
 export type GdprDeleteResult = boolean;
 export type FriendSummary = {
   id: string;
@@ -266,6 +266,11 @@ export const api = {
     }),
   deleteOrganization: (id: number) =>
     request<boolean>(`/organizations/${id}`, { method: "DELETE" }),
+  updateOrganizationDescription: (id: number, description: string) =>
+    request<Organization>(`/organizations/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ description }),
+    }),
 
   // bindings
   getUserOrganizationBindings: (organizationId: number) =>
