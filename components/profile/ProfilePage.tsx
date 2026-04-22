@@ -142,14 +142,7 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsError, setPostsError] = useState<string | null>(null);
 
-  const [users, setUsers] = useState<ProfileUser[]>(
-    isOrg ? [
-      { id: "1", firstName: "Alice", lastName: "Johnson", since: formatMemberSince("2023-03-15"), badge: "Admin" },
-      { id: "2", firstName: "Bob", lastName: "Smith", since: formatMemberSince("2023-06-01"), badge: "Member" },
-      { id: "3", firstName: "Carol", lastName: "White", since: formatMemberSince("2024-01-20"), badge: "Member" },
-      { id: "4", firstName: "David", lastName: "Lee", since: formatMemberSince("2024-09-05"), badge: "Member" },
-    ] : []
-  );
+  const [users, setUsers] = useState<ProfileUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersLoadingError, setUsersLoadingError] = useState<string | null>(null);
 
