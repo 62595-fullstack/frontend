@@ -451,22 +451,29 @@ export default function ProfilePage(props: ProfilePageProps) {
             <h2 className="text-sm font-semibold text-text">{Tabs.people.title}</h2>
             {isOrg ? (
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-                {members.map((member) => (
-                  <div key={member.id} className="rounded-xl border border-border-muted bg-bg p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                        {getInitials(member.firstName)}
+                {members.map((member) => {
+                  const fullName = `${member.firstName} ${member.lastName}`;
+                  const memberSince = new Date(member.memberSince);
+                  const memberSinceLabel = Number.isNaN(memberSince.getTime())
+                    ? "Member since unknown date"
+                    : `Member since ${memberSince.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
+                  return (
+                    <div key={member.id} className="rounded-xl border border-border-muted bg-bg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
+                          {getInitials(fullName)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-text">{fullName}</p>
+                          <p className="mt-2 text-xs text-text-muted">{memberSinceLabel}</p>
+                        </div>
+                        <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                          {member.role}
+                        </span>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-text">{member.firstName}</p>
-                        <p className="truncate text-xs text-text-muted">{member.lastName}</p>
-                      </div>
-                      <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                        {member.role}
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <>
