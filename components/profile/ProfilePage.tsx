@@ -307,24 +307,22 @@ export default function ProfilePage(props: ProfilePageProps) {
               )}
             </div>
 
-            {/* User-only tab bar */}
-            {!isOrg && (
-              <div className="mt-4 border-t border-border-muted">
-                <div className="flex gap-2 overflow-x-auto py-2 text-sm font-semibold">
-                  {(["posts", "about", "friends"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
-                        activeTab === tab ? "bg-brand text-bg-dark" : "text-text hover:bg-highlight"
-                      }`}
-                    >
-                      {tab[0].toUpperCase() + tab.slice(1)}
-                    </button>
-                  ))}
-                </div>
+            {/* Tab bar */}
+            <div className="mt-4 border-t border-border-muted">
+              <div className="flex gap-2 overflow-x-auto py-2 text-sm font-semibold">
+                {(isOrg ? ["posts", "about"] as const : ["posts", "about", "friends"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
+                      activeTab === tab ? "bg-brand text-bg-dark" : "text-text hover:bg-highlight"
+                    }`}
+                  >
+                    {tab[0].toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
