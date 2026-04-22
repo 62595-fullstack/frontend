@@ -400,10 +400,6 @@ export default function ProfilePage(props: ProfilePageProps) {
               {/* User-only action buttons */}
               {isOwnProfile && (
                 <>
-                  <div className="hidden xl:flex flex-wrap gap-2 xl:pb-2">
-                    <button className="btn-brand text-sm">Edit profile</button>
-                    <button className="btn-brand text-sm">More</button>
-                  </div>
                   <div className="relative xl:hidden self-end">
                     <button
                       onClick={() => setShowMenu(!showMenu)}
@@ -417,7 +413,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                     </button>
                     {showMenu && (
                       <div className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-t-lg">
+                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-lg">
                           Edit cover photo
                         </button>
                         {/*<button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
