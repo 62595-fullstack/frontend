@@ -191,13 +191,13 @@ export default function ProfilePage(props: ProfilePageProps) {
   }, [props.variant, userId]);
 
   useEffect(() => {
-    if (isOwnProfile || !userId) return;
+    if (!userId) return;
     let cancelled = false;
     api.getUserById(userId)
     .then((user) => { if (!cancelled) setViewedUser({ firstName: user.firstName, lastName: user.lastName }); })
     .catch(() => {});
     return () => { cancelled = true; };
-  }, [isOwnProfile, userId]);
+  }, [userId]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -218,21 +218,20 @@ export default function ProfilePage(props: ProfilePageProps) {
   ), [posts]);
 
   const userProfile = useMemo<UserProfileData>(() => ({
-    name: isOwnProfile
-      ? "Your Profile"
-      : viewedUser
-        ? `${viewedUser.firstName} ${viewedUser.lastName}`
-        : userId ?? "User",
+    name: `${viewedUser!.firstName} ${viewedUser!.lastName}`,
     bio: isOwnProfile
       ? "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details."
       : undefined,
     friendsCount: users.length,
-  }), [isOwnProfile, userId, viewedUser, users.length]);
+  }), [isOwnProfile, viewedUser, users.length]);
 
   if (isOrg && orgError) {
     return <div className="page"><p className="text-danger">{orgError}</p></div>;
   }
   if (isOrg && !org) {
+    return <div className="page"><p className="text-text-muted">Loading…</p></div>;
+  }
+  if (!isOrg && !viewedUser) {
     return <div className="page"><p className="text-text-muted">Loading…</p></div>;
   }
 
