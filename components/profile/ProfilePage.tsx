@@ -420,12 +420,12 @@ export default function ProfilePage(props: ProfilePageProps) {
                         <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-t-lg">
                           Edit cover photo
                         </button>
-                        <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
+                        {/*<button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
                           Edit profile
                         </button>
                         <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">
                           More
-                        </button>
+                        </button>*/}
                       </div>
                     )}
                   </div>
