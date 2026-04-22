@@ -240,8 +240,8 @@ export default function ProfilePage(props: ProfilePageProps) {
     if (descriptionSaving || !orgId) return;
     setDescriptionSaving(true);
     try {
-      const updated = await api.updateOrganizationDescription(orgId, descriptionInput);
-      setOrg((prev) => prev ? { ...prev, description: updated.description } : prev);
+      await api.updateOrganizationDescription(orgId, descriptionInput);
+      setOrg((prev) => prev ? { ...prev, description: descriptionInput } : prev);
       setEditingDescription(false);
     } finally {
       setDescriptionSaving(false);
