@@ -17,7 +17,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { href: "/organizations", label: "Organizations" },
     { href: "/notifications", label: "Notifications" },
     { href: "/events", label: "Events" },
-    { href: "/profile", label: "Profile" },
+    { href: "/profile", label: "My Profile" },
   ];
 
   return (
