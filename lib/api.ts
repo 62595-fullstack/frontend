@@ -296,6 +296,7 @@ export const api = {
 
   // users
   getMe: () => request<UserSummary>(`/users/me`),
+  searchUsers: (query: string) => request<UserSummary[]>(`/users?query=${encodeURIComponent(query)}`),
   getUserById: (userId: string) => request<UserSummary>(`/users/${userId}`),
   getPostsByUser: async (userId: string): Promise<Post[]> => {
     const data = await request<unknown>(`/users/${userId}/posts`);
