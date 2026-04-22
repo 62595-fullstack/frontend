@@ -218,7 +218,7 @@ export default function ProfilePage(props: ProfilePageProps) {
   ), [posts]);
 
   const userProfile = useMemo<UserProfileData>(() => ({
-    name: `${viewedUser!.firstName} ${viewedUser!.lastName}`,
+    name: viewedUser ? `${viewedUser.firstName} ${viewedUser.lastName}` : "",
     bio: isOwnProfile
       ? "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details."
       : undefined,
