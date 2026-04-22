@@ -106,8 +106,8 @@ export default function ProfilePage(props: ProfilePageProps) {
       title: 'About',
       description: isOrg ? 'About this organization' : 'Bio, location, work, and school details'
     },
-    people: {
-      id: 'people',
+    users: {
+      id: 'users',
       title: isOrg ? 'Members' : 'Friends',
       description: isOrg ? 'Organization members' : 'User friends'
     },
@@ -215,7 +215,7 @@ export default function ProfilePage(props: ProfilePageProps) {
           <div className="grid grid-cols-2 gap-3">
             <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length}
                          tone="accent"/>
-            <PagebarStat label={Tabs.people.title}
+            <PagebarStat label={Tabs.users.title}
                          value={usersLoading ? "..." : (isOrg ? members.length : userProfile.friendsCount)}/>
           </div>
           {isOrg && events.length > 0 && (
@@ -468,9 +468,9 @@ export default function ProfilePage(props: ProfilePageProps) {
         )}
 
         {/* User friends and organization members tab */}
-        {activeTab.id === Tabs.people.id && (
+        {activeTab.id === Tabs.users.id && (
           <Card>
-            <h2 className="text-sm font-semibold text-text">{Tabs.people.title}</h2>
+            <h2 className="text-sm font-semibold text-text">{Tabs.users.title}</h2>
             {usersLoadingError && (
               <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{usersLoadingError}</div>
             )}
