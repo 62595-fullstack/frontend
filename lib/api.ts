@@ -309,6 +309,12 @@ export const api = {
     return parsePostsResponse(data);
   },
   getFriendsByUser: (userId: string) => request<FriendSummary[]>(`/users/${userId}/friends`),
+  getMyFriends: () => request<FriendSummary[]>(`/users/me/friends`),
+  addFriend: (friendUserId: string) => request<FriendSummary>(`/users/me/friends`, {
+    method: "POST",
+    body: JSON.stringify({ friendUserId }),
+  }),
+  removeFriend: (friendUserId: string) => request<void>(`/users/me/friends/${friendUserId}`, { method: "DELETE" }),
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {

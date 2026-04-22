@@ -157,6 +157,9 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string } | null>(null);
 
+  const [isFriend, setIsFriend] = useState<boolean | null>(null);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
+
   useEffect(() => {
     if (props.variant !== "user") return;
     let cancelled = false;
@@ -198,6 +201,31 @@ export default function ProfilePage(props: ProfilePageProps) {
     .catch(() => {});
     return () => { cancelled = true; };
   }, [userId]);
+
+  useEffect(() => {
+    if (!userId || isOwnProfile) return;
+    let cancelled = false;
+    api.getMyFriends()
+    .then((friends) => { if (!cancelled) setIsFriend(friends.some((f) => f.id === userId)); })
+    .catch(() => { if (!cancelled) setIsFriend(false); });
+    return () => { cancelled = true; };
+  }, [userId, isOwnProfile]);
+
+  async function handleFriendAction() {
+    if (!userId || friendActionLoading) return;
+    setFriendActionLoading(true);
+    try {
+      if (isFriend) {
+        await api.removeFriend(userId);
+        setIsFriend(false);
+      } else {
+        await api.addFriend(userId);
+        setIsFriend(true);
+      }
+    } finally {
+      setFriendActionLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!orgId) return;
@@ -337,6 +365,19 @@ export default function ProfilePage(props: ProfilePageProps) {
                   </p>
                 </div>
               </div>
+
+              {/* Friend action button */}
+              {!isOwnProfile && !isOrg && (
+                <div className="self-end pb-2">
+                  <button
+                    onClick={handleFriendAction}
+                    disabled={isFriend === null || friendActionLoading}
+                    className="btn-brand text-sm disabled:opacity-50"
+                  >
+                    {isFriend === null ? "…" : friendActionLoading ? "…" : isFriend ? "Remove Friend" : "Add Friend"}
+                  </button>
+                </div>
+              )}
 
               {/* User-only action buttons */}
               {isOwnProfile && (
