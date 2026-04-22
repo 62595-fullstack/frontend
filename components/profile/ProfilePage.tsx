@@ -505,6 +505,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               </div>
             )}
 
+            {/*
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               {members.map((member) => {
                 const fullName = `${member.firstName} ${member.lastName}`;
@@ -534,6 +535,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                 );
               })}
             </div>
+            */}
           </Card>
         )}
       </div>
