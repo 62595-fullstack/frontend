@@ -155,7 +155,10 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [orgError, setOrgError] = useState<string | null>(null);
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
 
-  const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string } | null>(null);
+  const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string; email: string; dateOfBirth?: string; bio?: string } | null>(null);
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioInput, setBioInput] = useState("");
+  const [bioSaving, setBioSaving] = useState(false);
 
   const [isFriend, setIsFriend] = useState<boolean | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
@@ -197,7 +200,12 @@ export default function ProfilePage(props: ProfilePageProps) {
     if (!userId) return;
     let cancelled = false;
     api.getUserById(userId)
-    .then((user) => { if (!cancelled) setViewedUser({ firstName: user.firstName, lastName: user.lastName }); })
+    .then((user) => {
+      if (!cancelled) {
+        setViewedUser({ firstName: user.firstName, lastName: user.lastName, email: user.email, dateOfBirth: user.dateOfBirth, bio: user.bio });
+        setBioInput(user.bio ?? "");
+      }
+    })
     .catch(() => {});
     return () => { cancelled = true; };
   }, [userId]);
@@ -210,6 +218,18 @@ export default function ProfilePage(props: ProfilePageProps) {
     .catch(() => { if (!cancelled) setIsFriend(false); });
     return () => { cancelled = true; };
   }, [userId, isOwnProfile]);
+
+  async function handleSaveBio() {
+    if (bioSaving) return;
+    setBioSaving(true);
+    try {
+      const updated = await api.updateMyProfile({ bio: bioInput });
+      setViewedUser((prev) => prev ? { ...prev, bio: updated.bio } : prev);
+      setEditingBio(false);
+    } finally {
+      setBioSaving(false);
+    }
+  }
 
   async function handleFriendAction() {
     if (!userId || friendActionLoading) return;
@@ -247,11 +267,9 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const userProfile = useMemo<UserProfileData>(() => ({
     name: viewedUser ? `${viewedUser.firstName} ${viewedUser.lastName}` : "",
-    bio: isOwnProfile
-      ? "Your backend does not expose a profile endpoint yet, so this page is using local placeholder profile details."
-      : undefined,
+    bio: viewedUser?.bio ?? undefined,
     friendsCount: users.length,
-  }), [isOwnProfile, viewedUser, users.length]);
+  }), [viewedUser, users.length]);
 
   if (isOrg && orgError) {
     return <div className="page"><p className="text-danger">{orgError}</p></div>;
@@ -444,11 +462,37 @@ export default function ProfilePage(props: ProfilePageProps) {
             <div className="space-y-4 lg:col-span-5">
               <Card>
                 <h2 className="text-sm font-semibold text-text">About</h2>
-                <p className="mt-2 text-sm text-text-muted">
-                  {isOrg ? (org!.description?.trim() || "No description yet.") : userProfile.bio}
-                </p>
-                {isOwnProfile && (
-                  <button className="btn-brand mt-4 w-full text-sm">Edit details</button>
+                {isOrg ? (
+                  <p className="mt-2 text-sm text-text-muted">{org!.description?.trim() || "No description yet."}</p>
+                ) : editingBio ? (
+                  <div className="mt-2 space-y-2">
+                    <textarea
+                      value={bioInput}
+                      onChange={(e) => setBioInput(e.target.value)}
+                      rows={4}
+                      maxLength={500}
+                      className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={handleSaveBio} disabled={bioSaving} className="btn-brand text-sm flex-1 disabled:opacity-50">
+                        {bioSaving ? "Saving…" : "Save"}
+                      </button>
+                      <button onClick={() => { setEditingBio(false); setBioInput(viewedUser?.bio ?? ""); }} className="text-sm flex-1 rounded-lg px-3 py-2 hover:bg-highlight text-text-muted">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-2 text-sm text-text-muted">
+                      {userProfile.bio?.trim() || (isOwnProfile ? "Add a bio to tell people about yourself." : "No bio yet.")}
+                    </p>
+                    {isOwnProfile && (
+                      <button onClick={() => setEditingBio(true)} className="btn-brand mt-4 w-full text-sm">
+                        {userProfile.bio ? "Edit bio" : "Add bio"}
+                      </button>
+                    )}
+                  </>
                 )}
               </Card>
             </div>
@@ -536,10 +580,13 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <>
                   {[
                     { label: "Bio", value: userProfile.bio },
-                    { label: "Works at", value: userProfile.company },
-                    { label: "Studied at", value: userProfile.school },
-                    { label: "Lives in", value: userProfile.city },
-                    { label: "Website", value: userProfile.website },
+                    { label: "Email", value: viewedUser?.email },
+                    {
+                      label: "Date of birth",
+                      value: viewedUser?.dateOfBirth
+                        ? new Date(viewedUser.dateOfBirth).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+                        : undefined,
+                    },
                   ].map(({ label, value }) => (
                     <p key={label}>
                       <span className="font-semibold text-text">{label}:</span>{" "}

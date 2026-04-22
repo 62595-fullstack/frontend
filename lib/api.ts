@@ -99,7 +99,8 @@ export type UserSummary = {
   email: string;
   firstName: string;
   lastName: string;
-  age?: number;
+  dateOfBirth?: string;
+  bio?: string;
 };
 
 export type MemberSummary = {
@@ -315,6 +316,10 @@ export const api = {
     body: JSON.stringify({ friendUserId }),
   }),
   removeFriend: (friendUserId: string) => request<void>(`/users/me/friends/${friendUserId}`, { method: "DELETE" }),
+  updateMyProfile: (data: { bio?: string }) => request<UserSummary>(`/users/me`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  }),
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
