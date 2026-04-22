@@ -6,6 +6,7 @@ import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { api, FriendSummary, Organization, OrganizationEvent, Post } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
+import OrganizationCard from "@/components/organizations/OrganizationCard";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="rounded-xl bg-bg-light shadow-sm p-4">{children}</div>;
@@ -91,7 +92,15 @@ export default function ProfilePage(props: ProfilePageProps) {
   const isOrg = props.variant === "organization";
   const orgId = isOrg ? (props as { variant: "organization"; orgId: number }).orgId : null;
 
-  const [activeTab, setActiveTab] = useState<"posts" | "about" | "friends">("posts");
+  const Tabs = {
+    posts: { id: "posts", title: "Posts", description: "Latest activity..." },
+    about: { id: "about", title: "About", description: "Bio, location..." },
+    people: { id: "people", title: "Friends", description: "Friend network" },
+  } as const;
+
+  type Tab = typeof Tabs[keyof typeof Tabs]
+
+  const [activeTab, setActiveTab] = useState<Tab>(Tabs.posts);
   const [showMenu, setShowMenu] = useState(false);
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -168,8 +177,8 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const pagebarTitle = isOrg
     ? "Organization details"
-    : activeTab === "posts" ? "Profile overview"
-    : activeTab === "about" ? "About profile"
+    : activeTab === Tabs.posts ? "Profile overview"
+    : activeTab === Tabs.about ? "About profile"
     : "Friend network";
 
   // The label/count shown in the right-column header card
@@ -209,12 +218,9 @@ export default function ProfilePage(props: ProfilePageProps) {
             </PagebarList>
           )}
           <PagebarList>
-            <PagebarListItem active={activeTab === "posts"} title="Posts" meta="Latest activity and publishing history"/>
-            <PagebarListItem active={activeTab === "about"} title="About" meta="Bio, location, work, and school details"/>
-            {!isOrg && (
-              // Should only show if this is the client user's page
-              <PagebarListItem active={activeTab === "friends"} title="Friends" meta="Relationship graph and social context"/>
-            )}
+            {Object.values(Tabs).map((tab) => (
+              <PagebarListItem key={tab.id} active={activeTab.id === tab.id} title={tab.title} meta={tab.description} />
+            ))}
           </PagebarList>
         </PagebarSection>
       </PagebarContent>
@@ -310,15 +316,15 @@ export default function ProfilePage(props: ProfilePageProps) {
             {/* Tab bar */}
             <div className="mt-4 border-t border-border-muted">
               <div className="flex gap-2 overflow-x-auto py-2 text-sm font-semibold">
-                {(isOrg ? ["posts", "about"] as const : ["posts", "about", "friends"] as const).map((tab) => (
+                {Object.values(Tabs).map((tab) => (
                   <button
-                    key={tab}
+                    key={tab.id}
                     onClick={() => setActiveTab(tab)}
                     className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
                       activeTab === tab ? "bg-brand text-bg-dark" : "text-text hover:bg-highlight"
                     }`}
                   >
-                    {tab[0].toUpperCase() + tab.slice(1)}
+                    {tab.title}
                   </button>
                 ))}
               </div>
@@ -327,7 +333,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         </div>
 
         {/* Posts tab */}
-        {activeTab === "posts" && (
+        {activeTab === Tabs.posts && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Left: About */}
             <div className="space-y-4 lg:col-span-5">
@@ -414,7 +420,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         )}
 
         {/* About tab */}
-        {activeTab === "about" && (
+        {activeTab === Tabs.about && (
           <Card>
             <h2 className="text-sm font-semibold text-text">About</h2>
             <div className="mt-3 space-y-2 text-sm text-text-muted">
@@ -443,7 +449,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         )}
 
         {/* User friends tab */}
-        {!isOrg && activeTab === "friends" && (
+        {activeTab === Tabs.people && (
           <Card>
             <h2 className="text-sm font-semibold text-text">Friends</h2>
             {friendsError && (
