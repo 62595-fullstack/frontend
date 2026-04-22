@@ -4,9 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
-import { api, FriendSummary, Organization, OrganizationEvent, Post } from "@/lib/api";
+import { api, FriendSummary, MemberSummary, Organization, OrganizationEvent, Post } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
-import OrganizationCard from "@/components/organizations/OrganizationCard";
 
 function Card({ children }: { children: React.ReactNode }) {
   return <div className="rounded-xl bg-bg-light shadow-sm p-4">{children}</div>;
@@ -121,8 +120,9 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [friendsError, setFriendsError] = useState<string | null>(null);
 
   const [org, setOrg] = useState<Organization | null>(null);
-  const [events, setEvents] = useState<OrganizationEvent[]>([]);
   const [orgError, setOrgError] = useState<string | null>(null);
+  const [events, setEvents] = useState<OrganizationEvent[]>([]);
+  const [members, setMembers] = useState<MemberSummary[]>([]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
@@ -202,7 +202,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         <PagebarSection eyebrow={isOrg ? "Overview" : "Identity"} title={pagebarTitle}>
           <div className="grid grid-cols-2 gap-3">
             <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length} tone="accent" />
-            <PagebarStat label={Tabs.people.title} value={isOrg ? "N/A" : (friendsLoading ? "..." : userProfile.friendsCount ?? 0)} />
+            <PagebarStat label={Tabs.people.title} value={isOrg ? members.length : (friendsLoading ? "..." : userProfile.friendsCount ?? 0)} />
           </div>
           {isOrg && events.length > 0 && (
             <PagebarList>
@@ -449,37 +449,60 @@ export default function ProfilePage(props: ProfilePageProps) {
         {activeTab.id === Tabs.people.id && (
           <Card>
             <h2 className="text-sm font-semibold text-text">{Tabs.people.title}</h2>
-            {friendsError && (
-              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{friendsError}</div>
-            )}
-            {friendsLoading && (
-              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading friends...</div>
-            )}
-            {!friendsLoading && !friendsError && friends.length === 0 && (
-              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">No friends found for the current user.</div>
-            )}
-            {!friendsLoading && !friendsError && friends.length > 0 && (
+            {isOrg ? (
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-                {friends.map((friend: FriendSummary) => (
-                  <div key={friend.id} className="rounded-xl border border-border-muted bg-bg p-4">
+                {members.map((member) => (
+                  <div key={member.id} className="rounded-xl border border-border-muted bg-bg p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
-                        {getInitials(friend.userName || friend.firstName)}
+                        {getInitials(member.firstName)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-text">
-                          {friend.userName || friend.firstName}
-                        </p>
-                        <p className="truncate text-xs text-text-muted">{friend.email}</p>
-                        <p className="mt-2 text-xs text-text-muted">{formatFriendSince(friend.friendsSince)}</p>
+                        <p className="truncate text-sm font-semibold text-text">{member.firstName}</p>
+                        <p className="truncate text-xs text-text-muted">{member.lastName}</p>
                       </div>
                       <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
-                        {friend.age}
+                        {member.role}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
+            ) : (
+              <>
+                {friendsError && (
+                  <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{friendsError}</div>
+                )}
+                {friendsLoading && (
+                  <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading friends...</div>
+                )}
+                {!friendsLoading && !friendsError && friends.length === 0 && (
+                  <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">No friends found for the current user.</div>
+                )}
+                {!friendsLoading && !friendsError && friends.length > 0 && (
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {friends.map((friend: FriendSummary) => (
+                      <div key={friend.id} className="rounded-xl border border-border-muted bg-bg p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
+                            {getInitials(friend.userName || friend.firstName)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-text">
+                              {friend.userName || friend.firstName}
+                            </p>
+                            <p className="truncate text-xs text-text-muted">{friend.email}</p>
+                            <p className="mt-2 text-xs text-text-muted">{formatFriendSince(friend.friendsSince)}</p>
+                          </div>
+                          <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                            {friend.age}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </Card>
         )}

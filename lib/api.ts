@@ -88,6 +88,14 @@ export type FriendSummary = {
   friendsSince: string;
 };
 
+export type MemberSummary = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  memberSince: string;
+  role: string;
+};
+
 type RawOrganization = {
   Id?: number;
   id?: number;
