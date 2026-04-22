@@ -113,6 +113,8 @@ export default function ProfilePage(props: ProfilePageProps) {
   const userId = !isOrg ? (props as { variant: "user"; userId?: string }).userId : null;
   const isOwnProfile = !isOrg && !userId;
 
+  const [resolvedUserId, setResolvedUserId] = useState<string | null>(userId ?? null);
+
   const Tabs = {
     overview: {
       id: 'overview',
@@ -158,23 +160,32 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string } | null>(null);
 
   useEffect(() => {
-    if (props.variant !== "user") return;
+    if (!isOwnProfile) return;
+    let cancelled = false;
+    api.getMe()
+    .then((me) => { if (!cancelled) setResolvedUserId(me.id); })
+    .catch(() => {});
+    return () => { cancelled = true; };
+  }, [isOwnProfile]);
+
+  useEffect(() => {
+    if (props.variant !== "user" || !resolvedUserId) return;
     let cancelled = false;
     setPostsLoading(true);
     setPostsError(null);
-    api.getPostsByUser(userId ?? "me")
+    api.getPostsByUser(resolvedUserId)
     .then((data) => { if (!cancelled) setPosts(data ?? []); })
     .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
     .finally(() => { if (!cancelled) setPostsLoading(false); });
     return () => { cancelled = true; };
-  }, [props.variant, userId]);
+  }, [props.variant, resolvedUserId]);
 
   useEffect(() => {
-    if (props.variant !== "user") return;
+    if (props.variant !== "user" || !resolvedUserId) return;
     let cancelled = false;
     setUsersLoading(true);
     setUsersLoadingError(null);
-    api.getFriendsByUser(userId ?? "me")
+    api.getFriendsByUser(resolvedUserId)
     .then((friends) => {
       if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
         id: friend.id,
@@ -188,16 +199,16 @@ export default function ProfilePage(props: ProfilePageProps) {
     .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
     .finally(() => { if (!cancelled) setUsersLoading(false); });
     return () => { cancelled = true; };
-  }, [props.variant, userId]);
+  }, [props.variant, resolvedUserId]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (isOwnProfile || !resolvedUserId) return;
     let cancelled = false;
-    api.getUserById(userId)
+    api.getUserById(resolvedUserId)
     .then((user) => { if (!cancelled) setViewedUser({ firstName: user.firstName, lastName: user.lastName }); })
-    .catch(() => { /* silently fall back to showing userId */ });
+    .catch(() => {});
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [isOwnProfile, resolvedUserId]);
 
   useEffect(() => {
     if (!orgId) return;

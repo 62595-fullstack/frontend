@@ -295,6 +295,7 @@ export const api = {
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
 
   // users
+  getMe: () => request<UserSummary>(`/users/me`),
   getUserById: (userId: string) => request<UserSummary>(`/users/${userId}`),
   getPostsByUser: async (userId: string): Promise<Post[]> => {
     const data = await request<unknown>(`/users/${userId}/posts`);
