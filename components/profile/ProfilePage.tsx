@@ -331,9 +331,9 @@ export default function ProfilePage(props: ProfilePageProps) {
 
       <div className="w-full max-w-5xl p-4 space-y-4">
         {/* Header card — identical structure for both variants */}
-        <div className="rounded-xl bg-bg-light shadow-sm overflow-hidden">
+        <div className="rounded-xl bg-bg-light shadow-sm">
           {/* Cover photo */}
-          <div className="relative">
+          <div className="relative overflow-hidden rounded-t-xl">
             {coverPhoto ? (
               <div
                 className="w-full h-40 md:h-56 bg-cover bg-center"
