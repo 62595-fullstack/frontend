@@ -104,16 +104,14 @@ type UserProfileData = {
 };
 
 export type ProfilePageProps =
-  | { variant: "user"; userId?: string }
+  | { variant: "user"; userId: string; isOwnProfile?: boolean }
   | { variant: "organization"; orgId: number };
 
 export default function ProfilePage(props: ProfilePageProps) {
   const isOrg = props.variant === "organization";
-  const orgId = isOrg ? (props as { variant: "organization"; orgId: number }).orgId : null;
-  const userId = !isOrg ? (props as { variant: "user"; userId?: string }).userId : null;
-  const isOwnProfile = !isOrg && !userId;
-
-  const [resolvedUserId, setResolvedUserId] = useState<string | null>(userId ?? null);
+  const orgId = isOrg ? props.orgId : null;
+  const userId = !isOrg ? props.userId : null;
+  const isOwnProfile = !isOrg && (props.isOwnProfile ?? false);
 
   const Tabs = {
     overview: {
@@ -160,32 +158,23 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string } | null>(null);
 
   useEffect(() => {
-    if (!isOwnProfile) return;
-    let cancelled = false;
-    api.getMe()
-    .then((me) => { if (!cancelled) setResolvedUserId(me.id); })
-    .catch(() => {});
-    return () => { cancelled = true; };
-  }, [isOwnProfile]);
-
-  useEffect(() => {
-    if (props.variant !== "user" || !resolvedUserId) return;
+    if (props.variant !== "user") return;
     let cancelled = false;
     setPostsLoading(true);
     setPostsError(null);
-    api.getPostsByUser(resolvedUserId)
+    api.getPostsByUser(userId!)
     .then((data) => { if (!cancelled) setPosts(data ?? []); })
     .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
     .finally(() => { if (!cancelled) setPostsLoading(false); });
     return () => { cancelled = true; };
-  }, [props.variant, resolvedUserId]);
+  }, [props.variant, userId]);
 
   useEffect(() => {
-    if (props.variant !== "user" || !resolvedUserId) return;
+    if (props.variant !== "user") return;
     let cancelled = false;
     setUsersLoading(true);
     setUsersLoadingError(null);
-    api.getFriendsByUser(resolvedUserId)
+    api.getFriendsByUser(userId!)
     .then((friends) => {
       if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
         id: friend.id,
@@ -199,16 +188,16 @@ export default function ProfilePage(props: ProfilePageProps) {
     .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
     .finally(() => { if (!cancelled) setUsersLoading(false); });
     return () => { cancelled = true; };
-  }, [props.variant, resolvedUserId]);
+  }, [props.variant, userId]);
 
   useEffect(() => {
-    if (isOwnProfile || !resolvedUserId) return;
+    if (isOwnProfile || !userId) return;
     let cancelled = false;
-    api.getUserById(resolvedUserId)
+    api.getUserById(userId)
     .then((user) => { if (!cancelled) setViewedUser({ firstName: user.firstName, lastName: user.lastName }); })
     .catch(() => {});
     return () => { cancelled = true; };
-  }, [isOwnProfile, resolvedUserId]);
+  }, [isOwnProfile, userId]);
 
   useEffect(() => {
     if (!orgId) return;
