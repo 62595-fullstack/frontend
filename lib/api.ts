@@ -71,6 +71,7 @@ export type OrganizationEvent = {
   title: string;
   description: string;
   rules: string;
+  bracketResults: string;
   attachment: Attachment | null;
   createdDate?: string;
   startDate?: string;
@@ -111,6 +112,8 @@ type RawEvent = {
   description?: string;
   Rules?: string;
   rules?: string;
+  BracketResults?: string;
+  bracketResults?: string;
   Attachment?: Attachment | null;
   attachment?: Attachment | null;
   CreatedDate?: string;
@@ -187,6 +190,7 @@ function normalizeEvent(raw: RawEvent): OrganizationEvent {
     title: raw.Title ?? raw.title ?? "",
     description: raw.Description ?? raw.description ?? "",
     rules: raw.Rules ?? raw.rules ?? "",
+    bracketResults: raw.BracketResults ?? raw.bracketResults ?? "{}",
     attachment: raw.Attachment ?? raw.attachment ?? null,
     createdDate: raw.CreatedDate ?? raw.createdDate ?? "",
     startDate: raw.StartDate ?? raw.startDate ?? "",
@@ -260,7 +264,7 @@ export const api = {
     }),
   deleteOrganizationEvent: (id: number) =>
     request<void>(`/OrganizationEvents/${id}`, { method: "DELETE" }),
-  updateEvent: (id: number, fields: { description?: string; rules?: string }) =>
+  updateEvent: (id: number, fields: { description?: string; rules?: string; bracketResults?: string }) =>
     request<void>(`/OrganizationEvents/${id}`, {
       method: "PATCH",
       body: JSON.stringify(fields),
@@ -272,5 +276,7 @@ export const api = {
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
-  return request<OrganizationEvent | null>(`/OrganizationEvents/event/${eventId}`);
+  const data = await request<unknown>(`/OrganizationEvents/event/${eventId}`);
+  if (!data) return null;
+  return normalizeEvent(unwrapResult(data) as RawEvent);
 }
