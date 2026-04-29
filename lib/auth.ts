@@ -7,7 +7,7 @@ export type CheckLoginResult = {
 
 export async function checkIfLoggedIn(): Promise<CheckLoginResult> {
   const cookieStore = await cookies()
-  if (!cookieStore.has('session')) {
+  if (!cookieStore.has('token')) {
     return { isLoggedIn: false }
   }
   return { isLoggedIn: true }

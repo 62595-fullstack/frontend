@@ -1,0 +1,823 @@
+"use client";
+
+import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import PagebarContent from "@/components/pagebar/PagebarContent";
+import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
+import { api, OrgMember, Organization, OrganizationEvent, Post } from "@/lib/api";
+import { getOrgImages } from "@/lib/mockOrgImages";
+
+function Card({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-xl bg-bg-light shadow-sm p-4">{children}</div>;
+}
+
+function ItemHeader({
+  picture,
+  initials,
+  title,
+  meta,
+  action,
+}: {
+  picture?: string | null;
+  initials: string;
+  title: string;
+  meta: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        {picture ? (
+          <img src={picture} alt={title} className="w-10 h-10 rounded-full object-cover"/>
+        ) : (
+          <div
+            className="w-10 h-10 rounded-full bg-bg flex items-center justify-center text-xs font-semibold text-brand">
+            {initials}
+          </div>
+        )}
+        <div>
+          <p className="text-sm font-semibold text-text">{title}</p>
+          <p className="text-xs text-text-muted">{meta}</p>
+        </div>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function getInitials(name?: string) {
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
+  if (parts.length === 0) return "?";
+  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("");
+}
+
+function formatPostTime(iso?: string) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, {
+    year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function formatFriendSince(iso?: string) {
+  if (!iso) return "Friends since unknown date";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Friends since unknown date";
+  return `Friends since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
+}
+
+function formatMemberSince(iso?: string) {
+  if (!iso) return "Member since unknown date";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Member since unknown date";
+  return `Member since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
+}
+
+function formatFriendsCount(count?: number) {
+  if (typeof count !== "number" || !Number.isFinite(count)) return "Friends count unavailable";
+  return `${count.toLocaleString()} friend${count === 1 ? "" : "s"}`;
+}
+
+function formatMembersCount(count?: number) {
+  if (typeof count !== "number" || !Number.isFinite(count)) return "Members count unavailable";
+  return `${count.toLocaleString()} member${count === 1 ? "" : "s"}`;
+}
+
+type ProfileUser = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  detail?: string;
+  since: string;
+  badge?: string | number;
+  roleId?: number;
+};
+
+type UserProfileData = {
+  name: string;
+  bio?: string;
+  website?: string;
+  city?: string;
+  company?: string;
+  school?: string;
+  friendsCount?: number;
+};
+
+export type ProfilePageProps =
+  | { variant: "user"; userId: string; isOwnProfile?: boolean }
+  | { variant: "organization"; orgId: number; isOrgAdmin?: boolean; isMember?: boolean | null };
+
+export default function ProfilePage(props: ProfilePageProps) {
+  const isOrg = props.variant === "organization";
+  const orgId = isOrg ? props.orgId : null;
+  const userId = !isOrg ? props.userId : null;
+  const isOwnProfile = !isOrg && (props.isOwnProfile ?? false);
+  const isOrgAdmin = isOrg && (props.isOrgAdmin ?? false);
+  const isMemberProp = isOrg ? (props.isMember ?? null) : null;
+
+  const Tabs = {
+    overview: {
+      id: 'overview',
+      title: isOrg ? 'Events' : 'Posts',
+      description: isOrg ? 'Current organization events' : 'User posts',
+    },
+    about: {
+      id: 'about',
+      title: 'About',
+      description: isOrg ? 'About this organization' : 'Bio, location, work, and school details'
+    },
+    users: {
+      id: 'users',
+      title: isOrg ? 'Members' : 'Friends',
+      description: isOrg ? 'Organization members' : 'User friends'
+    },
+  } as const;
+
+  type Tab = typeof Tabs[keyof typeof Tabs]
+
+  const [activeTab, setActiveTab] = useState<Tab>(Tabs.overview);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState<string | null>(null);
+
+  const [users, setUsers] = useState<ProfileUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersLoadingError, setUsersLoadingError] = useState<string | null>(null);
+
+  const [org, setOrg] = useState<Organization | null>(null);
+  const [orgError, setOrgError] = useState<string | null>(null);
+  const [events, setEvents] = useState<OrganizationEvent[]>([]);
+
+  const [viewedUser, setViewedUser] = useState<{ firstName: string; lastName: string; email: string; dateOfBirth?: string; bio?: string } | null>(null);
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioInput, setBioInput] = useState("");
+  const [bioSaving, setBioSaving] = useState(false);
+
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [descriptionInput, setDescriptionInput] = useState("");
+  const [descriptionSaving, setDescriptionSaving] = useState(false);
+
+  const [isFriend, setIsFriend] = useState<boolean | null>(null);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
+
+  const [isMember, setIsMember] = useState<boolean | null>(isMemberProp);
+  const [joinLoading, setJoinLoading] = useState(false);
+
+  useEffect(() => { setIsMember(isMemberProp); }, [isMemberProp]);
+
+  useEffect(() => {
+    if (props.variant !== "user") return;
+    let cancelled = false;
+    setPostsLoading(true);
+    setPostsError(null);
+    api.getPostsByUser(userId!)
+    .then((data) => { if (!cancelled) setPosts(data ?? []); })
+    .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
+    .finally(() => { if (!cancelled) setPostsLoading(false); });
+    return () => { cancelled = true; };
+  }, [props.variant, userId]);
+
+  useEffect(() => {
+    if (props.variant !== "user") return;
+    let cancelled = false;
+    setUsersLoading(true);
+    setUsersLoadingError(null);
+    api.getFriendsByUser(userId!)
+    .then((friends) => {
+      if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
+        id: friend.id,
+        firstName: friend.firstName,
+        lastName: friend.lastName,
+        detail: friend.email,
+        since: formatFriendSince(friend.friendsSince),
+        badge: friend.age,
+      })) : []);
+    })
+    .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
+    .finally(() => { if (!cancelled) setUsersLoading(false); });
+    return () => { cancelled = true; };
+  }, [props.variant, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    api.getUserById(userId)
+    .then((user) => {
+      if (!cancelled) {
+        setViewedUser({ firstName: user.firstName, lastName: user.lastName, email: user.email, dateOfBirth: user.dateOfBirth, bio: user.bio });
+        setBioInput(user.bio ?? "");
+      }
+    })
+    .catch(() => {});
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId || isOwnProfile) return;
+    let cancelled = false;
+    api.getMyFriends()
+    .then((friends) => { if (!cancelled) setIsFriend(friends.some((f) => f.id === userId)); })
+    .catch(() => { if (!cancelled) setIsFriend(false); });
+    return () => { cancelled = true; };
+  }, [userId, isOwnProfile]);
+
+  async function handleSaveBio() {
+    if (bioSaving) return;
+    setBioSaving(true);
+    try {
+      const updated = await api.updateMyProfile({ bio: bioInput });
+      setViewedUser((prev) => prev ? { ...prev, bio: updated.bio } : prev);
+      setEditingBio(false);
+    } finally {
+      setBioSaving(false);
+    }
+  }
+
+  async function handleSaveDescription() {
+    if (descriptionSaving || !orgId) return;
+    setDescriptionSaving(true);
+    try {
+      await api.updateOrganizationDescription(orgId, descriptionInput);
+      setOrg((prev) => prev ? { ...prev, description: descriptionInput } : prev);
+      setEditingDescription(false);
+    } finally {
+      setDescriptionSaving(false);
+    }
+  }
+
+  async function handleFriendAction() {
+    if (!userId || friendActionLoading) return;
+    setFriendActionLoading(true);
+    try {
+      if (isFriend) {
+        await api.removeFriend(userId);
+        setIsFriend(false);
+      } else {
+        await api.addFriend(userId);
+        setIsFriend(true);
+      }
+    } finally {
+      setFriendActionLoading(false);
+    }
+  }
+
+  async function handleJoinOrganization() {
+    if (!orgId || joinLoading) return;
+    setJoinLoading(true);
+    try {
+      await api.joinOrganization(orgId);
+      setIsMember(true);
+    } finally {
+      setJoinLoading(false);
+    }
+  }
+
+  const [leaveLoading, setLeaveLoading] = useState(false);
+  const [removingUserId, setRemovingUserId] = useState<string | null>(null);
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
+
+  async function handleLeaveOrganization() {
+    if (!orgId || leaveLoading) return;
+    setLeaveLoading(true);
+    try {
+      await api.leaveOrganization(orgId);
+      setIsMember(false);
+    } finally {
+      setLeaveLoading(false);
+    }
+  }
+
+  async function handleRemoveMember(userId: string) {
+    if (!orgId || removingUserId) return;
+    setRemovingUserId(userId);
+    try {
+      await api.removeOrganizationMember(orgId, userId);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } finally {
+      setRemovingUserId(null);
+    }
+  }
+
+  async function handleChangeRole(userId: string, roleId: number) {
+    if (!orgId || updatingRoleUserId) return;
+    setUpdatingRoleUserId(userId);
+    try {
+      await api.updateOrganizationMemberRole(orgId, userId, roleId);
+      const roleName = roleId === 1000 ? "Admin" : "Member";
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, roleId, badge: roleName } : u));
+    } finally {
+      setUpdatingRoleUserId(null);
+    }
+  }
+
+  useEffect(() => {
+    if (!orgId) return;
+    let cancelled = false;
+    setUsersLoading(true);
+    setUsersLoadingError(null);
+    api.getOrganizationMembers(orgId)
+      .then((members: OrgMember[]) => {
+        if (!cancelled) setUsers(members.map((m) => ({
+          id: m.userId,
+          firstName: m.firstName,
+          lastName: m.lastName,
+          since: "",
+          badge: m.roleName,
+          roleId: m.roleId,
+        })));
+      })
+      .catch((err: unknown) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load members"); })
+      .finally(() => { if (!cancelled) setUsersLoading(false); });
+    return () => { cancelled = true; };
+  }, [orgId]);
+
+  useEffect(() => {
+    if (!orgId) return;
+    let cancelled = false;
+    api.getOrganizationById(orgId)
+    .then((data) => { if (!cancelled) { setOrg(data); setDescriptionInput(data.description ?? ""); } })
+    .catch((err) => { if (!cancelled) setOrgError(err instanceof Error ? err.message : "Failed to load organization."); });
+    api.getOrganizationEvents(orgId)
+    .then((data) => { if (!cancelled) setEvents(data); })
+    .catch(() => { if (!cancelled) setEvents([]); });
+    return () => { cancelled = true; };
+  }, [orgId]);
+
+  const sortedPosts = useMemo(() => (
+    [...posts].sort((a, b) =>
+      new Date(b?.createdDate ?? 0).getTime() - new Date(a?.createdDate ?? 0).getTime()
+    )
+  ), [posts]);
+
+  const userProfile = useMemo<UserProfileData>(() => ({
+    name: viewedUser ? `${viewedUser.firstName} ${viewedUser.lastName}` : "",
+    bio: viewedUser?.bio ?? undefined,
+    friendsCount: users.length,
+  }), [viewedUser, users.length]);
+
+  if (isOrg && orgError) {
+    return <div className="page"><p className="text-danger">{orgError}</p></div>;
+  }
+  if (isOrg && !org) {
+    return <div className="page"><p className="text-text-muted">Loading…</p></div>;
+  }
+  if (!isOrg && !viewedUser) {
+    return <div className="page"><p className="text-text-muted">Loading…</p></div>;
+  }
+
+  const orgImages = org ? getOrgImages(org.id) : null;
+  const coverPhoto = orgImages?.coverPhoto ?? null;
+  const profilePicture = orgImages?.profilePicture ?? null;
+  const displayName = isOrg ? org!.name : userProfile.name;
+  const initials = isOrg ? getInitials(org!.name) : getInitials(userProfile.name);
+
+  const pagebarTitle = isOrg
+    ? "Organization details"
+    : activeTab.id === Tabs.overview.id ? "Profile overview"
+      : activeTab.id === Tabs.about.id ? "About profile"
+        : "Friend network";
+
+  const itemsCount = isOrg ? events.length : sortedPosts.length;
+  const itemsCountLabel = isOrg
+    ? `${events.length} total`
+    : postsLoading ? "Loading..." : `${sortedPosts.length} total`;
+
+  return (
+    <div className="page !items-center overflow-y-auto">
+      <PagebarContent title={displayName}>
+        <PagebarSection eyebrow={isOrg ? "Overview" : "Identity"} title={pagebarTitle}>
+          <div className="grid grid-cols-2 gap-3">
+            <PagebarStat label={Tabs.overview.title} value={isOrg ? events.length : sortedPosts.length}
+                         tone="accent"/>
+            <PagebarStat label={Tabs.users.title}
+                         value={usersLoading ? "..." : users.length}/>
+          </div>
+          {isOrg && events.length > 0 && (
+            <PagebarList>
+              {events.slice(0, 3).map((event, i) => (
+                <PagebarListItem
+                  key={event.id}
+                  active={i === 0}
+                  title={event.title}
+                  meta={event.startDate ? new Date(event.startDate).toLocaleDateString() : "No date"}
+                />
+              ))}
+            </PagebarList>
+          )}
+          <PagebarList>
+            {Object.values(Tabs).map((tab) => (
+              <PagebarListItem key={tab.id} active={activeTab.id === tab.id} title={tab.title}
+                               meta={tab.description}/>
+            ))}
+          </PagebarList>
+        </PagebarSection>
+      </PagebarContent>
+
+      <div className="w-full max-w-5xl p-4 space-y-4">
+        {/* Header card — identical structure for both variants */}
+        <div className="rounded-xl bg-bg-light shadow-sm">
+          {/* Cover photo */}
+          <div className="relative overflow-hidden rounded-t-xl">
+            {coverPhoto ? (
+              <div
+                className="w-full h-40 md:h-56 bg-cover bg-center"
+                style={{ backgroundImage: `url(${coverPhoto})` }}
+              />
+            ) : (
+              <div className="w-full h-40 md:h-56 bg-brand/20"/>
+            )}
+          </div>
+
+          {/* Profile info row */}
+          <div className="relative px-4 pb-4">
+            <div className="-mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex items-end gap-3">
+                {/* Avatar */}
+                <div className="relative">
+                  {profilePicture ? (
+                    <img
+                      src={profilePicture}
+                      alt={displayName}
+                      className="w-28 h-28 rounded-full border-4 border-bg object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="w-28 h-28 rounded-full bg-bg-light border-4 border-bg flex items-center justify-center text-3xl font-bold text-brand select-none">
+                      {initials}
+                    </div>
+                  )}
+                  {isOwnProfile && (
+                    <button
+                      className="absolute bottom-1 right-1 rounded-full bg-bg-light p-2 shadow text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
+                      Edit
+                    </button>
+                  )}
+                </div>
+
+                {/* Name + subtitle */}
+                <div className="pb-1 text-sm text-text-muted">
+                  <h1 className="text-2xl font-bold text-text">{displayName}</h1>
+                  <p>
+                    {usersLoading ? "..." : (isOrg ? formatMembersCount(users.length) : formatFriendsCount(users.length))}
+                  </p>
+                </div>
+              </div>
+
+              {/* Friend action button */}
+              {!isOwnProfile && !isOrg && (
+                <div className="self-end pb-2">
+                  <button
+                    onClick={handleFriendAction}
+                    disabled={isFriend === null || friendActionLoading}
+                    className="btn-brand text-sm disabled:opacity-50"
+                  >
+                    {isFriend === null ? "…" : friendActionLoading ? "…" : isFriend ? "Remove Friend" : "Add Friend"}
+                  </button>
+                </div>
+              )}
+
+              {/* Join organization button */}
+              {isOrg && !isOrgAdmin && isMember === false && (
+                <div className="self-end pb-2">
+                  <button
+                    onClick={handleJoinOrganization}
+                    disabled={joinLoading}
+                    className="btn-brand text-sm disabled:opacity-50"
+                  >
+                    {joinLoading ? "Joining…" : "Join Organization"}
+                  </button>
+                </div>
+              )}
+
+              {/* Profile action buttons */}
+              {(isOwnProfile || (isOrg && !isOrgAdmin && isMember === true)) && (
+                <>
+                  {isOwnProfile && (
+                    <div className="relative xl:hidden self-end">
+                      <button
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="btn-brand p-2 text-sm"
+                        aria-label="Profile menu"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                      </button>
+                      {showMenu && (
+                        <div className="absolute right-0 mt-1 w-44 rounded-lg bg-bg-light shadow-lg border border-border-muted z-10">
+                          <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-lg">
+                            Edit cover photo
+                          </button>
+                          {/*<button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight">
+                            Edit profile
+                          </button>
+                          <button className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-highlight rounded-b-lg">
+                            More
+                          </button>*/}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {isOrg && !isOrgAdmin && isMember === true && (
+                    <div className="self-end pb-2">
+                      <button
+                        onClick={handleLeaveOrganization}
+                        disabled={leaveLoading}
+                        className="rounded-lg px-3 py-2 text-sm text-danger hover:bg-highlight disabled:opacity-50 transition-all cursor-pointer active:scale-95"
+                      >
+                        {leaveLoading ? "Leaving…" : "Leave Organization"}
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Tab bar */}
+            <div className="mt-4 border-t border-border-muted">
+              <div className="flex gap-2 overflow-x-auto py-2 text-sm font-semibold">
+                {Object.values(Tabs).map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab)}
+                    className={`rounded-lg px-3 py-2 transition-all cursor-pointer active:scale-95 active:bg-brand-on-click ${
+                      activeTab.id === tab.id ? "bg-brand text-bg-dark" : "text-text hover:bg-highlight"
+                    }`}
+                  >
+                    {tab.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Posts tab */}
+        {activeTab.id === Tabs.overview.id && (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+            {/* Left: About */}
+            <div className="space-y-4 lg:col-span-5">
+              <Card>
+                <h2 className="text-sm font-semibold text-text">About</h2>
+                {isOrg && editingDescription ? (
+                  <div className="mt-2 space-y-2">
+                    <textarea
+                      value={descriptionInput}
+                      onChange={(e) => setDescriptionInput(e.target.value)}
+                      rows={4}
+                      maxLength={512}
+                      className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={handleSaveDescription} disabled={descriptionSaving} className="btn-brand text-sm flex-1 disabled:opacity-50">
+                        {descriptionSaving ? "Saving…" : "Save"}
+                      </button>
+                      <button onClick={() => { setEditingDescription(false); setDescriptionInput(org?.description ?? ""); }} className="text-sm flex-1 rounded-lg px-3 py-2 hover:bg-highlight text-text-muted">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : isOrg ? (
+                  <>
+                    <p className="mt-2 text-sm text-text-muted">{org!.description?.trim() || (isOrgAdmin ? "Add a description for this organization." : "No description yet.")}</p>
+                    {isOrgAdmin && (
+                      <button onClick={() => setEditingDescription(true)} className="btn-brand mt-4 w-full text-sm">
+                        {org!.description?.trim() ? "Edit description" : "Add description"}
+                      </button>
+                    )}
+                  </>
+                ) : editingBio ? (
+                  <div className="mt-2 space-y-2">
+                    <textarea
+                      value={bioInput}
+                      onChange={(e) => setBioInput(e.target.value)}
+                      rows={4}
+                      maxLength={512}
+                      className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={handleSaveBio} disabled={bioSaving} className="btn-brand text-sm flex-1 disabled:opacity-50">
+                        {bioSaving ? "Saving…" : "Save"}
+                      </button>
+                      <button onClick={() => { setEditingBio(false); setBioInput(viewedUser?.bio ?? ""); }} className="text-sm flex-1 rounded-lg px-3 py-2 hover:bg-highlight text-text-muted">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-2 text-sm text-text-muted">
+                      {userProfile.bio?.trim() || (isOwnProfile ? "Add a bio to tell people about yourself." : "No bio yet.")}
+                    </p>
+                    {isOwnProfile && (
+                      <button onClick={() => setEditingBio(true)} className="btn-brand mt-4 w-full text-sm">
+                        {userProfile.bio ? "Edit bio" : "Add bio"}
+                      </button>
+                    )}
+                  </>
+                )}
+              </Card>
+            </div>
+
+            {/* Right: Events / Posts */}
+            <div className="space-y-4 lg:col-span-7">
+              {/* Header card — identical structure for both variants */}
+              <Card>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-text">{Tabs.overview.title}</h2>
+                  <span className="text-xs text-text-muted">{itemsCountLabel}</span>
+                </div>
+                {!isOrg && postsError && (
+                  <p className="mt-2 text-sm text-danger">{postsError}</p>
+                )}
+              </Card>
+
+              {/* Empty state — same structure for both */}
+              {itemsCount === 0 && !postsLoading && (
+                <Card>
+                  <p className="text-sm text-text-muted">No {Tabs.overview.title.toLowerCase()} yet.</p>
+                </Card>
+              )}
+
+              {/* Event cards */}
+              {isOrg && events.map((event) => (
+                <Card key={event.id}>
+                  <ItemHeader
+                    picture={profilePicture}
+                    initials={initials}
+                    title={event.title}
+                    meta={event.startDate ? new Date(event.startDate).toLocaleDateString() : "No date"}
+                  />
+                  {event.description && (
+                    <p className="mt-2 text-sm text-text-muted whitespace-pre-wrap">{event.description}</p>
+                  )}
+                  <Link href={`/events/${event.id}`} className="btn-brand mt-3 text-sm inline-block">
+                    View Event
+                  </Link>
+                </Card>
+              ))}
+
+              {/* Post cards — same Card wrapper and ItemHeader as event cards */}
+              {!isOrg && sortedPosts.map((post, index) => (
+                <Card key={`${post.id || "post"}-${post.createdDate || "no-date"}-${index}`}>
+                  <ItemHeader
+                    picture={profilePicture}
+                    initials={initials}
+                    title={userProfile.name}
+                    meta={`${formatPostTime(post.createdDate)} | Public`}
+                    action={
+                      <button className="rounded-lg px-2 py-1 text-text-muted hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
+                        More
+                      </button>
+                    }
+                  />
+                  <div className="mt-2 space-y-1 text-sm text-text">
+                    {post.title && <p className="font-semibold">{post.title}</p>}
+                    <p className="whitespace-pre-wrap text-text-muted">
+                      {post.bodytext?.trim() ? post.bodytext : "(No body text)"}
+                    </p>
+                  </div>
+                  <div
+                    className="mt-3 pt-3 border-t border-border-muted flex gap-1 text-sm font-semibold text-text-muted">
+                    {["Like", "Comment", "Share"].map((label) => (
+                      <button key={label} className="rounded-lg px-3 py-2 flex-1 hover:text-text transition-all cursor-pointer hover:bg-highlight active:scale-95 active:bg-brand-on-click">
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* About tab */}
+        {activeTab.id === Tabs.about.id && (
+          <Card>
+            <h2 className="text-sm font-semibold text-text">{Tabs.about.title}</h2>
+            <div className="mt-3 space-y-2 text-sm text-text-muted">
+              {isOrg ? (
+                <>
+                  {editingDescription ? (
+                    <div className="space-y-2">
+                      <textarea
+                        value={descriptionInput}
+                        onChange={(e) => setDescriptionInput(e.target.value)}
+                        rows={4}
+                        maxLength={512}
+                        className="w-full rounded-lg border border-border-muted bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={handleSaveDescription} disabled={descriptionSaving} className="btn-brand text-sm flex-1 disabled:opacity-50">
+                          {descriptionSaving ? "Saving…" : "Save"}
+                        </button>
+                        <button onClick={() => { setEditingDescription(false); setDescriptionInput(org?.description ?? ""); }} className="text-sm flex-1 rounded-lg px-3 py-2 hover:bg-highlight text-text-muted">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p>{org!.description?.trim() || (isOrgAdmin ? "Add a description for this organization." : "No description yet.")}</p>
+                      {isOrgAdmin && (
+                        <button onClick={() => setEditingDescription(true)} className="btn-brand mt-4 w-full text-sm">
+                          {org!.description?.trim() ? "Edit description" : "Add description"}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  {[
+                    { label: "Bio", value: userProfile.bio },
+                    { label: "Email", value: viewedUser?.email },
+                    {
+                      label: "Date of birth",
+                      value: viewedUser?.dateOfBirth
+                        ? new Date(viewedUser.dateOfBirth).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+                        : undefined,
+                    },
+                  ].map(({ label, value }) => (
+                    <p key={label}>
+                      <span className="font-semibold text-text">{label}:</span>{" "}
+                      {value || "Not provided"}
+                    </p>
+                  ))}
+                </>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* User friends and organization members tab */}
+        {activeTab.id === Tabs.users.id && (
+          <Card>
+            <h2 className="text-sm font-semibold text-text">{Tabs.users.title}</h2>
+            {usersLoadingError && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-danger">{usersLoadingError}</div>
+            )}
+            {usersLoading && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">Loading...</div>
+            )}
+            {!usersLoading && !usersLoadingError && users.length === 0 && (
+              <div className="mt-3 rounded-lg bg-bg p-4 text-sm text-text-muted">
+                No {Tabs.users.title.toLowerCase()} found.
+              </div>
+            )}
+            {!usersLoading && !usersLoadingError && users.length > 0 && (
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                {users.map((user) => (
+                  <div key={user.id} className="rounded-xl border border-border-muted bg-bg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-sm font-bold text-brand">
+                        {getInitials(`${user.firstName} ${user.lastName}`)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-text">
+                          {`${user.firstName} ${user.lastName}`}
+                        </p>
+                        {user.detail && <p className="truncate text-xs text-text-muted">{user.detail}</p>}
+                        {user.since && <p className="mt-2 text-xs text-text-muted">{user.since}</p>}
+                      </div>
+                      {isOrg && isOrgAdmin ? (
+                        <div className="flex flex-col items-end gap-2">
+                          <select
+                            value={user.roleId ?? 999}
+                            disabled={updatingRoleUserId === user.id}
+                            onChange={(e) => handleChangeRole(user.id, Number(e.target.value))}
+                            className="rounded-lg border border-border-muted bg-bg px-2 py-1 text-xs text-text focus:outline-none focus:ring-1 focus:ring-brand disabled:opacity-50 cursor-pointer"
+                          >
+                            <option value={999}>Member</option>
+                            <option value={1000}>Admin</option>
+                          </select>
+                          <button
+                            onClick={() => handleRemoveMember(user.id)}
+                            disabled={removingUserId === user.id}
+                            className="text-xs text-danger hover:bg-highlight rounded-lg px-2 py-1 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                          >
+                            {removingUserId === user.id ? "Removing…" : "Remove"}
+                          </button>
+                        </div>
+                      ) : (
+                        user.badge != null && (
+                          <span className="rounded-full bg-highlight px-2 py-1 text-[11px] font-medium text-text">
+                            {user.badge}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

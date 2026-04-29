@@ -16,7 +16,8 @@ export default function EventTabs({ eventId }: { eventId: string }) {
   const pathname = usePathname();
 
   return (
-    <div className="mt-6 flex border-b border-gray-300">
+    <div className="mt-6 border-t border-border-muted overflow-auto [transform:rotateX(180deg)]">
+      <div className="flex [transform:rotateX(180deg)]">
       {tabs.map((t) => {
         const href = t.href(eventId);
         const active = pathname === href;
@@ -26,17 +27,18 @@ export default function EventTabs({ eventId }: { eventId: string }) {
             key={t.label}
             href={href}
             className={[
-              "pb-3 px-8 text-base font-semibold text-black",
+              "py-3 px-8 text-base font-semibold text-text",
               "cursor-pointer transition-all duration-200 ease-in-out",
               active
-                ? "border-b-2 border-black opacity-100"
-                : "opacity-70 hover:opacity-100 hover:border-b-2 hover:border-black/60",
+                ? "border-b-2 border-brand opacity-100"
+                : "opacity-70 hover:opacity-100 hover:border-b-2 hover:border-brand/60",
             ].join(" ")}
           >
             {t.label}
           </Link>
         );
       })}
+      </div>
     </div>
   );
 }

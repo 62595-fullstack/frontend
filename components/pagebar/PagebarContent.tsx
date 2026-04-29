@@ -19,7 +19,7 @@ export default function PagebarContent({
       setContent(null);
       setTitle("PageBar");
     };
-  }, [children, setContent]);
+  }, [children, setContent, setTitle, title]);
 
   return null;
 }

@@ -2,19 +2,27 @@
 
 import { usePagebar } from "./PagebarContext";
 
-export default function Pagebar() {
+export default function Pagebar({ onClose }: { onClose?: () => void }) {
   const { content, title } = usePagebar();
 
   if (!content) return null;
 
   return (
-    <aside className="w-72 h-screen bg-bg text-text flex flex-col">
-      <div className="bg-bg px-4 h-[73px] flex items-center font-semibold text-text text-xl flex-shrink-0">
-        {title}
+    <aside className="flex h-full min-h-0 w-72 flex-shrink-0 flex-col border-l border-border/60 bg-bg text-text">
+      <div className="border-b border-border/60 px-5 py-5 flex items-center justify-between">
+        <h2 className="text-2xl font-semibold tracking-tight text-text">{title}</h2>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 text-text-muted hover:text-text"
+            aria-label="Close menu"
+          >
+            ✕
+          </button>
+        )}
       </div>
       <div
-        className="p-2 overflow-y-auto flex-1"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+        className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
       >
         {content}
       </div>
