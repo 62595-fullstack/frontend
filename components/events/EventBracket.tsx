@@ -202,16 +202,18 @@ function getRoundLayout(roundIndex: number) {
 
 function MatchCard({
   match,
+  canEdit,
   showLeftConnector,
   showRightConnector,
   onSelectWinner,
 }: {
   match: Match;
+  canEdit: boolean;
   showLeftConnector: boolean;
   showRightConnector: boolean;
   onSelectWinner: (matchId: string, entrant: Entrant) => void;
 }) {
-  const canSelectWinner = Boolean(match.slotA.entrant && match.slotB.entrant);
+  const canSelectWinner = Boolean(canEdit && match.slotA.entrant && match.slotB.entrant);
   const matchEntrants = [match.slotA.entrant, match.slotB.entrant].filter(
     (entrant): entrant is Entrant => Boolean(entrant),
   );
@@ -240,13 +242,15 @@ function MatchCard({
   }
 
   function handleSlotDragOver(event: DragEvent<HTMLButtonElement>, slot: Slot) {
-    if (canSelectWinner || slot.sourceMatchId) {
+    if (canEdit && (canSelectWinner || slot.sourceMatchId)) {
       event.preventDefault();
       event.dataTransfer.dropEffect = "move";
     }
   }
 
   function handleSlotDrop(event: DragEvent<HTMLButtonElement>, slot: Slot) {
+    if (!canEdit) return;
+
     event.preventDefault();
     const entrantId = event.dataTransfer.getData("application/x-entrant-id");
     const sourceEntrant = slot.sourceEntrants?.find((entrant) => entrant.id === entrantId);
@@ -287,7 +291,7 @@ function MatchCard({
             key={`${match.id}-${index}`}
             type="button"
             draggable={Boolean(slot.entrant && canSelectWinner)}
-            disabled={!slot.entrant && !slot.sourceMatchId}
+            disabled={!canEdit || (!slot.entrant && !slot.sourceMatchId)}
             onClick={() => {
               if (slot.entrant && canSelectWinner) {
                 onSelectWinner(match.id, slot.entrant);
@@ -333,11 +337,13 @@ function RoundColumn({
   round,
   roundIndex,
   totalRounds,
+  canEdit,
   onSelectWinner,
 }: {
   round: Round;
   roundIndex: number;
   totalRounds: number;
+  canEdit: boolean;
   onSelectWinner: (matchId: string, entrant: Entrant) => void;
 }) {
   const { gapRem, marginTopRem } = getRoundLayout(roundIndex);
@@ -376,6 +382,7 @@ function RoundColumn({
 
             <MatchCard
               match={match}
+              canEdit={canEdit}
               showLeftConnector={roundIndex > 0}
               showRightConnector={!isFinalRound}
               onSelectWinner={onSelectWinner}
@@ -388,7 +395,7 @@ function RoundColumn({
 }
 
 export default function EventBracket() {
-  const { event, setEvent } = useEventContext();
+  const { event, isCreator, setEvent } = useEventContext();
   const [selectedWinnerIds, setSelectedWinnerIds] = useState<Record<string, string>>(() =>
     parseSavedWinnerIds(event?.bracketResults),
   );
@@ -421,6 +428,8 @@ export default function EventBracket() {
   }
 
   function selectWinner(matchId: string, entrant: Entrant) {
+    if (!isCreator) return;
+
     setSelectedWinnerIds((current) => {
       const next = {
         ...current,
@@ -462,6 +471,7 @@ export default function EventBracket() {
               round={round}
               roundIndex={roundIndex}
               totalRounds={rounds.length}
+              canEdit={isCreator}
               onSelectWinner={selectWinner}
             />
           ))}
