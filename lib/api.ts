@@ -77,15 +77,47 @@ export type OrganizationEvent = {
   ageLimit?: number;
   creatorName?: string;
 };
-export type UserOrganizationBinding = { id: number; organizationId: number };
+export type UserOrganizationBinding = { id: number; organizationId: number; roleId?: number };
 export type GdprDeleteResult = boolean;
 export type FriendSummary = {
   id: string;
   email: string;
   firstName: string;
-  userName: string;
+  lastName: string;
   age: number;
   friendsSince: string;
+};
+
+export type UserSearchResult = {
+  id: string;
+  firstName: string;
+  lastName: string;
+};
+
+export type UserSummary = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth?: string;
+  bio?: string;
+};
+
+export type MemberSummary = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  memberSince: string;
+  role: string;
+};
+
+export type OrgMember = {
+  bindingId: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  roleId: number;
+  roleName: string;
 };
 
 type RawOrganization = {
@@ -243,6 +275,11 @@ export const api = {
     }),
   deleteOrganization: (id: number) =>
     request<boolean>(`/organizations/${id}`, { method: "DELETE" }),
+  updateOrganizationDescription: (id: number, description: string) =>
+    request<Organization>(`/organizations/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ description }),
+    }),
 
   // bindings
   getUserOrganizationBindings: (organizationId: number) =>
@@ -255,6 +292,16 @@ export const api = {
     request<UserOrganizationBinding>(
       `/UserOrganizationBinding/${organizationId}/me`
     ),
+  joinOrganization: (organizationId: number) =>
+    request<void>(`/UserOrganizationBinding/join/${organizationId}`, { method: "POST" }),
+  leaveOrganization: (organizationId: number) =>
+    request<void>(`/UserOrganizationBinding/leave/${organizationId}`, { method: "DELETE" }),
+  getOrganizationMembers: (organizationId: number) =>
+    request<OrgMember[]>(`/UserOrganizationBinding/${organizationId}/members`),
+  removeOrganizationMember: (organizationId: number, userId: string) =>
+    request<void>(`/UserOrganizationBinding/${organizationId}/member/${userId}`, { method: "DELETE" }),
+  updateOrganizationMemberRole: (organizationId: number, userId: string, roleId: number) =>
+    request<void>(`/UserOrganizationBinding/${organizationId}/member/${userId}/role/${roleId}`, { method: "PATCH" }),
 
   // events
   getOrganizationEvents: async (organizationId: number): Promise<OrganizationEvent[]> => {
@@ -279,7 +326,24 @@ export const api = {
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
 
   // users
+  getMe: () => request<UserSummary>(`/users/me`),
+  searchUsers: (query: string) => request<UserSearchResult[]>(`/users?query=${encodeURIComponent(query)}`),
+  getUserById: (userId: string) => request<UserSummary>(`/users/${userId}`),
+  getPostsByUser: async (userId: string): Promise<Post[]> => {
+    const data = await request<unknown>(`/users/${userId}/posts`);
+    return parsePostsResponse(data);
+  },
+  getFriendsByUser: (userId: string) => request<FriendSummary[]>(`/users/${userId}/friends`),
   getMyFriends: () => request<FriendSummary[]>(`/users/me/friends`),
+  addFriend: (friendUserId: string) => request<FriendSummary>(`/users/me/friends`, {
+    method: "POST",
+    body: JSON.stringify({ friendUserId }),
+  }),
+  removeFriend: (friendUserId: string) => request<void>(`/users/me/friends/${friendUserId}`, { method: "DELETE" }),
+  updateMyProfile: (data: { bio?: string }) => request<UserSummary>(`/users/me`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  }),
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
