@@ -112,6 +112,13 @@ export type MemberSummary = {
   role: string;
 };
 
+export type EventParticipant = {
+  bindingId: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
+};
+
 export type OrgMember = {
   bindingId: number;
   userId: string;
@@ -324,6 +331,14 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(fields),
     }),
+  joinEvent: (eventId: number) =>
+    request<void>(`/OrganizationEvents/${eventId}/join`, { method: "POST" }),
+  leaveEvent: (eventId: number) =>
+    request<void>(`/OrganizationEvents/${eventId}/join`, { method: "DELETE" }),
+  getEventParticipants: (eventId: number) =>
+    request<EventParticipant[]>(`/OrganizationEvents/${eventId}/participants`),
+  isRegisteredForEvent: (eventId: number) =>
+    request<boolean>(`/OrganizationEvents/${eventId}/is-registered`),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEventContext } from "@/components/events/EventContext";
-import { api } from "@/lib/api";
+import { api, EventParticipant } from "@/lib/api";
 import type { DragEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Entrant = {
   id: string;
@@ -33,40 +33,6 @@ type Round = {
   matches: Match[];
 };
 
-const NAME_POOL = [
-  "Falcons",
-  "Titans",
-  "Orbit",
-  "Nova",
-  "Rangers",
-  "Vortex",
-  "Echo",
-  "Inferno",
-  "Cyclones",
-  "Apex",
-  "Raiders",
-  "Storm",
-  "Pulse",
-  "Blaze",
-  "Phantoms",
-  "Hydra",
-  "Velocity",
-  "Comets",
-  "Gladiators",
-  "Onyx",
-  "Sentinels",
-  "Riptide",
-  "Rebels",
-  "Monarchs",
-  "Altitude",
-  "Frontier",
-  "Phoenix",
-  "Strikers",
-  "Voyagers",
-  "Drift",
-  "Dynasty",
-  "Breakers",
-];
 
 const CARD_HEIGHT_REM = 7;
 const BASE_GAP_REM = 2;
@@ -106,20 +72,6 @@ function getRoundLabel(roundIndex: number, rounds: number) {
   return `Round ${roundIndex + 1}`;
 }
 
-function buildEntrants(eventId: number, title: string): Entrant[] {
-  const normalizedTitle = title.trim() || "Event";
-  const seed = normalizedTitle.split("").reduce((sum, char) => sum + char.charCodeAt(0), eventId);
-  const sizeOptions = [6, 8, 12, 16, 24, 32];
-  const entrantCount = sizeOptions[seed % sizeOptions.length];
-
-  return Array.from({ length: entrantCount }, (_, index) => {
-    const poolName = NAME_POOL[(seed + index) % NAME_POOL.length];
-    return {
-      id: `${eventId}-${index + 1}`,
-      name: `${poolName} ${index + 1}`,
-    };
-  });
-}
 
 function buildRounds(entrants: Entrant[], selectedWinnerIds: Record<string, string>): Round[] {
   if (entrants.length < 2) return [];
@@ -395,14 +347,27 @@ function RoundColumn({
 }
 
 export default function EventBracket() {
-  const { event, isCreator, setEvent } = useEventContext();
+  const { event, isCreator, isRegistered, setEvent, setIsRegistered } = useEventContext();
+  const [participants, setParticipants] = useState<EventParticipant[]>([]);
+  const [participantsLoading, setParticipantsLoading] = useState(true);
   const [selectedWinnerIds, setSelectedWinnerIds] = useState<Record<string, string>>(() =>
     parseSavedWinnerIds(event?.bracketResults),
   );
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [registerState, setRegisterState] = useState<"idle" | "loading" | "error">("idle");
+
+  useEffect(() => {
+    if (!event) return;
+    setParticipantsLoading(true);
+    api.getEventParticipants(event.id)
+      .then(setParticipants)
+      .catch(() => {})
+      .finally(() => setParticipantsLoading(false));
+  }, [event?.id]);
+
   const entrants = useMemo(
-    () => (event ? buildEntrants(event.id, event.title) : []),
-    [event],
+    () => participants.map((p) => ({ id: p.userId, name: `${p.firstName} ${p.lastName}` })),
+    [participants],
   );
   const rounds = useMemo(() => buildRounds(entrants, selectedWinnerIds), [entrants, selectedWinnerIds]);
 
@@ -456,12 +421,55 @@ export default function EventBracket() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
           <span className="rounded-full border border-border px-3 py-2">{entrants.length} players</span>
           <span className="rounded-full border border-border px-3 py-2">{rounds.length} rounds</span>
           <span className="rounded-full border border-border px-3 py-2">{byeCount} byes</span>
+          <button
+            type="button"
+            disabled={registerState === "loading"}
+            onClick={async () => {
+              setRegisterState("loading");
+              try {
+                if (isRegistered) {
+                  await api.leaveEvent(event.id);
+                  setIsRegistered(false);
+                } else {
+                  await api.joinEvent(event.id);
+                  setIsRegistered(true);
+                }
+                const updated = await api.getEventParticipants(event.id);
+                setParticipants(updated);
+                setRegisterState("idle");
+              } catch {
+                setRegisterState("error");
+              }
+            }}
+            className={[
+              "rounded-full border px-3 py-2 transition-colors",
+              isRegistered
+                ? "border-danger/50 text-danger hover:bg-danger/10"
+                : "border-brand/50 text-brand hover:bg-brand/10",
+              registerState === "loading" ? "opacity-50" : "",
+            ].join(" ")}
+          >
+            {registerState === "loading" ? "..." : isRegistered ? "Leave bracket" : "Join bracket"}
+          </button>
+          {registerState === "error" && (
+            <span className="normal-case tracking-normal text-danger">Failed, try again</span>
+          )}
         </div>
       </div>
+
+      {participantsLoading ? (
+        <p className="p-6 text-sm text-text-muted">Loading participants…</p>
+      ) : entrants.length < 2 ? (
+        <p className="p-6 text-sm text-text-muted">
+          {entrants.length === 0
+            ? "No participants yet — be the first to join the bracket."
+            : "Waiting for at least one more participant before the bracket can be drawn."}
+        </p>
+      ) : null}
 
       <div className="overflow-x-auto p-6">
         <div className="flex min-w-max items-start pb-4" style={{ columnGap: `${COLUMN_GAP_REM}rem` }}>
