@@ -100,7 +100,10 @@ export default function Page() {
     return () => { es.close(); };
   }, [me]);
 
-  const messages = activeId ? messagesByFriend[activeId] ?? [] : [];
+  const messages = useMemo(
+    () => (activeId ? messagesByFriend[activeId] ?? [] : []),
+    [activeId, messagesByFriend],
+  );
   const activeFriend = friends?.find((f) => f.id === activeId) ?? null;
   const loadingHistory = activeId !== null && messagesByFriend[activeId] === undefined;
 
