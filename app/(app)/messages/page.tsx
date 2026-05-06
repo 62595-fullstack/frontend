@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import React from "react";
 import Image from "next/image";
 import PagebarContent from "@/components/pagebar/PagebarContent";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import MessageInput from "@/components/MessageInput";
 import { Message, mockConversations, parseTimeToMinutes } from "@/lib/useMessages";
 
 export default function Page() {
@@ -16,8 +16,6 @@ export default function Page() {
   const messages = allMessages[activeId];
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,28 +35,6 @@ export default function Page() {
       [activeId]: [...prev[activeId], newMsg],
     }));
     setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    const el = e.target;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  };
-
-  const onEmojiClick = (emojiData: EmojiClickData) => {
-    setInput((prev) => prev + emojiData.emoji);
-    setShowPicker(false);
   };
 
   return (
@@ -182,42 +158,13 @@ export default function Page() {
           </div>
 
           {/* Input */}
-          <div className="flex w-full px-6 py-4 bg-bg-light border-t border-brand items-end gap-3">
-            <div className="relative flex-1">
-              <div
-                className="flex items-end flex-1 rounded-2xl border border-brand bg-bg-input-field focus-within:ring-2 focus-within:ring-bg-brand pr-2"
-              >
-            <textarea
-              ref={textareaRef}
+          <div className="px-6 py-4 bg-bg-light border-t border-brand">
+            <MessageInput
               value={input}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
+              onChange={setInput}
+              onSend={handleSend}
               placeholder="Type a message..."
-              rows={1}
-              className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40"
             />
-                <div className="relative">
-                  <button
-                    onClick={() => setShowPicker((prev) => !prev)}
-                    className="text-lg pb-2.5 leading-none"
-                  >
-                    😊
-                  </button>
-
-                  {showPicker && (
-                    <div className="absolute bottom-full right-0 mb-2">
-                      <EmojiPicker onEmojiClick={onEmojiClick}/>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={handleSend}
-              className="btn-brand font-semibold px-5 py-2 rounded-2xl text-sm"
-            >
-              Send
-            </button>
           </div>
         </div>
       </div>

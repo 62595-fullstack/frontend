@@ -1,7 +1,15 @@
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, '');
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`/api/proxy${path}`, {
+  return requestVia<T>("/api/proxy", path, init);
+}
+
+async function requestMessaging<T>(path: string, init?: RequestInit): Promise<T> {
+  return requestVia<T>("/api/messaging-proxy", path, init);
+}
+
+async function requestVia<T>(proxyBase: string, path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${proxyBase}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -93,6 +101,15 @@ export type UserSearchResult = {
   id: string;
   firstName: string;
   lastName: string;
+};
+
+export type EventComment = {
+  id: number;
+  eventId: number;
+  parentCommentId: number | null;
+  authorUserId: string;
+  content: string;
+  createdDate: string;
 };
 
 export type UserSummary = {
@@ -339,6 +356,15 @@ export const api = {
     request<EventParticipant[]>(`/OrganizationEvents/${eventId}/participants`),
   isRegisteredForEvent: (eventId: number) =>
     request<boolean>(`/OrganizationEvents/${eventId}/is-registered`),
+
+  // comments (served by the messaging service)
+  getEventComments: (eventId: number) =>
+    requestMessaging<EventComment[]>(`/Comments/event/${eventId}`),
+  createEventComment: (eventId: number, content: string, parentCommentId?: number | null) =>
+    requestMessaging<EventComment>(`/Comments`, {
+      method: "POST",
+      body: JSON.stringify({ eventId, content, parentCommentId: parentCommentId ?? null }),
+    }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
