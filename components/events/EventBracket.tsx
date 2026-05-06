@@ -348,8 +348,14 @@ function RoundColumn({
 
 export default function EventBracket() {
   const { event, isCreator, isRegistered, setEvent, setIsRegistered } = useEventContext();
-  const [participants, setParticipants] = useState<EventParticipant[]>([]);
-  const [participantsLoading, setParticipantsLoading] = useState(true);
+  const eventId = event?.id ?? null;
+  const [participantsState, setParticipantsState] = useState<{
+    eventId: number | null;
+    participants: EventParticipant[];
+  }>({
+    eventId: null,
+    participants: [],
+  });
   const [selectedWinnerIds, setSelectedWinnerIds] = useState<Record<string, string>>(() =>
     parseSavedWinnerIds(event?.bracketResults),
   );
@@ -357,14 +363,26 @@ export default function EventBracket() {
   const [registerState, setRegisterState] = useState<"idle" | "loading" | "error">("idle");
 
   useEffect(() => {
-    if (!event) return;
-    setParticipantsLoading(true);
-    api.getEventParticipants(event.id)
-      .then(setParticipants)
-      .catch(() => {})
-      .finally(() => setParticipantsLoading(false));
-  }, [event?.id]);
+    if (eventId === null) return;
+    let cancelled = false;
 
+    api.getEventParticipants(eventId)
+      .then((participants) => {
+        if (!cancelled) {
+          setParticipantsState({ eventId, participants });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId]);
+
+  const participants = useMemo(
+    () => (participantsState.eventId === eventId ? participantsState.participants : []),
+    [eventId, participantsState.eventId, participantsState.participants],
+  );
+  const participantsLoading = eventId !== null && participantsState.eventId !== eventId;
   const entrants = useMemo(
     () => participants.map((p) => ({ id: p.userId, name: `${p.firstName} ${p.lastName}` })),
     [participants],
@@ -439,7 +457,7 @@ export default function EventBracket() {
                   setIsRegistered(true);
                 }
                 const updated = await api.getEventParticipants(event.id);
-                setParticipants(updated);
+                setParticipantsState({ eventId: event.id, participants: updated });
                 setRegisterState("idle");
               } catch {
                 setRegisterState("error");
