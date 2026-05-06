@@ -76,9 +76,15 @@ function CommentItem({
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? "Expand replies" : "Collapse replies"}
-          className="group absolute left-0 inset-y-0 w-3 cursor-pointer"
+          className="group absolute left-0 inset-y-0 w-4 cursor-pointer"
         >
-          <span className="absolute left-0 inset-y-0 w-px bg-border-muted group-hover:bg-text transition-colors" />
+          <span className="absolute left-0 top-3.5 bottom-0 w-px bg-border-muted group-hover:bg-text transition-colors" />
+          <span
+            aria-hidden="true"
+            className="absolute -left-2 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-bg text-base leading-none text-text-muted group-hover:text-text transition-colors"
+          >
+            {collapsed ? "▸" : "▾"}
+          </span>
         </button>
       ) : (
         <span className="absolute left-0 inset-y-0 w-px bg-border-muted" />
