@@ -22,9 +22,9 @@ function formatTimestamp(iso: string): string {
 }
 
 export default function Page() {
-  const { notifications, unreadCount, loading, error, markRead, markAllRead } = useNotifications();
+  const { notifications, unreadCount, loading, error, markRead, markAllRead, deleteNotification } = useNotifications();
 
-  const handleClick = (n: Notification) => {
+  const handleHover = (n: Notification) => {
     if (!n.read) markRead(n.id);
   };
 
@@ -62,9 +62,11 @@ export default function Page() {
         <ul className="flex flex-col gap-2">
           {notifications.map((n) => (
             <li key={n.id}>
-              <button
-                onClick={() => handleClick(n)}
-                className={`w-full flex items-start gap-3 px-4 py-3 rounded-lg text-left transition-colors cursor-pointer ${
+              <div
+                onMouseEnter={() => handleHover(n)}
+                onFocus={() => handleHover(n)}
+                tabIndex={0}
+                className={`flex items-start gap-3 px-4 py-3 rounded-lg transition-colors ${
                   n.read ? "bg-bg-light hover:bg-highlight" : "bg-bg-light border-l-4 border-brand hover:bg-highlight"
                 }`}
               >
@@ -86,7 +88,14 @@ export default function Page() {
                 {!n.read && (
                   <span className="w-2 h-2 rounded-full bg-brand flex-shrink-0 mt-2" aria-label="Unread" />
                 )}
-              </button>
+                <button
+                  onClick={() => deleteNotification(n.id)}
+                  aria-label="Delete notification"
+                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-text-muted hover:bg-danger hover:text-white transition-colors cursor-pointer"
+                >
+                  <span aria-hidden="true" className="text-lg leading-none">×</span>
+                </button>
+              </div>
             </li>
           ))}
         </ul>

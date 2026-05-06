@@ -20,6 +20,7 @@ type NotificationsContextValue = {
   error: string | null;
   markRead: (id: number) => Promise<void>;
   markAllRead: () => Promise<void>;
+  deleteNotification: (id: number) => Promise<void>;
 };
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
@@ -95,14 +96,23 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
+  const deleteNotification = useCallback(async (id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    try {
+      await api.deleteNotification(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete notification.");
+    }
+  }, []);
+
   const unreadCount = useMemo(
     () => notifications.reduce((acc, n) => acc + (n.read ? 0 : 1), 0),
     [notifications],
   );
 
   const value = useMemo<NotificationsContextValue>(
-    () => ({ notifications, unreadCount, loading, error, markRead, markAllRead }),
-    [notifications, unreadCount, loading, error, markRead, markAllRead],
+    () => ({ notifications, unreadCount, loading, error, markRead, markAllRead, deleteNotification }),
+    [notifications, unreadCount, loading, error, markRead, markAllRead, deleteNotification],
   );
 
   return (

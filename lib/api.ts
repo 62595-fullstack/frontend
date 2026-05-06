@@ -399,6 +399,8 @@ export const api = {
     request<void>(`/notifications/${id}/read`, { method: "POST" }),
   markAllNotificationsRead: () =>
     request<{ updated: number }>(`/notifications/read-all`, { method: "POST" }),
+  deleteNotification: (id: number) =>
+    request<void>(`/notifications/${id}`, { method: "DELETE" }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
