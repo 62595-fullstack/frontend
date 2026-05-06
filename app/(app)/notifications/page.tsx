@@ -1,10 +1,11 @@
 'use client'
 
+import { useState } from "react";
 import Image from "next/image";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
 import { useNotifications } from "@/lib/NotificationsContext";
-import { Notification } from "@/lib/api";
+import { api, Notification } from "@/lib/api";
 
 function avatarFor(userId: string): string {
   return `https://picsum.photos/seed/${encodeURIComponent(userId)}/100/100`;
@@ -23,9 +24,26 @@ function formatTimestamp(iso: string): string {
 
 export default function Page() {
   const { notifications, unreadCount, loading, error, markRead, markAllRead, deleteNotification } = useNotifications();
+  const [requestActionPending, setRequestActionPending] = useState<Set<number>>(new Set());
 
   const handleHover = (n: Notification) => {
     if (!n.read) markRead(n.id);
+  };
+
+  const respondToFriendRequest = async (n: Notification, accept: boolean) => {
+    if (!n.actorUserId) return;
+    setRequestActionPending((prev) => new Set(prev).add(n.id));
+    try {
+      if (accept) await api.acceptFriendRequest(n.actorUserId);
+      else await api.declineFriendRequest(n.actorUserId);
+      deleteNotification(n.id);
+    } catch {
+      setRequestActionPending((prev) => {
+        const next = new Set(prev);
+        next.delete(n.id);
+        return next;
+      });
+    }
   };
 
   return (
@@ -84,6 +102,24 @@ export default function Page() {
                     {n.message}
                   </p>
                   <p className="text-xs text-text-muted mt-1">{formatTimestamp(n.createdDate)}</p>
+                  {n.type === "friend_request" && n.actorUserId && (
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => respondToFriendRequest(n, true)}
+                        disabled={requestActionPending.has(n.id)}
+                        className="px-3 py-1 rounded-md text-xs font-semibold bg-brand text-bg-dark hover:opacity-90 disabled:opacity-50 cursor-pointer transition-opacity"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => respondToFriendRequest(n, false)}
+                        disabled={requestActionPending.has(n.id)}
+                        className="px-3 py-1 rounded-md text-xs font-semibold bg-bg-light border border-text-muted/40 text-text hover:bg-highlight disabled:opacity-50 cursor-pointer transition-colors"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {!n.read && (
                   <span className="w-2 h-2 rounded-full bg-brand flex-shrink-0 mt-2" aria-label="Unread" />

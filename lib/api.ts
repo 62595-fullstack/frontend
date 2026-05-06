@@ -130,6 +130,16 @@ export type Notification = {
   createdDate: string;
 };
 
+export type FriendRequest = {
+  id: number;
+  requesterId: string;
+  requesterFirstName: string;
+  requesterLastName: string;
+  createdDate: string;
+};
+
+export type FriendshipStatus = "None" | "Friends" | "OutgoingPending" | "IncomingPending";
+
 export type UserSummary = {
   id: string;
   email: string;
@@ -416,11 +426,21 @@ export const api = {
   },
   getFriendsByUser: (userId: string) => request<FriendSummary[]>(`/users/${userId}/friends`),
   getMyFriends: () => request<FriendSummary[]>(`/users/me/friends`),
-  addFriend: (friendUserId: string) => request<FriendSummary>(`/users/me/friends`, {
-    method: "POST",
-    body: JSON.stringify({ friendUserId }),
-  }),
   removeFriend: (friendUserId: string) => request<void>(`/users/me/friends/${friendUserId}`, { method: "DELETE" }),
+  getFriendshipStatus: (userId: string) =>
+    request<{ status: FriendshipStatus }>(`/users/${userId}/friend-status`),
+  getMyIncomingFriendRequests: () => request<FriendRequest[]>(`/users/me/friend-requests`),
+  sendFriendRequest: (friendUserId: string) =>
+    request<{ status: FriendshipStatus }>(`/users/me/friend-requests`, {
+      method: "POST",
+      body: JSON.stringify({ friendUserId }),
+    }),
+  acceptFriendRequest: (requesterUserId: string) =>
+    request<void>(`/users/me/friend-requests/${requesterUserId}/accept`, { method: "POST" }),
+  declineFriendRequest: (requesterUserId: string) =>
+    request<void>(`/users/me/friend-requests/${requesterUserId}/decline`, { method: "POST" }),
+  cancelFriendRequest: (recipientUserId: string) =>
+    request<void>(`/users/me/friend-requests/${recipientUserId}`, { method: "DELETE" }),
   updateMyProfile: (data: { bio?: string }) => request<UserSummary>(`/users/me`, {
     method: "PATCH",
     body: JSON.stringify(data),
