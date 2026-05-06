@@ -63,6 +63,26 @@ export default function Page() {
     return () => { cancelled = true; };
   }, [activeId, messagesByFriend]);
 
+  useEffect(() => {
+    if (!me) return;
+    const es = new EventSource("/api/messaging-proxy/Messages/stream");
+    es.onmessage = (event) => {
+      try {
+        const msg: DirectMessage = JSON.parse(event.data);
+        const friendId = msg.senderUserId === me.id ? msg.receiverUserId : msg.senderUserId;
+        setMessagesByFriend((prev) => {
+          const existing = prev[friendId];
+          if (!existing) return prev;
+          if (existing.some((m) => m.id === msg.id)) return prev;
+          return { ...prev, [friendId]: [...existing, msg] };
+        });
+      } catch {
+        // ignore malformed events
+      }
+    };
+    return () => { es.close(); };
+  }, [me]);
+
   const messages = activeId ? messagesByFriend[activeId] ?? [] : [];
   const activeFriend = friends?.find((f) => f.id === activeId) ?? null;
 

@@ -4,9 +4,12 @@ import { Agent, fetch as undiciFetch } from "undici";
 
 const MESSAGING_BASE = process.env.NEXT_PUBLIC_MESSAGING_BASE?.replace(/\/$/, "");
 
-// Messaging dev server uses a self-signed cert.
+// Messaging dev server uses a self-signed cert; bodyTimeout=0 so SSE connections
+// can stay open indefinitely without undici killing them.
 const insecureDispatcher = new Agent({
   connect: { rejectUnauthorized: false },
+  bodyTimeout: 0,
+  headersTimeout: 0,
 });
 
 async function forward(req: Request, path: string[]) {
@@ -34,7 +37,22 @@ async function forward(req: Request, path: string[]) {
         ? undefined
         : await req.text(),
     dispatcher: insecureDispatcher,
+    signal: req.signal,
   });
+
+  const contentType = res.headers.get("content-type") ?? "";
+
+  if (contentType.includes("text/event-stream")) {
+    return new NextResponse(res.body as unknown as ReadableStream, {
+      status: res.status,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  }
 
   const body = await res.text();
 
@@ -43,7 +61,6 @@ async function forward(req: Request, path: string[]) {
     expired.delete("token");
   }
 
-  const contentType = res.headers.get("content-type");
   return new NextResponse(body || null, {
     status: res.status,
     headers: contentType ? { "Content-Type": contentType } : {},
