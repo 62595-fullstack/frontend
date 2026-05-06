@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import React from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,7 +20,7 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function Page() {
+function MessagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const friendIdFromUrl = searchParams.get("friend");
@@ -263,5 +263,13 @@ export default function Page() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <MessagesPage />
+    </Suspense>
   );
 }
