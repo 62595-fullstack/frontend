@@ -10,6 +10,7 @@ interface Props {
   placeholder?: string;
   sendLabel?: string;
   disabled?: boolean;
+  autoFocus?: boolean;
 }
 
 export default function MessageInput({
@@ -19,6 +20,7 @@ export default function MessageInput({
   placeholder = "Type a message...",
   sendLabel = "Send",
   disabled,
+  autoFocus,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -66,6 +68,7 @@ export default function MessageInput({
             placeholder={placeholder}
             rows={1}
             disabled={disabled}
+            autoFocus={autoFocus}
             className="flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text focus:outline-none max-h-40"
           />
           <div className="relative">

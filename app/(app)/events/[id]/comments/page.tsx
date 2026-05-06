@@ -108,6 +108,7 @@ function CommentItem({
               placeholder="Write a reply…"
               sendLabel={submitting ? "Posting…" : "Reply"}
               disabled={submitting}
+              autoFocus
             />
           </div>
         )}
