@@ -42,6 +42,7 @@ export default function EventsPage() {
         title: data.title,
         description: data.description,
         rules: "",
+        bracketResults: "{}",
         attachment: data.attachment,
         startDate: data.startDate,
         ageLimit: data.ageLimit,

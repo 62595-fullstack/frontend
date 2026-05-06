@@ -23,6 +23,9 @@ export default function EventLayout({
   const [missing, setMissing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registrationLoading, setRegistrationLoading] = useState(false);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -32,14 +35,16 @@ export default function EventLayout({
         const found = await getEventById(Number(id));
         if (found) {
           setEvent(found);
-          const [org, myBinding] = await Promise.all([
+          const [org, myBinding, registered] = await Promise.all([
             api.getOrganizationById(found.organizationId),
             api.getUserOrganizationBindingForCurrentUser(found.organizationId).catch(() => null),
+            api.isRegisteredForEvent(found.id).catch(() => false),
           ]);
           if (org) setOrgName(org.name);
           if (myBinding && myBinding.id === found.userOrganizationBindingId) {
             setIsCreator(true);
           }
+          setIsRegistered(registered);
           setLoading(false);
           return;
         }
@@ -73,7 +78,7 @@ export default function EventLayout({
   }
 
   return (
-    <EventContext.Provider value={{ event, isCreator, setEvent }}>
+    <EventContext.Provider value={{ event, isCreator, isRegistered, setEvent, setIsRegistered }}>
       <PagebarContent title="Event details">
         <PagebarSection eyebrow="Live event" title={event.title}>
           <PagebarStat
@@ -98,7 +103,30 @@ export default function EventLayout({
         </PagebarSection>
 
         <PagebarSection eyebrow="Actions" title="Participation">
-          <PagebarAction>Not signed up</PagebarAction>
+          <PagebarAction
+            onClick={async () => {
+              setRegistrationError(null);
+              setRegistrationLoading(true);
+              try {
+                if (isRegistered) {
+                  await api.leaveEvent(event.id);
+                  setIsRegistered(false);
+                } else {
+                  await api.joinEvent(event.id);
+                  setIsRegistered(true);
+                }
+              } catch (err) {
+                setRegistrationError(err instanceof Error ? err.message : "Failed.");
+              } finally {
+                setRegistrationLoading(false);
+              }
+            }}
+          >
+            {registrationLoading ? "..." : isRegistered ? "Leave event" : "Register"}
+          </PagebarAction>
+          {registrationError && (
+            <p className="text-xs text-danger">{registrationError}</p>
+          )}
           <PagebarAction>Share with friends</PagebarAction>
         </PagebarSection>
 
