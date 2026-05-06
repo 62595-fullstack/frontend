@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import React from "react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import MessageInput from "@/components/MessageInput";
 import { api, DirectMessage, FriendSummary, UserSummary } from "@/lib/api";
@@ -20,14 +21,23 @@ function formatTime(iso: string): string {
 }
 
 export default function Page() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const friendIdFromUrl = searchParams.get("friend");
+
   const [me, setMe] = useState<UserSummary | null>(null);
   const [friends, setFriends] = useState<FriendSummary[] | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [messagesByFriend, setMessagesByFriend] = useState<Record<string, DirectMessage[]>>({});
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const activeId = useMemo<string | null>(() => {
+    if (!friends || friends.length === 0) return null;
+    if (friendIdFromUrl && friends.some((f) => f.id === friendIdFromUrl)) return friendIdFromUrl;
+    return friends[0].id;
+  }, [friends, friendIdFromUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,13 +46,23 @@ export default function Page() {
         if (cancelled) return;
         setMe(myUser);
         setFriends(myFriends);
-        if (myFriends.length > 0) setActiveId(myFriends[0].id);
       })
       .catch((err) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load.");
       });
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (!activeId) return;
+    if (friendIdFromUrl === activeId) return;
+    router.replace(`/messages?friend=${encodeURIComponent(activeId)}`, { scroll: false });
+  }, [activeId, friendIdFromUrl, router]);
+
+  const selectFriend = (id: string) => {
+    setInput("");
+    router.replace(`/messages?friend=${encodeURIComponent(id)}`, { scroll: false });
+  };
 
   useEffect(() => {
     if (!activeId) return;
@@ -119,10 +139,7 @@ export default function Page() {
               {friends.map((f) => (
                 <li key={f.id}>
                   <button
-                    onClick={() => {
-                      setActiveId(f.id);
-                      setInput("");
-                    }}
+                    onClick={() => selectFriend(f.id)}
                     className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-all cursor-pointer ${
                       f.id === activeId ? "bg-brand text-bg-dark" : "hover:bg-highlight text-text"
                     }`}
