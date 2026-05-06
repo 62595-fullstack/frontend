@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useEvent } from "@/components/events/EventContext";
 import { api, EventComment } from "@/lib/api";
+import MessageInput from "@/components/MessageInput";
 
 type CommentNode = EventComment & { children: CommentNode[] };
 
@@ -85,16 +86,9 @@ function CommentItem({
 
         {isReplying && (
           <div className="mt-2 flex flex-col gap-2">
-            <textarea
-              className="w-full rounded bg-bg-light border border-highlight p-2 text-sm text-text resize-y min-h-[60px] focus:outline-none focus:ring-1 focus:ring-accent"
-              placeholder="Write a reply…"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              disabled={submitting}
-            />
-            <div className="flex gap-2 justify-end">
+            <div className="flex justify-end">
               <button
-                className="btn-regular text-xs"
+                className="text-xs text-text-muted hover:text-text transition-colors"
                 onClick={() => {
                   setDraft("");
                   onCancelReply();
@@ -103,18 +97,18 @@ function CommentItem({
               >
                 Cancel
               </button>
-              <button
-                className="rounded bg-accent px-3 py-1 text-xs font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-                onClick={async () => {
-                  if (!draft.trim()) return;
-                  await onSubmitReply(node.id, draft.trim());
-                  setDraft("");
-                }}
-                disabled={submitting || !draft.trim()}
-              >
-                {submitting ? "Posting…" : "Post reply"}
-              </button>
             </div>
+            <MessageInput
+              value={draft}
+              onChange={setDraft}
+              onSend={async () => {
+                await onSubmitReply(node.id, draft.trim());
+                setDraft("");
+              }}
+              placeholder="Write a reply…"
+              sendLabel={submitting ? "Posting…" : "Reply"}
+              disabled={submitting}
+            />
           </div>
         )}
       </div>
@@ -229,23 +223,15 @@ export default function CommentsTab() {
       <div className="h-10 bg-bg-dark px-6 py-2 underline text-text">Comments</div>
       <div className="p-6 text-text">
         <div className="flex flex-col gap-2">
-          <textarea
-            className="w-full rounded bg-bg-light border border-highlight p-3 text-sm text-text resize-y min-h-[80px] focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder="Add a comment…"
+          <MessageInput
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={setDraft}
+            onSend={postTopLevel}
+            placeholder="Add a comment…"
+            sendLabel={submitting ? "Posting…" : "Post"}
             disabled={submitting}
           />
           {submitError && <p className="text-sm text-danger">{submitError}</p>}
-          <div className="flex justify-end">
-            <button
-              className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-              onClick={postTopLevel}
-              disabled={submitting || !draft.trim()}
-            >
-              {submitting ? "Posting…" : "Post comment"}
-            </button>
-          </div>
         </div>
 
         <div className="mt-6">
