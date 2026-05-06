@@ -28,7 +28,6 @@ export default function Page() {
   const [me, setMe] = useState<UserSummary | null>(null);
   const [friends, setFriends] = useState<FriendSummary[] | null>(null);
   const [messagesByFriend, setMessagesByFriend] = useState<Record<string, DirectMessage[]>>({});
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -68,17 +67,15 @@ export default function Page() {
     if (!activeId) return;
     if (messagesByFriend[activeId]) return;
     let cancelled = false;
-    setLoadingHistory(true);
     api.getMessagesWith(activeId)
       .then((rows) => {
         if (cancelled) return;
         setMessagesByFriend((prev) => ({ ...prev, [activeId]: rows ?? [] }));
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load messages.");
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingHistory(false);
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Failed to load messages.");
+        setMessagesByFriend((prev) => ({ ...prev, [activeId]: [] }));
       });
     return () => { cancelled = true; };
   }, [activeId, messagesByFriend]);
@@ -105,6 +102,7 @@ export default function Page() {
 
   const messages = activeId ? messagesByFriend[activeId] ?? [] : [];
   const activeFriend = friends?.find((f) => f.id === activeId) ?? null;
+  const loadingHistory = activeId !== null && messagesByFriend[activeId] === undefined;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
