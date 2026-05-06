@@ -6,9 +6,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
 import { api, Notification } from "@/lib/api";
+import { useToast } from "@/components/ui/Toaster";
 
 type NotificationsContextValue = {
   notifications: Notification[];
@@ -25,6 +28,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
+  const router = useRouter();
+  const seenIdsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +38,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       .getNotifications()
       .then((rows) => {
         if (cancelled) return;
-        setNotifications(rows ?? []);
+        const list = rows ?? [];
+        for (const n of list) seenIdsRef.current.add(n.id);
+        setNotifications(list);
         setLoading(false);
       })
       .catch((err) => {
@@ -50,9 +58,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     es.onmessage = (event) => {
       try {
         const incoming: Notification = JSON.parse(event.data);
-        setNotifications((prev) => {
-          if (prev.some((n) => n.id === incoming.id)) return prev;
-          return [incoming, ...prev];
+        if (seenIdsRef.current.has(incoming.id)) return;
+        seenIdsRef.current.add(incoming.id);
+        setNotifications((prev) => [incoming, ...prev]);
+        showToast({
+          title: "New notification",
+          message: incoming.message,
+          onClick: () => router.push("/notifications"),
         });
       } catch {
         // ignore malformed events
@@ -61,7 +73,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     return () => {
       es.close();
     };
-  }, []);
+  }, [showToast, router]);
 
   const markRead = useCallback(async (id: number) => {
     setNotifications((prev) =>
