@@ -11,6 +11,7 @@ interface Props {
   sendLabel?: string;
   disabled?: boolean;
   autoFocus?: boolean;
+  onBlur?: () => void;
 }
 
 export default function MessageInput({
@@ -21,9 +22,18 @@ export default function MessageInput({
   sendLabel = "Send",
   disabled,
   autoFocus,
+  onBlur,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [showPicker, setShowPicker] = useState(false);
+
+  const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (!onBlur) return;
+    const next = e.relatedTarget as Node | null;
+    if (next && wrapperRef.current?.contains(next)) return;
+    onBlur();
+  };
 
   useEffect(() => {
     if (value === "" && textareaRef.current) {
@@ -57,7 +67,7 @@ export default function MessageInput({
   };
 
   return (
-    <div className="flex w-full items-end gap-3">
+    <div ref={wrapperRef} className="flex w-full items-end gap-3">
       <div className="relative flex-1">
         <div className="flex items-end flex-1 rounded-2xl border border-brand bg-bg-input-field focus-within:ring-2 focus-within:ring-bg-brand pr-2">
           <textarea
@@ -65,6 +75,7 @@ export default function MessageInput({
             value={value}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
             placeholder={placeholder}
             rows={1}
             disabled={disabled}

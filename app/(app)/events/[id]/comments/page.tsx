@@ -85,25 +85,17 @@ function CommentItem({
         </button>
 
         {isReplying && (
-          <div className="mt-2 flex flex-col gap-2">
-            <div className="flex justify-end">
-              <button
-                className="text-xs text-text-muted hover:text-text transition-colors"
-                onClick={() => {
-                  setDraft("");
-                  onCancelReply();
-                }}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-            </div>
+          <div className="mt-2">
             <MessageInput
               value={draft}
               onChange={setDraft}
               onSend={async () => {
                 await onSubmitReply(node.id, draft.trim());
                 setDraft("");
+              }}
+              onBlur={() => {
+                setDraft("");
+                onCancelReply();
               }}
               placeholder="Write a reply…"
               sendLabel={submitting ? "Posting…" : "Reply"}
