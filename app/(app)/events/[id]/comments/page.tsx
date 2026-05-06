@@ -62,19 +62,38 @@ function CommentItem({
   submitting: boolean;
 }) {
   const [draft, setDraft] = useState("");
+  const [collapsed, setCollapsed] = useState(false);
   const isReplying = replyingTo === node.id;
+  const hasChildren = node.children.length > 0;
 
   return (
     <div
-      className="border-l border-border-muted pl-4"
+      className="relative pl-4"
       style={{ marginLeft: depth === 0 ? 0 : 12 }}
     >
+      {hasChildren ? (
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "Expand replies" : "Collapse replies"}
+          className="group absolute left-0 inset-y-0 w-3 cursor-pointer"
+        >
+          <span className="absolute left-0 inset-y-0 w-px bg-border-muted group-hover:bg-text transition-colors" />
+        </button>
+      ) : (
+        <span className="absolute left-0 inset-y-0 w-px bg-border-muted" />
+      )}
       <div className="py-2">
         <div className="flex items-baseline gap-2 text-xs text-text-muted">
           <span className="font-semibold text-text">
             {authorNames[node.authorUserId] ?? "Unknown user"}
           </span>
           <span>{formatDate(node.createdDate)}</span>
+          {hasChildren && collapsed && (
+            <span className="text-text-muted">
+              · {node.children.length} {node.children.length === 1 ? "reply" : "replies"} hidden
+            </span>
+          )}
         </div>
         <p className="mt-1 text-sm text-text whitespace-pre-wrap">{node.content}</p>
         <button
@@ -106,7 +125,7 @@ function CommentItem({
         )}
       </div>
 
-      {node.children.length > 0 && (
+      {hasChildren && !collapsed && (
         <div className="ml-2">
           {node.children.map((child) => (
             <CommentItem
