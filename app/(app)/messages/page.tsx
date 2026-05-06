@@ -5,167 +5,223 @@ import React from "react";
 import Image from "next/image";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import MessageInput from "@/components/MessageInput";
-import { Message, mockConversations, parseTimeToMinutes } from "@/lib/useMessages";
+import { api, DirectMessage, FriendSummary, UserSummary } from "@/lib/api";
+
+const TIME_SEPARATOR_GAP_MS = 60 * 60 * 1000;
+
+function avatarFor(userId: string): string {
+  return `https://picsum.photos/seed/${encodeURIComponent(userId)}/100/100`;
+}
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
 
 export default function Page() {
-  const [activeId, setActiveId] = useState(mockConversations[0].id);
-  const activeContact = mockConversations.find((c) => c.id === activeId)!;
-  const [allMessages, setAllMessages] = useState<Record<string, Message[]>>(
-    Object.fromEntries(mockConversations.map((c) => [c.id, c.messages]))
-  );
-  const messages = allMessages[activeId];
+  const [me, setMe] = useState<UserSummary | null>(null);
+  const [friends, setFriends] = useState<FriendSummary[] | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [messagesByFriend, setMessagesByFriend] = useState<Record<string, DirectMessage[]>>({});
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([api.getMe(), api.getMyFriends()])
+      .then(([myUser, myFriends]) => {
+        if (cancelled) return;
+        setMe(myUser);
+        setFriends(myFriends);
+        if (myFriends.length > 0) setActiveId(myFriends[0].id);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load.");
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!activeId) return;
+    if (messagesByFriend[activeId]) return;
+    let cancelled = false;
+    setLoadingHistory(true);
+    api.getMessagesWith(activeId)
+      .then((rows) => {
+        if (cancelled) return;
+        setMessagesByFriend((prev) => ({ ...prev, [activeId]: rows ?? [] }));
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load messages.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingHistory(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeId, messagesByFriend]);
+
+  const messages = activeId ? messagesByFriend[activeId] ?? [] : [];
+  const activeFriend = friends?.find((f) => f.id === activeId) ?? null;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      text: trimmed,
-      sender: "me",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-    setAllMessages((prev) => ({
-      ...prev,
-      [activeId]: [...prev[activeId], newMsg],
-    }));
+    if (!trimmed || !activeId) return;
     setInput("");
+    try {
+      const created = await api.sendMessage(activeId, trimmed);
+      setMessagesByFriend((prev) => ({
+        ...prev,
+        [activeId]: [...(prev[activeId] ?? []), created],
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send message.");
+      setInput(trimmed);
+    }
   };
 
   return (
     <div className="page">
       <div className="flex flex-col h-full w-full font-sans">
         <PagebarContent title="Conversations">
-          <ul className="space-y-1">
-            {mockConversations.map((c) => (
-              <li key={c.id}>
-                <button
-                  onClick={() => {
-                    setActiveId(c.id);
-                    setInput("");
-                  }}
-                  className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-all cursor-pointer ${
-                    c.id === activeId ? "bg-brand text-bg-dark" : "hover:bg-highlight text-text"
-                  }`}
-                >
-                  <div className="relative flex-shrink-0">
-                    <Image src={c.avatar} alt={c.name} width={28} height={28} className="rounded-full object-cover"/>
-                    {c.online && (
-                      <span
-                        className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border border-white rounded-full"/>
-                    )}
-                  </div>
-                  <span className="truncate">{c.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          {friends === null && <p className="px-2 py-2 text-sm text-text-muted">Loading…</p>}
+          {friends && friends.length === 0 && (
+            <p className="px-2 py-2 text-sm text-text-muted">Add friends to start messaging.</p>
+          )}
+          {friends && friends.length > 0 && (
+            <ul className="space-y-1">
+              {friends.map((f) => (
+                <li key={f.id}>
+                  <button
+                    onClick={() => {
+                      setActiveId(f.id);
+                      setInput("");
+                    }}
+                    className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-left text-sm transition-all cursor-pointer ${
+                      f.id === activeId ? "bg-brand text-bg-dark" : "hover:bg-highlight text-text"
+                    }`}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <Image
+                        src={avatarFor(f.id)}
+                        alt={`${f.firstName} ${f.lastName}`}
+                        width={28}
+                        height={28}
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                    <span className="truncate">{f.firstName} {f.lastName}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </PagebarContent>
 
-        {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-4 bg-bg-light border-b border-brand shadow-sm">
-          <div className="relative">
-            <Image
-              src={activeContact.avatar}
-              alt={activeContact.name}
-              width={40}
-              height={40}
-              className="rounded-full object-cover"
-            />
-            {activeContact.online && (
-              <span
-                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"/>
-            )}
+        {activeFriend && (
+          <div className="flex items-center gap-3 px-6 py-4 bg-bg-light border-b border-brand shadow-sm">
+            <div className="relative">
+              <Image
+                src={avatarFor(activeFriend.id)}
+                alt={`${activeFriend.firstName} ${activeFriend.lastName}`}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+              />
+            </div>
+            <div>
+              <p className="font-semibold text-text">{activeFriend.firstName} {activeFriend.lastName}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-text">{activeContact.name}</p>
-            <p
-              className={`text-xs ${activeContact.online ? "text-green-500" : "text-text-muted"}`}
-            >
-              {activeContact.online ? "Active now" : "Offline"}
-            </p>
-          </div>
-        </div>
+        )}
 
         <div className="flex flex-col flex-1 min-h-0">
-          {/* Messages */}
-          <div
-            className="flex flex-col flex-1 w-full overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark"
-          >
+          <div className="flex flex-col flex-1 w-full overflow-y-auto px-6 py-4 space-y-3 bg-bg-dark">
             <div className="flex-1" />
+            {error && <p className="text-sm text-danger">{error}</p>}
+            {!activeFriend && friends && friends.length > 0 && (
+              <p className="text-sm text-text-muted">Select a conversation to start messaging.</p>
+            )}
+            {activeFriend && loadingHistory && messages.length === 0 && (
+              <p className="text-sm text-text-muted">Loading messages…</p>
+            )}
+            {activeFriend && !loadingHistory && messages.length === 0 && (
+              <p className="text-sm text-text-muted">No messages yet. Say hi!</p>
+            )}
             {messages.map((msg, index) => {
+              const sender = me && msg.senderUserId === me.id ? "me" : "them";
               const prevMsg = messages[index - 1];
               const nextMsg = messages[index + 1];
-              const sameAsNext = nextMsg?.sender === msg.sender;
+              const sameAsNext = nextMsg ? nextMsg.senderUserId === msg.senderUserId : false;
               const showTimeSeparator = prevMsg &&
-                parseTimeToMinutes(msg.timestamp) - parseTimeToMinutes(prevMsg.timestamp) > 60;
-              const showTimeSeparatorNext = msg && nextMsg &&
-                parseTimeToMinutes(nextMsg.timestamp) - parseTimeToMinutes(msg.timestamp) > 60;
+                new Date(msg.createdDate).getTime() - new Date(prevMsg.createdDate).getTime() > TIME_SEPARATOR_GAP_MS;
+              const showTimeSeparatorNext = nextMsg &&
+                new Date(nextMsg.createdDate).getTime() - new Date(msg.createdDate).getTime() > TIME_SEPARATOR_GAP_MS;
               const showImageAndTimestamp = !sameAsNext || showTimeSeparatorNext;
+              const timestamp = formatTime(msg.createdDate);
 
               return (
                 <React.Fragment key={msg.id}>
                   {showTimeSeparator && (
                     <div className="flex items-center gap-3 py-2">
                       <div className="flex-1 h-px bg-text-muted/25" />
-                      <span className="text-xs text-text-muted px-1">{msg.timestamp}</span>
+                      <span className="text-xs text-text-muted px-1">{timestamp}</span>
                       <div className="flex-1 h-px bg-text-muted/25" />
                     </div>
                   )}
-                <div
-                  className={`flex items-end gap-2 ${msg.sender === "me" ? "flex-row-reverse" : "flex-row"}`}
-                >
-                  {msg.sender === "them" && (
-                    <div className="w-7 flex-shrink-0">
+                  <div className={`flex items-end gap-2 ${sender === "me" ? "flex-row-reverse" : "flex-row"}`}>
+                    {sender === "them" && activeFriend && (
+                      <div className="w-7 flex-shrink-0">
+                        {showImageAndTimestamp && (
+                          <Image
+                            src={avatarFor(activeFriend.id)}
+                            alt={`${activeFriend.firstName} ${activeFriend.lastName}`}
+                            width={28}
+                            height={28}
+                            className="rounded-full object-cover mb-1"
+                          />
+                        )}
+                      </div>
+                    )}
+                    <div className={`flex flex-col ${sender === "me" ? "items-end" : "items-start"}`}>
+                      <div
+                        className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                          sender === "me"
+                            ? "bg-brand text-bg-dark rounded-br-sm"
+                            : showImageAndTimestamp
+                              ? "bg-bg-light text-text rounded-bl-sm shadow-sm"
+                              : "bg-bg-light text-text rounded-2xl shadow-sm"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
                       {showImageAndTimestamp && (
-                        <Image
-                          src={activeContact.avatar}
-                          alt={activeContact.name}
-                          width={28}
-                          height={28}
-                          className="rounded-full object-cover mb-1"
-                        />
+                        <span className="text-xs text-text-muted mt-1">{timestamp}</span>
                       )}
                     </div>
-                  )}
-                  <div className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}>
-                    <div
-                      className={`max-w-sm px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
-                        msg.sender === "me"
-                          ? "bg-brand text-bg-dark rounded-br-sm"
-                          : showImageAndTimestamp
-                            ? "bg-bg-light text-text rounded-bl-sm shadow-sm"
-                            : "bg-bg-light text-text rounded-2xl shadow-sm"
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                    {showImageAndTimestamp && (
-                      <span className="text-xs text-text-muted mt-1">{msg.timestamp}
-                  </span>
-                    )}
                   </div>
-                </div>
                 </React.Fragment>
               );
             })}
             <div ref={bottomRef}/>
           </div>
 
-          {/* Input */}
-          <div className="px-6 py-4 bg-bg-light border-t border-brand">
-            <MessageInput
-              value={input}
-              onChange={setInput}
-              onSend={handleSend}
-              placeholder="Type a message..."
-            />
-          </div>
+          {activeFriend && (
+            <div className="px-6 py-4 bg-bg-light border-t border-brand">
+              <MessageInput
+                value={input}
+                onChange={setInput}
+                onSend={handleSend}
+                placeholder="Type a message..."
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
