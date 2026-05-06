@@ -120,6 +120,16 @@ export type DirectMessage = {
   createdDate: string;
 };
 
+export type Notification = {
+  id: number;
+  userId: string;
+  type: string;
+  message: string;
+  actorUserId: string | null;
+  read: boolean;
+  createdDate: string;
+};
+
 export type UserSummary = {
   id: string;
   email: string;
@@ -382,6 +392,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ receiverUserId, content }),
     }),
+
+  // notifications
+  getNotifications: () => request<Notification[]>(`/notifications`),
+  markNotificationRead: (id: number) =>
+    request<void>(`/notifications/${id}/read`, { method: "POST" }),
+  markAllNotificationsRead: () =>
+    request<{ updated: number }>(`/notifications/read-all`, { method: "POST" }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
