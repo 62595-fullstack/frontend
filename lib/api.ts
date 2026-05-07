@@ -112,6 +112,14 @@ export type EventComment = {
   createdDate: string;
 };
 
+export type DirectMessage = {
+  id: number;
+  senderUserId: string;
+  receiverUserId: string;
+  content: string;
+  createdDate: string;
+};
+
 export type UserSummary = {
   id: string;
   email: string;
@@ -364,6 +372,15 @@ export const api = {
     requestMessaging<EventComment>(`/Comments`, {
       method: "POST",
       body: JSON.stringify({ eventId, content, parentCommentId: parentCommentId ?? null }),
+    }),
+
+  // direct messages (served by the messaging service)
+  getMessagesWith: (otherUserId: string) =>
+    requestMessaging<DirectMessage[]>(`/Messages/with/${otherUserId}`),
+  sendMessage: (receiverUserId: string, content: string) =>
+    requestMessaging<DirectMessage>(`/Messages`, {
+      method: "POST",
+      body: JSON.stringify({ receiverUserId, content }),
     }),
 
   // GDPR
