@@ -1,6 +1,13 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { Agent, fetch as undiciFetch } from "undici";
 import { API_BASE } from "@/lib/api";
+
+// bodyTimeout=0 so SSE connections can stay open indefinitely without undici killing them.
+const dispatcher = new Agent({
+  bodyTimeout: 0,
+  headersTimeout: 0,
+});
 
 async function forward(req: Request, path: string[]) {
   if (!API_BASE) {
@@ -16,7 +23,7 @@ async function forward(req: Request, path: string[]) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
-  const res = await fetch(url, {
+  const res = await undiciFetch(url, {
     method: req.method,
     headers: {
       "Content-Type": req.headers.get("content-type") ?? "application/json",
@@ -26,17 +33,31 @@ async function forward(req: Request, path: string[]) {
       req.method === "GET" || req.method === "HEAD"
         ? undefined
         : await req.text(),
-    cache: "no-store",
+    dispatcher,
+    signal: req.signal,
   });
+
+  const contentType = res.headers.get("content-type") ?? "";
+
+  if (contentType.includes("text/event-stream")) {
+    return new NextResponse(res.body as unknown as ReadableStream, {
+      status: res.status,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  }
 
   const body = await res.text();
 
   if (res.status === 401) {
-    const cookieStore = await cookies();
-    cookieStore.delete("token");
+    const expired = await cookies();
+    expired.delete("token");
   }
 
-  const contentType = res.headers.get("content-type");
   return new NextResponse(body || null, {
     status: res.status,
     headers: contentType ? { "Content-Type": contentType } : {},
