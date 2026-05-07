@@ -67,13 +67,6 @@ function formatFriendSince(iso?: string) {
   return `Friends since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
 }
 
-function formatMemberSince(iso?: string) {
-  if (!iso) return "Member since unknown date";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "Member since unknown date";
-  return `Member since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
-}
-
 function formatFriendsCount(count?: number) {
   if (typeof count !== "number" || !Number.isFinite(count)) return "Friends count unavailable";
   return `${count.toLocaleString()} friend${count === 1 ? "" : "s"}`;
