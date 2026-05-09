@@ -636,7 +636,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                   </div>
                 ) : (
                   <>
-                    <p className="mt-2 text-sm text-text-muted">
+                    <p className="mt-2 text-sm text-text-muted whitespace-pre-wrap break-words">
                       {userProfile.bio?.trim() || (isOwnProfile ? "Add a bio to tell people about yourself." : "No bio yet.")}
                     </p>
                     {isOwnProfile && (
