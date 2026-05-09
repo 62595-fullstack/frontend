@@ -166,18 +166,19 @@ export default function CommentsTab() {
   useEffect(() => {
     if (!event) return;
     let cancelled = false;
-    setLoading(true);
-    setLoadError(null);
-    api.getEventComments(event.id)
-      .then((rows) => {
+    const load = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const rows = await api.getEventComments(event.id);
         if (!cancelled) setComments(rows ?? []);
-      })
-      .catch((err) => {
+      } catch (err) {
         if (!cancelled) setLoadError(err instanceof Error ? err.message : "Failed to load comments.");
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    };
+    void load();
     return () => { cancelled = true; };
   }, [event]);
 
