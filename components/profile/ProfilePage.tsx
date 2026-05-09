@@ -159,38 +159,50 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [isMember, setIsMember] = useState<boolean | null>(isMemberProp);
   const [joinLoading, setJoinLoading] = useState(false);
 
-  useEffect(() => { setIsMember(isMemberProp); }, [isMemberProp]);
+  useEffect(() => { void (async () => setIsMember(isMemberProp))(); }, [isMemberProp]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
     let cancelled = false;
-    setPostsLoading(true);
-    setPostsError(null);
-    api.getPostsByUser(userId!)
-    .then((data) => { if (!cancelled) setPosts(data ?? []); })
-    .catch((err) => { if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts"); })
-    .finally(() => { if (!cancelled) setPostsLoading(false); });
+    const load = async () => {
+      setPostsLoading(true);
+      setPostsError(null);
+      try {
+        const data = await api.getPostsByUser(userId!);
+        if (!cancelled) setPosts(data ?? []);
+      } catch (err) {
+        if (!cancelled) setPostsError(err instanceof Error ? err.message : "Failed to load posts");
+      } finally {
+        if (!cancelled) setPostsLoading(false);
+      }
+    };
+    void load();
     return () => { cancelled = true; };
   }, [props.variant, userId]);
 
   useEffect(() => {
     if (props.variant !== "user") return;
     let cancelled = false;
-    setUsersLoading(true);
-    setUsersLoadingError(null);
-    api.getFriendsByUser(userId!)
-    .then((friends) => {
-      if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
-        id: friend.id,
-        firstName: friend.firstName,
-        lastName: friend.lastName,
-        detail: friend.email,
-        since: formatFriendSince(friend.friendsSince),
-        badge: friend.age,
-      })) : []);
-    })
-    .catch((err) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends"); })
-    .finally(() => { if (!cancelled) setUsersLoading(false); });
+    const load = async () => {
+      setUsersLoading(true);
+      setUsersLoadingError(null);
+      try {
+        const friends = await api.getFriendsByUser(userId!);
+        if (!cancelled) setUsers(Array.isArray(friends) ? friends.map((friend) => ({
+          id: friend.id,
+          firstName: friend.firstName,
+          lastName: friend.lastName,
+          detail: friend.email,
+          since: formatFriendSince(friend.friendsSince),
+          badge: friend.age,
+        })) : []);
+      } catch (err) {
+        if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load friends");
+      } finally {
+        if (!cancelled) setUsersLoading(false);
+      }
+    };
+    void load();
     return () => { cancelled = true; };
   }, [props.variant, userId]);
 
@@ -325,11 +337,12 @@ export default function ProfilePage(props: ProfilePageProps) {
   useEffect(() => {
     if (!orgId) return;
     let cancelled = false;
-    setUsersLoading(true);
-    setUsersLoadingError(null);
-    api.getOrganizationMembers(orgId)
-      .then((members: OrgMember[]) => {
-        if (!cancelled) setUsers(members.map((m) => ({
+    const load = async () => {
+      setUsersLoading(true);
+      setUsersLoadingError(null);
+      try {
+        const members = await api.getOrganizationMembers(orgId);
+        if (!cancelled) setUsers(members.map((m: OrgMember) => ({
           id: m.userId,
           firstName: m.firstName,
           lastName: m.lastName,
@@ -337,9 +350,13 @@ export default function ProfilePage(props: ProfilePageProps) {
           badge: m.roleName,
           roleId: m.roleId,
         })));
-      })
-      .catch((err: unknown) => { if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load members"); })
-      .finally(() => { if (!cancelled) setUsersLoading(false); });
+      } catch (err: unknown) {
+        if (!cancelled) setUsersLoadingError(err instanceof Error ? err.message : "Failed to load members");
+      } finally {
+        if (!cancelled) setUsersLoading(false);
+      }
+    };
+    void load();
     return () => { cancelled = true; };
   }, [orgId]);
 

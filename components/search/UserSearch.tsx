@@ -20,31 +20,36 @@ export default function UserSearch() {
 
   useEffect(() => {
     const trimmed = query.trim();
-    if (!trimmed) {
-      setResults([]);
-      setOpen(false);
-      setError(null);
-      return;
-    }
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
-    setLoading(true);
-    setError(null);
-
-    const timer = setTimeout(async () => {
-      try {
-        const data = await api.searchUsers(trimmed);
-        setResults(Array.isArray(data) ? data : []);
-        setOpen(true);
-        setActiveIndex(-1);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Search failed");
+    const run = async () => {
+      if (!trimmed) {
         setResults([]);
-      } finally {
-        setLoading(false);
+        setOpen(false);
+        setError(null);
+        return;
       }
-    }, 250);
 
-    return () => clearTimeout(timer);
+      setLoading(true);
+      setError(null);
+
+      timer = setTimeout(async () => {
+        try {
+          const data = await api.searchUsers(trimmed);
+          setResults(Array.isArray(data) ? data : []);
+          setOpen(true);
+          setActiveIndex(-1);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Search failed");
+          setResults([]);
+        } finally {
+          setLoading(false);
+        }
+      }, 250);
+    };
+
+    void run();
+    return () => { if (timer !== null) clearTimeout(timer); };
   }, [query]);
 
   useEffect(() => {
