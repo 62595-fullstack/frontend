@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
-import { api, OrgMember, Organization, OrganizationEvent, Post } from "@/lib/api";
+import { api, FriendshipStatus, OrgMember, Organization, OrganizationEvent, Post } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -65,13 +65,6 @@ function formatFriendSince(iso?: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "Friends since unknown date";
   return `Friends since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
-}
-
-function formatMemberSince(iso?: string) {
-  if (!iso) return "Member since unknown date";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "Member since unknown date";
-  return `Member since ${d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
 }
 
 function formatFriendsCount(count?: number) {
@@ -160,7 +153,7 @@ export default function ProfilePage(props: ProfilePageProps) {
   const [descriptionInput, setDescriptionInput] = useState("");
   const [descriptionSaving, setDescriptionSaving] = useState(false);
 
-  const [isFriend, setIsFriend] = useState<boolean | null>(null);
+  const [friendStatus, setFriendStatus] = useState<FriendshipStatus | null>(null);
   const [friendActionLoading, setFriendActionLoading] = useState(false);
 
   const [isMember, setIsMember] = useState<boolean | null>(isMemberProp);
@@ -230,9 +223,9 @@ export default function ProfilePage(props: ProfilePageProps) {
   useEffect(() => {
     if (!userId || isOwnProfile) return;
     let cancelled = false;
-    api.getMyFriends()
-    .then((friends) => { if (!cancelled) setIsFriend(friends.some((f) => f.id === userId)); })
-    .catch(() => { if (!cancelled) setIsFriend(false); });
+    api.getFriendshipStatus(userId)
+    .then((res) => { if (!cancelled) setFriendStatus(res.status); })
+    .catch(() => { if (!cancelled) setFriendStatus("None"); });
     return () => { cancelled = true; };
   }, [userId, isOwnProfile]);
 
@@ -261,20 +254,36 @@ export default function ProfilePage(props: ProfilePageProps) {
   }
 
   async function handleFriendAction() {
-    if (!userId || friendActionLoading) return;
+    if (!userId || friendActionLoading || friendStatus === null) return;
     setFriendActionLoading(true);
     try {
-      if (isFriend) {
+      if (friendStatus === "Friends") {
         await api.removeFriend(userId);
-        setIsFriend(false);
+        setFriendStatus("None");
+      } else if (friendStatus === "OutgoingPending") {
+        await api.cancelFriendRequest(userId);
+        setFriendStatus("None");
+      } else if (friendStatus === "IncomingPending") {
+        await api.acceptFriendRequest(userId);
+        setFriendStatus("Friends");
       } else {
-        await api.addFriend(userId);
-        setIsFriend(true);
+        const res = await api.sendFriendRequest(userId);
+        setFriendStatus(res.status);
       }
     } finally {
       setFriendActionLoading(false);
     }
   }
+
+  const friendButtonLabel = (() => {
+    if (friendStatus === null || friendActionLoading) return "…";
+    switch (friendStatus) {
+      case "Friends": return "Remove Friend";
+      case "OutgoingPending": return "Cancel Request";
+      case "IncomingPending": return "Accept Request";
+      default: return "Add Friend";
+    }
+  })();
 
   async function handleJoinOrganization() {
     if (!orgId || joinLoading) return;
@@ -488,10 +497,10 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <div className="self-end pb-2">
                   <button
                     onClick={handleFriendAction}
-                    disabled={isFriend === null || friendActionLoading}
+                    disabled={friendStatus === null || friendActionLoading}
                     className="btn-brand text-sm disabled:opacity-50"
                   >
-                    {isFriend === null ? "…" : friendActionLoading ? "…" : isFriend ? "Remove Friend" : "Add Friend"}
+                    {friendButtonLabel}
                   </button>
                 </div>
               )}
