@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Agent, fetch as undiciFetch } from "undici";
+import { isJwtExpired } from "@/lib/auth";
 
 const MESSAGING_BASE = process.env.NEXT_PUBLIC_MESSAGING_BASE?.replace(/\/$/, "");
 
@@ -56,7 +57,10 @@ async function forward(req: Request, path: string[]) {
 
   const body = await res.text();
 
-  if (res.status === 401) {
+  // A 401 only means "your session is dead" if the JWT we sent was actually
+  // expired. Otherwise the 401 is about this specific request (e.g. password
+  // re-verify, role check) and the session must be left intact.
+  if (res.status === 401 && isJwtExpired(token)) {
     const expired = await cookies();
     expired.delete("token");
   }
