@@ -1,24 +1,27 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Agent, fetch as undiciFetch } from "undici";
-import { API_BASE } from "@/lib/api";
 
-// bodyTimeout=0 so SSE connections can stay open indefinitely without undici killing them.
-const dispatcher = new Agent({
+const MESSAGING_BASE = process.env.NEXT_PUBLIC_MESSAGING_BASE?.replace(/\/$/, "");
+
+// Messaging dev server uses a self-signed cert; bodyTimeout=0 so SSE connections
+// can stay open indefinitely without undici killing them.
+const insecureDispatcher = new Agent({
+  connect: { rejectUnauthorized: false },
   bodyTimeout: 0,
   headersTimeout: 0,
 });
 
 async function forward(req: Request, path: string[]) {
-  if (!API_BASE) {
+  if (!MESSAGING_BASE) {
     return NextResponse.json(
-      { error: "NEXT_PUBLIC_API_BASE not set in .env.local" },
+      { error: "NEXT_PUBLIC_MESSAGING_BASE not set in .env.local" },
       { status: 500 }
     );
   }
 
   const { search } = new URL(req.url);
-  const url = `${API_BASE}/${path.join("/")}${search}`;
+  const url = `${MESSAGING_BASE}/${path.join("/")}${search}`;
 
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
@@ -33,7 +36,7 @@ async function forward(req: Request, path: string[]) {
       req.method === "GET" || req.method === "HEAD"
         ? undefined
         : await req.text(),
-    dispatcher,
+    dispatcher: insecureDispatcher,
     signal: req.signal,
   });
 
@@ -64,7 +67,6 @@ async function forward(req: Request, path: string[]) {
   });
 }
 
-// Next.js expects params to be async in your version
 type Ctx = { params: Promise<{ path: string[] }> };
 
 export async function GET(req: Request, ctx: Ctx) {

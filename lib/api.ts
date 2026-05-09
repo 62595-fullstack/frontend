@@ -1,7 +1,15 @@
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, '');
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`/api/proxy${path}`, {
+  return requestVia<T>("/api/proxy", path, init);
+}
+
+async function requestMessaging<T>(path: string, init?: RequestInit): Promise<T> {
+  return requestVia<T>("/api/messaging-proxy", path, init);
+}
+
+async function requestVia<T>(proxyBase: string, path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${proxyBase}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -71,6 +79,7 @@ export type OrganizationEvent = {
   title: string;
   description: string;
   rules: string;
+  bracketResults: string;
   attachment: Attachment | null;
   createdDate?: string;
   startDate?: string;
@@ -94,6 +103,43 @@ export type UserSearchResult = {
   lastName: string;
 };
 
+export type EventComment = {
+  id: number;
+  eventId: number;
+  parentCommentId: number | null;
+  authorUserId: string;
+  content: string;
+  createdDate: string;
+};
+
+export type DirectMessage = {
+  id: number;
+  senderUserId: string;
+  receiverUserId: string;
+  content: string;
+  createdDate: string;
+};
+
+export type Notification = {
+  id: number;
+  userId: string;
+  type: string;
+  message: string;
+  actorUserId: string | null;
+  read: boolean;
+  createdDate: string;
+};
+
+export type FriendRequest = {
+  id: number;
+  requesterId: string;
+  requesterFirstName: string;
+  requesterLastName: string;
+  createdDate: string;
+};
+
+export type FriendshipStatus = "None" | "Friends" | "OutgoingPending" | "IncomingPending";
+
 export type UserSummary = {
   id: string;
   email: string;
@@ -109,6 +155,13 @@ export type MemberSummary = {
   lastName: string;
   memberSince: string;
   role: string;
+};
+
+export type EventParticipant = {
+  bindingId: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
 };
 
 export type OrgMember = {
@@ -151,6 +204,8 @@ type RawEvent = {
   description?: string;
   Rules?: string;
   rules?: string;
+  BracketResults?: string;
+  bracketResults?: string;
   Attachment?: Attachment | null;
   attachment?: Attachment | null;
   CreatedDate?: string;
@@ -227,6 +282,7 @@ function normalizeEvent(raw: RawEvent): OrganizationEvent {
     title: raw.Title ?? raw.title ?? "",
     description: raw.Description ?? raw.description ?? "",
     rules: raw.Rules ?? raw.rules ?? "",
+    bracketResults: raw.BracketResults ?? raw.bracketResults ?? "{}",
     attachment: raw.Attachment ?? raw.attachment ?? null,
     createdDate: raw.CreatedDate ?? raw.createdDate ?? "",
     startDate: raw.StartDate ?? raw.startDate ?? "",
@@ -315,11 +371,46 @@ export const api = {
     }),
   deleteOrganizationEvent: (id: number) =>
     request<void>(`/OrganizationEvents/${id}`, { method: "DELETE" }),
-  updateEvent: (id: number, fields: { description?: string; rules?: string }) =>
+  updateEvent: (id: number, fields: { description?: string; rules?: string; bracketResults?: string }) =>
     request<void>(`/OrganizationEvents/${id}`, {
       method: "PATCH",
       body: JSON.stringify(fields),
     }),
+  joinEvent: (eventId: number) =>
+    request<void>(`/OrganizationEvents/${eventId}/join`, { method: "POST" }),
+  leaveEvent: (eventId: number) =>
+    request<void>(`/OrganizationEvents/${eventId}/join`, { method: "DELETE" }),
+  getEventParticipants: (eventId: number) =>
+    request<EventParticipant[]>(`/OrganizationEvents/${eventId}/participants`),
+  isRegisteredForEvent: (eventId: number) =>
+    request<boolean>(`/OrganizationEvents/${eventId}/is-registered`),
+
+  // comments (served by the messaging service)
+  getEventComments: (eventId: number) =>
+    requestMessaging<EventComment[]>(`/Comments/event/${eventId}`),
+  createEventComment: (eventId: number, content: string, parentCommentId?: number | null) =>
+    requestMessaging<EventComment>(`/Comments`, {
+      method: "POST",
+      body: JSON.stringify({ eventId, content, parentCommentId: parentCommentId ?? null }),
+    }),
+
+  // direct messages (served by the messaging service)
+  getMessagesWith: (otherUserId: string) =>
+    requestMessaging<DirectMessage[]>(`/Messages/with/${otherUserId}`),
+  sendMessage: (receiverUserId: string, content: string) =>
+    requestMessaging<DirectMessage>(`/Messages`, {
+      method: "POST",
+      body: JSON.stringify({ receiverUserId, content }),
+    }),
+
+  // notifications
+  getNotifications: () => request<Notification[]>(`/notifications`),
+  markNotificationRead: (id: number) =>
+    request<void>(`/notifications/${id}/read`, { method: "POST" }),
+  markAllNotificationsRead: () =>
+    request<{ updated: number }>(`/notifications/read-all`, { method: "POST" }),
+  deleteNotification: (id: number) =>
+    request<void>(`/notifications/${id}`, { method: "DELETE" }),
 
   // GDPR
   deleteGdprByUserId: (userId: number) =>
@@ -335,11 +426,21 @@ export const api = {
   },
   getFriendsByUser: (userId: string) => request<FriendSummary[]>(`/users/${userId}/friends`),
   getMyFriends: () => request<FriendSummary[]>(`/users/me/friends`),
-  addFriend: (friendUserId: string) => request<FriendSummary>(`/users/me/friends`, {
-    method: "POST",
-    body: JSON.stringify({ friendUserId }),
-  }),
   removeFriend: (friendUserId: string) => request<void>(`/users/me/friends/${friendUserId}`, { method: "DELETE" }),
+  getFriendshipStatus: (userId: string) =>
+    request<{ status: FriendshipStatus }>(`/users/${userId}/friend-status`),
+  getMyIncomingFriendRequests: () => request<FriendRequest[]>(`/users/me/friend-requests`),
+  sendFriendRequest: (friendUserId: string) =>
+    request<{ status: FriendshipStatus }>(`/users/me/friend-requests`, {
+      method: "POST",
+      body: JSON.stringify({ friendUserId }),
+    }),
+  acceptFriendRequest: (requesterUserId: string) =>
+    request<void>(`/users/me/friend-requests/${requesterUserId}/accept`, { method: "POST" }),
+  declineFriendRequest: (requesterUserId: string) =>
+    request<void>(`/users/me/friend-requests/${requesterUserId}/decline`, { method: "POST" }),
+  cancelFriendRequest: (recipientUserId: string) =>
+    request<void>(`/users/me/friend-requests/${recipientUserId}`, { method: "DELETE" }),
   updateMyProfile: (data: { bio?: string }) => request<UserSummary>(`/users/me`, {
     method: "PATCH",
     body: JSON.stringify(data),
@@ -347,5 +448,7 @@ export const api = {
 };
 
 export async function getEventById(eventId: number): Promise<OrganizationEvent | null> {
-  return request<OrganizationEvent | null>(`/OrganizationEvents/event/${eventId}`);
+  const data = await request<unknown>(`/OrganizationEvents/event/${eventId}`);
+  if (!data) return null;
+  return normalizeEvent(unwrapResult(data) as RawEvent);
 }
