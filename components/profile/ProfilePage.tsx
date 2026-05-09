@@ -2,8 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PagebarContent from "@/components/pagebar/PagebarContent";
 import { PagebarList, PagebarListItem, PagebarSection, PagebarStat } from "@/components/pagebar/PagebarSection";
+import Modal from "@/components/ui/Modal";
 import { api, FriendshipStatus, OrgMember, Organization, OrganizationEvent, Post } from "@/lib/api";
 import { getOrgImages } from "@/lib/mockOrgImages";
 
@@ -102,6 +104,7 @@ export type ProfilePageProps =
   | { variant: "organization"; orgId: number; isOrgAdmin?: boolean; isMember?: boolean | null };
 
 export default function ProfilePage(props: ProfilePageProps) {
+  const router = useRouter();
   const isOrg = props.variant === "organization";
   const orgId = isOrg ? props.orgId : null;
   const userId = !isOrg ? props.userId : null;
@@ -158,6 +161,9 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const [isMember, setIsMember] = useState<boolean | null>(isMemberProp);
   const [joinLoading, setJoinLoading] = useState(false);
+
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
 
   useEffect(() => { void (async () => setIsMember(isMemberProp))(); }, [isMemberProp]);
 
@@ -228,6 +234,26 @@ export default function ProfilePage(props: ProfilePageProps) {
     .catch(() => { if (!cancelled) setFriendStatus("None"); });
     return () => { cancelled = true; };
   }, [userId, isOwnProfile]);
+
+  async function handleDeleteAccount(values: Record<string, unknown>) {
+    const confirmation = typeof values.confirm === "string" ? values.confirm : "";
+    if (confirmation !== "DELETE") {
+      setDeleteAccountError("Please type DELETE exactly to confirm.");
+      return;
+    }
+    if (!viewedUser?.email) {
+      setDeleteAccountError("Could not determine your account email. Try reloading the page.");
+      return;
+    }
+    setDeleteAccountError(null);
+    try {
+      await api.deleteMyAccount(viewedUser.email);
+      await fetch("/api/logout", { method: "POST" });
+      router.push("/login");
+    } catch (err) {
+      setDeleteAccountError(err instanceof Error ? err.message : "Failed to delete account.");
+    }
+  }
 
   async function handleSaveBio() {
     if (bioSaving) return;
@@ -780,6 +806,22 @@ export default function ProfilePage(props: ProfilePageProps) {
           </Card>
         )}
 
+        {/* Danger zone — own profile only */}
+        {activeTab.id === Tabs.about.id && isOwnProfile && (
+          <Card>
+            <h2 className="text-sm font-semibold text-danger">Danger zone</h2>
+            <p className="mt-2 text-sm text-text-muted">
+              Permanently delete your account and all associated data. This cannot be undone.
+            </p>
+            <button
+              onClick={() => { setDeleteAccountError(null); setShowDeleteAccountModal(true); }}
+              className="mt-3 rounded-lg px-3 py-2 text-sm font-semibold text-danger hover:bg-highlight transition-all cursor-pointer active:scale-95"
+            >
+              Delete account
+            </button>
+          </Card>
+        )}
+
         {/* User friends and organization members tab */}
         {activeTab.id === Tabs.users.id && (
           <Card>
@@ -844,6 +886,26 @@ export default function ProfilePage(props: ProfilePageProps) {
           </Card>
         )}
       </div>
+
+      {showDeleteAccountModal && (
+        <Modal
+          title="Delete account"
+          fields={[
+            {
+              name: "confirm",
+              type: "text",
+              label: "Type DELETE to confirm",
+              placeholder: "DELETE",
+              required: true,
+            },
+          ]}
+          submitLabel="Delete forever"
+          submittingLabel="Deleting…"
+          onClose={() => { setShowDeleteAccountModal(false); setDeleteAccountError(null); }}
+          onSubmit={handleDeleteAccount}
+          error={deleteAccountError}
+        />
+      )}
     </div>
   );
 }

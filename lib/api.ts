@@ -415,6 +415,8 @@ export const api = {
   // GDPR
   deleteGdprByUserId: (userId: number) =>
     request<GdprDeleteResult>(`/GDPR/${userId}`, { method: "DELETE" }),
+  deleteMyAccount: (email: string) =>
+    request<number | null>(`/GDPR/${encodeURIComponent(email)}`, { method: "DELETE" }),
 
   // users
   getMe: () => request<UserSummary>(`/users/me`),
