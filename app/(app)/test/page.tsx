@@ -23,6 +23,24 @@ function nowMs() {
   return (typeof performance !== "undefined" ? performance.now() : Date.now());
 }
 
+const blackStyle: React.CSSProperties = { color: "black" };
+
+function ResultView({ result }: { result: CallResult | null }) {
+  if (!result) return <div style={blackStyle}>No result yet.</div>;
+  return (
+    <div style={blackStyle}>
+      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <strong>{result.ok ? "✅ Success" : "❌ Failed"}</strong>
+        <span>{result.statusText}</span>
+        <span>{result.ms}ms</span>
+      </div>
+      <pre style={{ ...blackStyle, marginTop: 10, whiteSpace: "pre-wrap" }}>
+        {JSON.stringify(result.ok ? result.data : { error: result.error }, null, 2)}
+      </pre>
+    </div>
+  );
+}
+
 export default function TestPage() {
   const [organizationId, setOrganizationId] = useState<number>(1);
   const [userId, setUserId] = useState<number>(1);
@@ -70,7 +88,6 @@ export default function TestPage() {
     }
   }
 
-  const blackStyle: React.CSSProperties = { color: "black" };
   const cardStyle: React.CSSProperties = {
     border: "1px solid #ddd",
     borderRadius: 10,
@@ -91,22 +108,6 @@ export default function TestPage() {
     padding: "6px 8px",
     width: 120,
   };
-
-  function ResultView({ result }: { result: CallResult | null }) {
-    if (!result) return <div style={blackStyle}>No result yet.</div>;
-    return (
-      <div style={blackStyle}>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <strong>{result.ok ? "✅ Success" : "❌ Failed"}</strong>
-          <span>{result.statusText}</span>
-          <span>{result.ms}ms</span>
-        </div>
-        <pre style={{ ...blackStyle, marginTop: 10, whiteSpace: "pre-wrap" }}>
-          {JSON.stringify(result.ok ? result.data : { error: result.error }, null, 2)}
-        </pre>
-      </div>
-    );
-  }
 
   return (
     <div style={{ ...blackStyle, padding: 20, maxWidth: 1100 }}>
